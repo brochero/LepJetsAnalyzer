@@ -234,7 +234,7 @@ void Plots(TString plots="2btag", bool LogScale=false) {
 
       Stack[h].mc[ch]->Draw("hist");
       Stack[h].mc[ch]->GetXaxis()->SetRange(WJets[h].hist[ch]->GetXaxis()->GetFirst(), 
-					    WJets[h].hist[ch]->GetXaxis()->GetLast());
+      					    WJets[h].hist[ch]->GetXaxis()->GetLast());
       Stack[h].mc[ch]->GetYaxis()->SetTitle("Events");
       Stack[h].mc[ch]->GetYaxis()->SetTitleOffset(1.2);
       Stack[h].mc[ch]->GetYaxis()->SetTitleSize(0.07);
@@ -458,16 +458,12 @@ void setuphistograms(std::vector<histos> histos, int color){
       
       // Overflows in the last bin
       histos[h].hist[ch]->SetBinContent(histos[h].hist[ch]->GetNbinsX(),
-					(histos[h].hist[ch]->GetBinContent(histos[h].hist[ch]->GetNbinsX()+1) + 
-					 histos[h].hist[ch]->GetBinContent(histos[h].hist[ch]->GetNbinsX())
-					 )
-					);
-      // !!!!!!!!!!!!!!!!!!!!!
-      // Temporal Rebinning
-      // !!!!!!!!!!!!!!!!!!!!!
-      //histos[h].hist[ch]->Rebin(2);
-      // Set overflows to 0
-      histos[h].hist[ch]->SetBinContent(histos[h].hist[ch]->GetNbinsX()+1, 0);
+      					(histos[h].hist[ch]->GetBinContent(histos[h].hist[ch]->GetNbinsX()+1) + 
+      					 histos[h].hist[ch]->GetBinContent(histos[h].hist[ch]->GetNbinsX())
+      					 )
+      					);
+      histos[h].hist[ch]->GetXaxis()->SetCanExtend(kFALSE);
+      histos[h].hist[ch]->SetBinContent(histos[h].hist[ch]->GetNbinsX()+1, 0.0);
 
       // Style
       // if(color == kRed+1)  histos[h].hist[ch]->SetLineColor(1); // Except ttbar
@@ -557,7 +553,7 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
     histofile.hist[2] = (TH1F*)histofile.hist[0]->Clone();
     histofile.hist[2]->Add(histofile.hist[0], histofile.hist[1]);
     histofile.hist[2]->SetName(histoname[h] + "_" + channel[2] + "_" + plots);
-    
+
     sample.push_back(histofile);
     
   }  

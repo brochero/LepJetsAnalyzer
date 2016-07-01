@@ -1,6 +1,6 @@
 all: TreeReader.run AccTreeReader.run TableYields.run 
 
-TreeReader.run: TopTools/SF_ID-ISO-Trigger/SFIDISOTrigger.o TopTools/ttbar_Categorization/ttbar_category.o TopTools/SF_Lumi/SFLumi.o TreeReader.o TopTools/SF_btag/BTagCalibrationStandalone.o
+TreeReader.run: TopTools/SF_ID-ISO-Trigger/SFIDISOTrigger.o TopTools/ttbar_Categorization/ttbar_category.o TopTools/SF_Lumi/SFLumi.o TopTools/SF_btag/BTagCalibrationStandalone.o TreeReader.o 
 	g++ -o TreeReader.run TreeReader.o TopTools/SF_ID-ISO-Trigger/SFIDISOTrigger.o TopTools/ttbar_Categorization/ttbar_category.o TopTools/SF_btag/BTagCalibrationStandalone.o TopTools/SF_Lumi/SFLumi.o `root-config --libs`
 
 TreeReader.o: TreeReader.C

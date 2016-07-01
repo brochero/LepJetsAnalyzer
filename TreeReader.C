@@ -97,7 +97,7 @@ int main(int argc, const char* argv[]){
   const char * _output   = 0;
   const char * _input    = 0;
   // TopTrees directory
-  const char * _dir      = "../Files_v7-6-4/";
+  const char * _dir      = "../v8-0-0/";
   const char * _syst_var = 0;
   const char * _tr       = 0;
   const char * _idiso    = 0;
@@ -223,14 +223,11 @@ int main(int argc, const char* argv[]){
            Tree Branches
   **********************************/
   
-  theTree.SetBranchAddress( "event",    &Event );
-  theTree.SetBranchAddress( "run",      &Run );
-
-  theTree.SetBranchAddress( "PUWeight",  &PUWeight_sys );
-  theTree.SetBranchAddress( "channel",   &Channel );
-
+  theTree.SetBranchAddress( "event",   &Event );
+  theTree.SetBranchAddress( "run",     &Run );
+  theTree.SetBranchAddress( "PUWeight",&PUWeight_sys );
+  theTree.SetBranchAddress( "channel", &Channel );
   theTree.SetBranchAddress( "GoodPV",  &GoodPV );
-
   theTree.SetBranchAddress( "MET",     &MET );
   theTree.SetBranchAddress( "MET_phi", &MET_Phi );
 
@@ -238,33 +235,28 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "lepton_py", &Lep_py );
   theTree.SetBranchAddress( "lepton_pz", &Lep_pz );
   theTree.SetBranchAddress( "lepton_E",  &Lep_E );
+  theTree.SetBranchAddress( "lepton_SF", &Lep_SF );
+  theTree.SetBranchAddress( "lepton_LES",&Lep_LES );
 
-  theTree.SetBranchAddress( "lepton_SF",  &Lep_SF );
-  theTree.SetBranchAddress( "lepton_LES",  &Lep_LES );
-
-  theTree.SetBranchAddress( "jet_px", &Jet_px );
-  theTree.SetBranchAddress( "jet_py", &Jet_py );
-  theTree.SetBranchAddress( "jet_pz", &Jet_pz );
-  theTree.SetBranchAddress( "jet_E",  &Jet_E );
-
-  theTree.SetBranchAddress( "jet_index",  &Jet_pTIndex );
-
-  theTree.SetBranchAddress( "jet_CSV",  &Jet_CSV );
-  theTree.SetBranchAddress( "jet_SF_CSV",  &Jet_SF_CSV );
-  theTree.SetBranchAddress( "jet_partonFlavour",  &Jet_partonFlavour );
-
-  theTree.SetBranchAddress( "jet_iCSVCvsL", &Jet_CSVCvsL );
-  theTree.SetBranchAddress( "jet_CCvsLT",  &Jet_CvsL );
-  theTree.SetBranchAddress( "jet_CCvBLT",  &Jet_CvsB );
+  theTree.SetBranchAddress( "jet_px",           &Jet_px );
+  theTree.SetBranchAddress( "jet_py",           &Jet_py );
+  theTree.SetBranchAddress( "jet_pz",           &Jet_pz );
+  theTree.SetBranchAddress( "jet_E",            &Jet_E );
+  theTree.SetBranchAddress( "jet_index",        &Jet_pTIndex );
+  theTree.SetBranchAddress( "jet_CSV",          &Jet_CSV );
+  theTree.SetBranchAddress( "jet_SF_CSV",       &Jet_SF_CSV );
+  theTree.SetBranchAddress( "jet_partonFlavour",&Jet_partonFlavour );
+  theTree.SetBranchAddress( "jet_iCSVCvsL",      &Jet_CSVCvsL );
+  theTree.SetBranchAddress( "jet_CCvsLT",        &Jet_CvsL );
+  theTree.SetBranchAddress( "jet_CCvBLT",        &Jet_CvsB );
 
 
   if(!fname.Contains("Data")){
     theTree.SetBranchAddress( "jet_JES_Up",  &Jet_JES_Up );
-    theTree.SetBranchAddress( "jet_JES_Down",  &Jet_JES_Down );
-    
+    theTree.SetBranchAddress( "jet_JES_Down",&Jet_JES_Down );  
     theTree.SetBranchAddress( "jet_JER_Up",  &Jet_JER_Up );
-    theTree.SetBranchAddress( "jet_JER_Nom",  &Jet_JER_Nom );
-    theTree.SetBranchAddress( "jet_JER_Down",  &Jet_JER_Down );
+    theTree.SetBranchAddress( "jet_JER_Nom", &Jet_JER_Nom );
+    theTree.SetBranchAddress( "jet_JER_Down",&Jet_JER_Down );
   }
   
   // Number of Events and Weights (MC@NLO)
@@ -294,12 +286,12 @@ int main(int argc, const char* argv[]){
 
   // ttbar event categorization
   if(fname.Contains("ttbar") && !fname.Contains("Bkg")){
-    theTree.SetBranchAddress("scaleweight",  &ScaleWeight );
-    theTree.SetBranchAddress("genconecatid", &GenConeCat);
-    theTree.SetBranchAddress("draddjets", &DRAddJets);
-    theTree.SetBranchAddress("genlepton_pT", &GenLep_pT);
-    theTree.SetBranchAddress("jet_MatchedGenJetIndex", &Jet_GENmatched);
-    theTree.SetBranchAddress("genjet_mom", &GenJet_Mom);
+    theTree.SetBranchAddress("scaleweight",           &ScaleWeight );
+    theTree.SetBranchAddress("genconecatid",          &GenConeCat);
+    theTree.SetBranchAddress("draddjets",             &DRAddJets);
+    theTree.SetBranchAddress("genlepton_pT",          &GenLep_pT);
+    theTree.SetBranchAddress("jet_MatchedGenJetIndex",&Jet_GENmatched);
+    theTree.SetBranchAddress("genjet_mom",            &GenJet_Mom);
   }
 
   /*********************************
@@ -310,14 +302,13 @@ int main(int argc, const char* argv[]){
   TH1::SetDefaultSumw2(kTRUE);  
   
   TH1F *hPV[4][2];
-
-  TH1F *hMET[4][2], *hMET_Phi[4][2];
+  TH1F *hMET[4][2], *hMET_Phi[4][2], *hHT[4][2];
+  TH1F *hmT[4][2];
+  TH1F *hNJets[4][2], *hNBtagJets[4][2];
+  TH1F *hEvtCatego[4][2];
 
   TH1F *hLepPt[4][2], *hLepEta[4][2], *hLepPhi[4][2];
 
-  TH1F *hmT[4][2];
-
-  TH1F *hNJets[4][2], *hHT[4][2], *hNBtagJets[4][2];
   TH1F *hCSV[6][4][2], *hJetPt[6][4][2], *hJetpTUncVar[6][4][2];
   TH1F *hCvsL[6][4][2], *hCvsB[6][4][2]; 
   TH2F *h2DCSV_23Jet[4][2], *h2DCSV_45Jet[4][2]; 
@@ -326,14 +317,11 @@ int main(int argc, const char* argv[]){
   TH1F *hMassJet[5][6][4][2];
   TH1F *hInvMassjj[4][2];
 
-  TH1F *hSFpT[4][2], *hSFpTError[4][2];
   TH1F *hSFIDISO[4][2], *hSFIDISOError[4][2];
   TH1F *hSFTrigger[4][2], *hSFTriggerError[4][2];
   TH2F *h2DSFbtag_Global[4][2];
   TH1F *hSFbtag_Global[4][2], *hSFbtag_Global_var[4][2];
   TH2F *h2DSFbtag_b[4][2], *h2DSFbtag_c[4][2], *h2DSFbtag_l[4][2], *h2DSFbtag_btag_b[4][2], *h2DSFbtag_btag_c[4][2], *h2DSFbtag_btag_l[4][2]; 
-
-  TH1F *hEvtCatego[4][2];
 
   TH1F *hTJetPosition, *hWJetPosition, *hOJetPosition;
   TH2F *h2DTJetPosition, *h2DWJetPosition;
@@ -711,8 +699,8 @@ int main(int argc, const char* argv[]){
 		     (*Jet_E)[ijet]);
       jet.Flavour = (*Jet_partonFlavour)[ijet];
       jet.CSV     = (*Jet_CSV)[ijet];
-      jet.CvsL    = (*Jet_CvsL)[ijet];
-      jet.CvsB    = (*Jet_CvsB)[ijet];
+      //jet.CvsL    = (*Jet_CvsL)[ijet];
+      //jet.CvsB    = (*Jet_CvsB)[ijet];
       jet.Mom     = -1;
       if((fname.Contains("ttbar")  && !fname.Contains("Bkg")) && 
 	 (*Jet_GENmatched)[ijet] != -999) jet.Mom = (*GenJet_Mom)[(*Jet_GENmatched)[ijet]];
@@ -938,8 +926,8 @@ int main(int argc, const char* argv[]){
 	if (ijet < 6){	  
 	  hJetPt[ijet][icut][Channel]->Fill(jet.Pt(), PUWeight);
 	  hCSV  [ijet][icut][Channel]->Fill(jet.CSV,  PUWeight);
-	  hCvsL [ijet][icut][Channel]->Fill(jet.CvsL, PUWeight);
-	  hCvsB [ijet][icut][Channel]->Fill(jet.CvsB, PUWeight);
+	  //hCvsL [ijet][icut][Channel]->Fill(jet.CvsL, PUWeight);
+	  //hCvsB [ijet][icut][Channel]->Fill(jet.CvsB, PUWeight);
 	}
 	// b-Jet Efficiencies
 	if(jet.Flavour == 5){
@@ -1042,21 +1030,18 @@ int main(int argc, const char* argv[]){
       hSFbtag_Global_var[j][i]->Write();
 
       for(int ij=0; ij<6; ij++){
-	hJetPt[ij][j][i]->Write();
-	hCSV  [ij][j][i]->Write();
-	hCvsL [ij][j][i]->Write();
-	hCvsB [ij][j][i]->Write();
+  	hJetPt[ij][j][i]->Write();
+  	hCSV  [ij][j][i]->Write();
+  	// hCvsL [ij][j][i]->Write();
+  	// hCvsB [ij][j][i]->Write();
       }
 
       for(int ja=0; ja<5; ja++){
-	for(int jb=ja+1; jb<6; jb++){
-	  hMassJet[ja][jb][j][i]->Write();
-	}
+  	for(int jb=ja+1; jb<6; jb++){
+  	  hMassJet[ja][jb][j][i]->Write();
+  	}
       }      
       hInvMassjj[j][i]->Write();
-
-      hSFpT[j][i]->Write();
-      hSFpTError[j][i]->Write();
       
       hSFIDISO[j][i]->Write();
       hSFIDISOError[j][i]->Write();

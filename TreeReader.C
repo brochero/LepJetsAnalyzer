@@ -600,7 +600,7 @@ int main(int argc, const char* argv[]){
   *************************/  
   float NormWeight = 0.0;
   // NormWeight = Lumi*(1.0/N_Gen_events)*(Xsec)
-  NormWeight = SFLumi(fname, 2170, nNorm_Event);  
+  NormWeight = SFLumi(fname, 5913., nNorm_Event);  
 
   std::cout << "-----------------------                                 -------------------------" << std::endl;
   std::cout << "Number of Events     = " << nNorm_Event << std::endl;

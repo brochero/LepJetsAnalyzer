@@ -47,4 +47,4 @@ void overwritehistograms (std::vector<histos> newhistos, TString plots, TString 
  Files and Directories
 ************************/
 TString dirnameIn= "TopResults/";
-TString fl  = "hSF-CERN_v1_Tree_LepJets_v8-0-0_Spring16-80X_4200pb-1";  
+TString fl  = "hSF-CERN_v2_Tree_LepJets_v8-0-0_Spring16-80X_4200pb-1";  

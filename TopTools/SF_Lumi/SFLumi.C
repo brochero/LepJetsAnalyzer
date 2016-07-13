@@ -20,7 +20,7 @@ float SFLumi(TString filename,
 
   if(filename.Contains("QCD_MuEnr_20to30"))     NormWeight = Lumi * (1.0/NGenEvents) * (1273190000.0) * (0.003); // [pb] (cross section) * (Filter Eff)
   if(filename.Contains("QCD_MuEnr_20to30"))     NormWeight = Lumi * (1.0/NGenEvents) * (558528000.0) * (0.0053); // [pb] (cross section) * (Filter Eff)
-  if(filename.Contains("QCD_MuEnr_30to50"))     NormWeight = Lumi * (1.0/NGenEvents) * (139803000.0) * (0.01182); // [pb] (cross section) * (Filter Eff)
+  if(filename.Contains("QCD_MuEnr_30to50"))     NormWeight = Lumi * (1.0/NGenEvents) * (139803000.0) * (0.0118); // [pb] (cross section) * (Filter Eff)
   if(filename.Contains("QCD_MuEnr_50to80"))     NormWeight = Lumi * (1.0/NGenEvents) * (19222500.0) * (0.02276); // [pb] (cross section) * (Filter Eff)
   if(filename.Contains("QCD_MuEnr_80to120"))    NormWeight = Lumi * (1.0/NGenEvents) * (2758420.0) * (0.03844);  // [pb] (cross section) * (Filter Eff)
   if(filename.Contains("QCD_MuEnr_120to170"))   NormWeight = Lumi * (1.0/NGenEvents) * (469797.0) * (0.05362);   // [pb] (cross section) * (Filter Eff)
@@ -31,30 +31,37 @@ float SFLumi(TString filename,
   if(filename.Contains("QCD_MuEnr_1000toInf"))  NormWeight = Lumi * (1.0/NGenEvents) * (10.4305) * (0.15544);    // [pb] (cross section) * (Filter Eff)
 
   if(filename.Contains("QCD_EGEnr_15to20"))     NormWeight = Lumi * (1.0/NGenEvents) * (1279000000.0) * (0.0018); // [pb] (cross section) * (Filter Eff)
-  if(filename.Contains("QCD_EGEnr_20to30"))     NormWeight = Lumi * (1.0/NGenEvents) * (557600000.0) * (0.0096); // [pb] (cross section) * (Filter Eff)
-  if(filename.Contains("QCD_EGEnr_30to50"))     NormWeight = Lumi * (1.0/NGenEvents) * (136000000.0) * (0.073); // [pb] (cross section) * (Filter Eff)
-  if(filename.Contains("QCD_EGEnr_50to80"))     NormWeight = Lumi * (1.0/NGenEvents) * (19800000.0) * (0.146); // [pb] (cross section) * (Filter Eff)
-  if(filename.Contains("QCD_EGEnr_80to120"))    NormWeight = Lumi * (1.0/NGenEvents) * (2800000.0) * (0.125); // [pb] (cross section) * (Filter Eff)
-  if(filename.Contains("QCD_EGEnr_120to170"))   NormWeight = Lumi * (1.0/NGenEvents) * (477000.0) * (0.132); // [pb] (cross section) * (Filter Eff)
-  if(filename.Contains("QCD_EGEnr_170to300"))   NormWeight = Lumi * (1.0/NGenEvents) * (114000.0) * (0.165); // [pb] (cross section) * (Filter Eff)
-  if(filename.Contains("QCD_EGEnr_300toInf"))   NormWeight = Lumi * (1.0/NGenEvents) * (9000.0) * (0.15); // [pb] (cross section) * (Filter Eff)
+  if(filename.Contains("QCD_EGEnr_20to30"))     NormWeight = Lumi * (1.0/NGenEvents) * (557600000.0) * (0.0096);  // [pb] (cross section) * (Filter Eff)
+  if(filename.Contains("QCD_EGEnr_30to50"))     NormWeight = Lumi * (1.0/NGenEvents) * (136000000.0) * (0.073);   // [pb] (cross section) * (Filter Eff)
+  if(filename.Contains("QCD_EGEnr_50to80"))     NormWeight = Lumi * (1.0/NGenEvents) * (19800000.0) * (0.146);    // [pb] (cross section) * (Filter Eff)
+  if(filename.Contains("QCD_EGEnr_80to120"))    NormWeight = Lumi * (1.0/NGenEvents) * (2800000.0) * (0.125);     // [pb] (cross section) * (Filter Eff)
+  if(filename.Contains("QCD_EGEnr_120to170"))   NormWeight = Lumi * (1.0/NGenEvents) * (477000.0) * (0.132);      // [pb] (cross section) * (Filter Eff)
+  if(filename.Contains("QCD_EGEnr_170to300"))   NormWeight = Lumi * (1.0/NGenEvents) * (114000.0) * (0.165);      // [pb] (cross section) * (Filter Eff)
+  if(filename.Contains("QCD_EGEnr_300toInf"))   NormWeight = Lumi * (1.0/NGenEvents) * (9000.0) * (0.15);         // [pb] (cross section) * (Filter Eff)
 
 
-  if(filename.Contains("ttHiggsbb"))      NormWeight = Lumi * (1.0/NGenEvents) * (0.577*0.5058);  // [pb]
-  if(filename.Contains("ZJets_M50"))      NormWeight = Lumi * (1.0/NGenEvents) * (6025.2);  // [pb]
-  if(filename.Contains("ZJets_M10to50"))  NormWeight = Lumi * (1.0/NGenEvents) * (18610.0);// [pb]
-  if(filename.Contains("WJets"))          NormWeight = Lumi * (1.0/NGenEvents) * (61526.7); // [pb]
-  if(filename.Contains("tW"))             NormWeight = Lumi * (1.0/NGenEvents) * (35.6);    // [pb]
-  if(filename.Contains("tbarW"))          NormWeight = Lumi * (1.0/NGenEvents) * (35.6);    // [pb]
-  if(filename.Contains("t_tchannel"))     NormWeight = Lumi * (1.0/NGenEvents) * (44.33);  // [pb]
-  if(filename.Contains("tbar_tchannel"))  NormWeight = Lumi * (1.0/NGenEvents) * (26.38);   // [pb]
-  if(filename.Contains("WW"))             NormWeight = Lumi * (1.0/NGenEvents) * (110.8);   // [pb]
+  if(filename.Contains("ttHbb"))      NormWeight = Lumi * (1.0/NGenEvents) * (0.577*0.5058); // [pb]
+  if(filename.Contains("ZJets_M50"))      NormWeight = Lumi * (1.0/NGenEvents) * (6025.2);   // [pb]
+  if(filename.Contains("ZJets_M10to50"))  NormWeight = Lumi * (1.0/NGenEvents) * (18610.0);  // [pb]
+  if(filename.Contains("WJets"))          NormWeight = Lumi * (1.0/NGenEvents) * (61526.7);  // [pb]
+  if(filename.Contains("tW"))             NormWeight = Lumi * (1.0/NGenEvents) * (35.6);     // [pb]
+  if(filename.Contains("tbarW"))          NormWeight = Lumi * (1.0/NGenEvents) * (35.6);     // [pb]
+  if(filename.Contains("t_tchannel"))     NormWeight = Lumi * (1.0/NGenEvents) * (44.33);    // [pb]
+  if(filename.Contains("tbar_tchannel"))  NormWeight = Lumi * (1.0/NGenEvents) * (26.38);    // [pb]
+  if(filename.Contains("WW"))             NormWeight = Lumi * (1.0/NGenEvents) * (110.8);    // [pb]
   if(filename.Contains("WZ"))             NormWeight = Lumi * (1.0/NGenEvents) * (47.13);    // [pb]
-  if(filename.Contains("ZZ"))             NormWeight = Lumi * (1.0/NGenEvents) * (16.52);    // [pb]                                                                                            
+  if(filename.Contains("ZZ"))             NormWeight = Lumi * (1.0/NGenEvents) * (16.52);    // [pb]
+
+  if(filename.Contains("ttW"))             NormWeight = Lumi * (1.0/NGenEvents) * (0.61);    // [pb]
+  if(filename.Contains("ttZ"))             NormWeight = Lumi * (1.0/NGenEvents) * (0.78);    // [pb]
   
-  if(filename.Contains("ttbar_PowhegPythia")) NormWeight = Lumi * (1.0/NGenEvents) * (831.76); // [pb] Br = (leptonic) * Hadronic = (0.1086*3) * (0.67)
-  if(filename.Contains("ttbar_MCatNLO"))      NormWeight = Lumi * (1.0/NGenEvents) * (831.76); // * (0.1086*3.0*3.0); // Br correction
-  if(filename.Contains("ttbar_Madgraph"))     NormWeight = Lumi * (1.0/NGenEvents) * (831.76);  if(filename.Contains("ttbar_PowhegHerwig")) NormWeight = Lumi * (1.0/NGenEvents) * (831.76); // [pb] Br = (leptonic) * Hadronic = (0.1086*3) * (0.67)
+  if(filename.Contains("ttbar_LepJetsPowhegPythia"))  NormWeight = Lumi * (1.0/NGenEvents) * (356.4); // [pb] Xsec*Br(lep+Jets) = (831.76) * 2[(0.1086*3) * (0.67)] = 363.12 (356.4)
+  if(filename.Contains("ttbb_aMCatNLOMadspinPythia")) NormWeight = Lumi * (1.0/NGenEvents) * (13.93); // [pb] Xsec*Br(tt+bb)
+  if(filename.Contains("ttbar_PowhegPythia"))         NormWeight = Lumi * (1.0/NGenEvents) * (831.76); // [pb] Br = (leptonic) * Hadronic = (0.1086*3) * (0.67)
+  if(filename.Contains("ttbar_aMCatNLO"))             NormWeight = Lumi * (1.0/NGenEvents) * (831.76); // * (0.1086*3.0*3.0); // Br correction
+  if(filename.Contains("ttbar_Madgraph"))             NormWeight = Lumi * (1.0/NGenEvents) * (831.76);  
+  if(filename.Contains("ttbar_PowhegHerwig"))         NormWeight = Lumi * (1.0/NGenEvents) * (831.76); // [pb] Br = (leptonic) * Hadronic = (0.1086*3) * (0.67)
+
  
   
   if(filename.Contains("Data"))               NormWeight = 1.0;

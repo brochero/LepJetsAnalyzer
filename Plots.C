@@ -31,6 +31,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
   int col_WJets     = TColor::GetColor("#33cc33");
   int col_ZJets     = TColor::GetColor("#3366ff");
   int col_QCD       = TColor::GetColor("#ffff00");
+  int col_ttbarV    = TColor::GetColor("#e75c8d");
+  int col_ttbarH    = TColor::GetColor("#e5c4f4");
   int col_VV        = TColor::GetColor("#ffffff");
   
   /****************
@@ -59,8 +61,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
   std::vector<histos> ttbar_0_ttbb;
   ttbar_0_ttbb = loadhistograms(plots, files + "_ttbar_PowhegPythiattbb");
   setuphistograms(ttbar_0_ttbb, col_ttbb);
-  std::vector<histos> ttbar_0_ttb;
-  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_PowhegPythiattb");
+  std::vector<histos> ttbar_0_ttbj;
+  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_PowhegPythiattbj");
   setuphistograms(ttbar_0_ttb, col_ttb);
   std::vector<histos> ttbar_0_ttcc;
   ttbar_0_ttcc = loadhistograms(plots, files + "_ttbar_PowhegPythiattcc");
@@ -100,11 +102,11 @@ void Plots(TString plots="2btag", bool LogScale=false) {
          VV
   ****************/ 
   std::vector<histos> WW;
-  WW = loadhistograms(plots, files + "_WW");
+  WW = loadhistograms(plots, files + "_WW_Pythia");
   std::vector<histos> WZ;
-  WZ = loadhistograms(plots, files + "_WZ");
+  WZ = loadhistograms(plots, files + "_WZ_Pythia");
   std::vector<histos> ZZ;
-  ZZ = loadhistograms(plots, files + "_ZZ");
+  ZZ = loadhistograms(plots, files + "_ZZ_Pythia");
   std::vector<histos> VV;
   VV = addhistograms(WW, WZ);
   VV = addhistograms(VV, ZZ);
@@ -114,13 +116,13 @@ void Plots(TString plots="2btag", bool LogScale=false) {
      Single Top
   ****************/ 
   std::vector<histos> tW;
-  tW = loadhistograms(plots, files + "_tW");
+  tW = loadhistograms(plots, files + "_tW_Powheg");
   std::vector<histos> tbarW;
-  tbarW = loadhistograms(plots, files + "_tbarW");
+  tbarW = loadhistograms(plots, files + "_tbarW_Powheg");
   std::vector<histos> t_tch;
-  t_tch = loadhistograms(plots, files + "_t_tchannel");
+  t_tch = loadhistograms(plots, files + "_t_tchannel_Powheg");
   std::vector<histos> tbar_tch;
-  tbar_tch = loadhistograms(plots, files + "_tbar_tchannel");
+  tbar_tch = loadhistograms(plots, files + "_tbar_tchannel_Powheg");
   std::vector<histos> Single_top;
   Single_top = addhistograms(tW, tbarW);
   Single_top = addhistograms(Single_top, t_tch);
@@ -131,7 +133,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
        W+Jets
   ****************/ 
   std::vector<histos> WJets;
-  WJets = loadhistograms(plots, files + "_WJets_aMCatNLO");
+  // WJets = loadhistograms(plots, files + "_WJets_aMCatNLO");
+  WJets = loadhistograms(plots, files + "_WJets_Madgraph");
   setuphistograms(WJets, col_WJets);
 
   /****************
@@ -144,6 +147,24 @@ void Plots(TString plots="2btag", bool LogScale=false) {
   std::vector<histos> QCD;  
   QCD = addhistograms(QCD_Mu, QCD_EG);
   setuphistograms(QCD, col_QCD);
+
+  /****************
+      ttbar+V
+  ****************/ 
+  std::vector<histos> ttbarW;
+  ttbarW = loadhistograms(plots, files + "_ttbarW_Madgraph");
+  std::vector<histos> ttbarZ;
+  ttbarZ = loadhistograms(plots, files + "_ttbarZ_Madgraph");
+  std::vector<histos> ttbarV;  
+  ttbarV = addhistograms(ttbarW, ttbarZ);
+  setuphistograms(ttbarV, col_ttbarV);
+
+  /****************
+      ttbar+H
+  ****************/ 
+  std::vector<histos> ttbarH;
+  ttbarH = loadhistograms(plots, files + "_ttbarHbb_Powheg");
+  setuphistograms(ttbarH, col_ttbarH);
 
   /****************
     All Syst Unc
@@ -180,6 +201,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
   Stack_bkg = addstack(Stack_bkg, VV);
   Stack_bkg = addstack(Stack_bkg, ttbar_bkg);
   Stack_bkg = addstack(Stack_bkg, ZJets);
+  Stack_bkg = addstack(Stack_bkg, ttbarV);
+  Stack_bkg = addstack(Stack_bkg, ttbarH);
   //-------------------------------------------------------
   // Full Stack
   Stack = addstack(Stack, ttbar_0_ttbb);
@@ -192,6 +215,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
   Stack = addstack(Stack, Single_top);
   Stack = addstack(Stack, VV);
   Stack = addstack(Stack, ZJets);
+  Stack = addstack(Stack, ttbarV);
+  Stack = addstack(Stack, ttbarH);
   //-------------------------------------------------------
   //-------------------------------------------------------
   // other ttbar Generators
@@ -305,6 +330,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       leg->AddEntry(Single_top[h].hist[ch],  "Single t","F");
       leg->AddEntry(QCD[h].hist[ch],         "QCD","F");
       leg->AddEntry(WJets[h].hist[ch],       "W+Jets","F");
+      leg->AddEntry(ttbarV[h].hist[ch],      "t#bar{t}+V","F");
+      leg->AddEntry(ttbarH[h].hist[ch],      "t#bar{t}+H","F");
       leg->AddEntry(ttOther[h].hist[ch],     "t#bar{t}+other","F");
       leg->AddEntry(ttbar_0_ttLF[h].hist[ch],"t#bar{t}+LF","F");
       leg->AddEntry(ttbar_0_ttcc[h].hist[ch],"t#bar{t}+cc","F");
@@ -336,7 +363,7 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       titlePr->Draw("SAME");
       
       TLatex *title;
-      title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 5.44 fb^{-1}");
+      title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 5.91 fb^{-1}");
       title->SetNDC();
       title->SetTextAlign(12);
       title->SetX(0.20);

@@ -488,7 +488,7 @@ int main(int argc, const char* argv[]){
      SF Parametrization
   *************************/
 
-  TString fSFdir = "../TopTrees_CATuples/ScaleFactors/";
+  TString fSFdir = "ScaleFactors/";
   
   TH2F *hmuIDISOSF, *hmuTriggerSF;
   TH2F *heIDISOSF,  *heTriggerSF;

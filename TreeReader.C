@@ -911,7 +911,8 @@ int main(int argc, const char* argv[]){
 	for(int jjet=ijet+1; jjet < jbmax; jjet++){
 	  ComJet jet_ = Jets[jjet];
 	  float DijetInvMass = (jet+jet_).M(); 
-	  hMassJet[ijet][jjet][icut][Channel]->Fill(DijetInvMass, PUWeight);
+	  h_DiJetVar[ijet][jjet][icut][Channel]["InvMass"]->Fill(DijetInvMass,      PUWeight);
+	  h2D_DiJetVar[ijet][jjet][icut][Channel]["2DCSV"]->Fill(jet.CSV, jet_.CSV, PUWeight);
 	}// for(jjet)
 	
       }//for(ijet)     

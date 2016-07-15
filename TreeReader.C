@@ -343,8 +343,8 @@ int main(int argc, const char* argv[]){
     target->mkdir(namecut[j]);
   
     for(int i=0; i<2; i++){ // Channel
-      target->mkdir(namech[i]);
-      target->mkdir(namech[i]);
+      target->mkdir(namecut[j] + "/" + namech[i]);
+      target->cd(namecut[j] + "/" + namech[i]);
 
       /***************************
              Event Variables

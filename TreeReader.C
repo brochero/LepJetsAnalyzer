@@ -295,10 +295,22 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress("genjet_mom",            &GenJet_Mom);
   }
 
+  /***************************
+         Output file
+  ***************************/
+  // --- Jet uncertainties (btag, JES and JER)
+  if(_syst) fname += "_SYS_" + syst_varname;
+  // ttbar Categorization
+  if(_ttbar_cat) fname += ttbar_id; 
+  // --- Output file
+  TString outfname=dirname + "/hSF-" + hname + "_" + fname + ".root";
+  TFile *target  = new TFile(outfname,"RECREATE" );  
+  
+  target->cd();
+
   /*********************************
              Histograms
   **********************************/
-
   //Correct Statistical Uncertainty Treatment
   TH1::SetDefaultSumw2(kTRUE);  
   
@@ -326,9 +338,13 @@ int main(int argc, const char* argv[]){
   TString titlenamech[2];
   titlenamech[0]="#mu+Jets";
   titlenamech[1]="e+Jets";
-  
+
   for(int j=0; j<4; j++){   // Cut
+    target->mkdir(namecut[j]);
+  
     for(int i=0; i<2; i++){ // Channel
+      target->mkdir(namech[i]);
+      target->mkdir(namech[i]);
 
       /***************************
              Event Variables
@@ -358,8 +374,8 @@ int main(int argc, const char* argv[]){
       h_EvtVar[j][i]["NbJets"]->GetXaxis()->SetBinLabel(4,"3");
       h_EvtVar[j][i]["NbJets"]->GetXaxis()->SetBinLabel(5,"4");
       h_EvtVar[j][i]["NbJets"]->GetXaxis()->SetBinLabel(6,"#geq 5");
-      if(j == 2) h_EvtVar[j][i]["hNbJets"]->GetXaxis()->SetRange(3,6);
-      if(j == 3) h_EvtVar[j][i]["hNbJets"]->GetXaxis()->SetRange(5,6);
+      if(j == 2) h_EvtVar[j][i]["NbJets"]->GetXaxis()->SetRange(3,6);
+      if(j == 3) h_EvtVar[j][i]["NbJets"]->GetXaxis()->SetRange(5,6);
 
       // SF(ID,ISO & Trigger)
       h_EvtVar[j][i]["SFIDISO"]        = new TH1F("hSFIDISO_"+namech[i]+"_"+namecut[j],"SF_{ID,ISO} " + titlenamech[i],400,0.8,1.2);    
@@ -395,30 +411,30 @@ int main(int argc, const char* argv[]){
              Jet Variables
       ***************************/
       for(int ij=0; ij<6; ij++){
-	TString jetn;
-	std::ostringstream jni;
-	jni << ij;
-	jetn = "Jet-" + jni.str();	
+      	TString jetn;
+      	std::ostringstream jni;
+      	jni << ij;
+      	jetn = "Jet-" + jni.str();	
 	
-	h_JetVar[ij][j][i]["pT"]   = new TH1F("hJetPt_" + jetn + "_" + namech[i] + "_" + namecut[j],"p_{T}^{Jet} " + jetn + " " + titlenamech[i] + ";p_{T}[GeV]",10,0,200);
-	h_JetVar[ij][j][i]["CSV"]  = new TH1F("hCSV_"   + jetn + "_" + namech[i] + "_" + namecut[j],"CSV "  + jetn + " " + titlenamech[i] + ";CSVv2",10,0,1);
-	h_JetVar[ij][j][i]["CvsL"] = new TH1F("hCvsL_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsL " + jetn + " " + titlenamech[i] + ";CvsL",10,0,1);
-	h_JetVar[ij][j][i]["CvsB"] = new TH1F("hCvsB_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsB " + jetn + " " + titlenamech[i] + ";CvsB",10,0,1);
+      	h_JetVar[ij][j][i]["pT"]   = new TH1F("hJetPt_" + jetn + "_" + namech[i] + "_" + namecut[j],"p_{T}^{Jet} " + jetn + " " + titlenamech[i] + ";p_{T}[GeV]",10,0,200);
+      	h_JetVar[ij][j][i]["CSV"]  = new TH1F("hCSV_"   + jetn + "_" + namech[i] + "_" + namecut[j],"CSV "  + jetn + " " + titlenamech[i] + ";CSVv2",10,0,1);
+      	h_JetVar[ij][j][i]["CvsL"] = new TH1F("hCvsL_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsL " + jetn + " " + titlenamech[i] + ";CvsL",10,0,1);
+      	h_JetVar[ij][j][i]["CvsB"] = new TH1F("hCvsB_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsB " + jetn + " " + titlenamech[i] + ";CvsB",10,0,1);
 
-	h_JetVar[ij][j][i]["pTUncVar"] = new TH1F("hJetpTUncVar_" + jetn + "_" + namech[i] + "_" + namecut[j], "#Delta pT^{Jet} " + jetn + " " + titlenamech[i], 20.0, 0.0, 2.0);
+      	h_JetVar[ij][j][i]["pTUncVar"] = new TH1F("hJetpTUncVar_" + jetn + "_" + namech[i] + "_" + namecut[j], "#Delta pT^{Jet} " + jetn + " " + titlenamech[i], 20.0, 0.0, 2.0);
       }
 
       for(int ja=0; ja<5; ja++){
-	for(int jb=ja+1; jb<6; jb++){
-	  TString dijetn;
-	  std::ostringstream jna, jnb;
-	  jna << ja;
-	  jnb << jb;
-	  dijetn = "Jet" + jnj.str() + jni.str();
+      	for(int jb=ja+1; jb<6; jb++){
+      	  TString dijetn;
+      	  std::ostringstream jna, jnb;
+      	  jna << ja;
+      	  jnb << jb;
+      	  dijetn = "Jet" + jna.str() + jnb.str();
 
-	  h_DiJetVar[ja][jb][j][i]["InvMass"] = new TH1F("hMassJet_" + dijetMassn + "_" + namech[i]+"_"+namecut[j],"transverse Mass of Dijets "+ dijetn + " " + titlenamech[i],80,0,400);
-	  h2D_DiJetVar[ja][jb][j][i]["2DCSV"] = new TH2F("h2DCSV_" + dijetn + "_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for " + dijetn + " " + titlenamech[i], 20,0,1,20,0,1);
-	}
+      	  h_DiJetVar[ja][jb][j][i]["InvMass"] = new TH1F("hMassJet_" + dijetn + "_" + namech[i]+"_"+namecut[j],"transverse Mass of Dijets "+ dijetn + " " + titlenamech[i],80,0,400);
+      	  h2D_DiJetVar[ja][jb][j][i]["2DCSV"] = new TH2F("h2DCSV_" + dijetn + "_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for " + dijetn + " " + titlenamech[i], 20,0,1,20,0,1);
+      	}
       }
 
     }//for(i)
@@ -434,6 +450,8 @@ int main(int argc, const char* argv[]){
   h2DTJetPosition    = new TH2F("h2DTJetPosition","CSV Position for jets from Top Vs Dijet Rank",  7,0,7,7,0,7);
   h2DWJetPosition    = new TH2F("h2DWJetPosition","CSV Position for jets from W Vs Dijet Rank",    7,0,7,7,0,7);
   
+  std::cout << "Full set of histograms has been created." << std::endl; 
+
   TStopwatch sw;
   sw.Start(kTRUE);
 
@@ -446,7 +464,6 @@ int main(int argc, const char* argv[]){
   /************************
      SF Parametrization
   *************************/
-
   TString fSFdir = "ScaleFactors/";
   
   TH2F *hmuIDISOSF, *hmuTriggerSF;
@@ -474,22 +491,6 @@ int main(int argc, const char* argv[]){
     std::cerr << "ERROR [ElectronSF]: Could not find histogram for SF reweighting" << std::endl;
   }
 
-  // Trigger and ID-ISO uncertainties
-  if(_idiso_unc){
-    if(IDISOUnc=="Up")        fname += "_SYS_IDISO_Up";      
-    else if(IDISOUnc=="Down") fname += "_SYS_IDISO_Down";
-    else if(IDISOUnc=="Nom")  fname += "_SYS_IDISO_Nom";
-  } // if(_idiso_unc)
-  
-  if(_tr_unc){
-    if(TrUnc=="Up")        fname += "_SYS_Trigger_Up";
-    else if(TrUnc=="Down") fname += "_SYS_Trigger_Down";
-    else if(TrUnc=="Nom")  fname += "_SYS_Trigger_Nom";
-  }// if(_tr_unc) 
-
-  // Jet uncertainties (btag, JES and JER)
-  if(_syst) fname += "_SYS_" + syst_varname;
-
 
   // Number de events for acceptance
   //          [Cut][Channel]
@@ -501,11 +502,6 @@ int main(int argc, const char* argv[]){
   float EffEvent[4][3]={0.0,0.0,0.0,0.0,
 			0.0,0.0,0.0,0.0,
 			0.0,0.0,0.0,0.0};  
-
-  /***************************
-     ttbar Categorization
-  ***************************/
-  if(_ttbar_cat) fname += ttbar_id; // add in the sample name the ttbar category
 
   // New WP for 76X: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation76X
   float CSV_WP = 0.800; // Medium
@@ -870,28 +866,22 @@ int main(int argc, const char* argv[]){
         Jet Variables
       ******************/
       
-      // 2D CSV discriminant plot for all Jets
-      if(Jets.size() > 3){
-	h2DCSV_23Jet[icut][Channel]->Fill(Jets[2].CSV, Jets[3].CSV, PUWeight);
-	if(Jets.size() > 4){  
-	  h2DCSV_24Jet[icut][Channel]->Fill(Jets[2].CSV, Jets[4].CSV, PUWeight);
-	  h2DCSV_34Jet[icut][Channel]->Fill(Jets[3].CSV, Jets[4].CSV, PUWeight);
-	  if(Jets.size() > 5){
-	    h2DCSV_25Jet[icut][Channel]->Fill(Jets[2].CSV, Jets[5].CSV, PUWeight);
-	    h2DCSV_35Jet[icut][Channel]->Fill(Jets[3].CSV, Jets[5].CSV, PUWeight);
-	  }
-	}
-      }// if(Jets.size() > 3
+      // // 2D CSV discriminant plot for all Jets
+      // if(Jets.size() > 3){
+      // 	h2DCSV_23Jet[icut][Channel]->Fill(Jets[2].CSV, Jets[3].CSV, PUWeight);
+      // 	if(Jets.size() > 4){  
+      // 	  h2DCSV_24Jet[icut][Channel]->Fill(Jets[2].CSV, Jets[4].CSV, PUWeight);
+      // 	  h2DCSV_34Jet[icut][Channel]->Fill(Jets[3].CSV, Jets[4].CSV, PUWeight);
+      // 	  if(Jets.size() > 5){
+      // 	    h2DCSV_25Jet[icut][Channel]->Fill(Jets[2].CSV, Jets[5].CSV, PUWeight);
+      // 	    h2DCSV_35Jet[icut][Channel]->Fill(Jets[3].CSV, Jets[5].CSV, PUWeight);
+      // 	  }
+      // 	}
+      // }// if(Jets.size() > 3
 
       // Jet Variables
       for(int ijet=0; ijet < Jets.size(); ijet++){
 	ComJet jet = Jets[ijet];
-	if (ijet < 6){	  
-	  hJetPt[ijet][icut][Channel]->Fill(jet.Pt(), PUWeight);
-	  hCSV  [ijet][icut][Channel]->Fill(jet.CSV,  PUWeight);
-	  //hCvsL [ijet][icut][Channel]->Fill(jet.CvsL, PUWeight);
-	  //hCvsB [ijet][icut][Channel]->Fill(jet.CvsB, PUWeight);
-	}
 	// b-Jet Efficiencies
 	if(jet.Flavour == 5){
 	  h2D_EvtVar[icut][Channel]["SFbtag_b"]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight); // b-Flavour
@@ -906,6 +896,13 @@ int main(int argc, const char* argv[]){
 	  if(jet.CSV > CSV_WP) h2D_EvtVar[icut][Channel]["SFbtag_btag_l"]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight);  
 	}
 	
+	if (ijet < 6){	  
+	  h_JetVar[ijet][icut][Channel]["pT"] ->Fill(jet.Pt(), PUWeight);
+	  h_JetVar[ijet][icut][Channel]["CSV"]->Fill(jet.CSV,  PUWeight);
+	  // h_JetVar[ijet][icut][Channel]["CvsL"]->Fill(jet.CvsL, PUWeight);
+	  // h_JetVar[ijet][icut][Channel]["CvsB"]->Fill(jet.CvsB, PUWeight);
+	}
+
 	//Dijet Invariant Mass 
 	int jbmax = std::min(6,NJets);
 	for(int jjet=ijet+1; jjet < jbmax; jjet++){
@@ -956,80 +953,75 @@ int main(int argc, const char* argv[]){
   }
   
   
-  // --- Write histograms
-  TString outfname=dirname + "/hSF-" + hname + "_" + fname + ".root";
-  TFile *target  = new TFile(outfname,"RECREATE" );  
   
-  target->cd();
-  
-  Yields->Write();
+  // Yields->Write();
 
-  for(int j=0; j<4; j++){
-    for(int i=0; i<2; i++){
+  // for(int j=0; j<4; j++){
+  //   for(int i=0; i<2; i++){
       
-      hEvtCatego[j][i]->Write();
-      hPV[j][i]->Write();
+  //     hEvtCatego[j][i]->Write();
+  //     hPV[j][i]->Write();
       
-      hMET[j][i]->Write();
-      hMET_Phi[j][i]->Write();
+  //     hMET[j][i]->Write();
+  //     hMET_Phi[j][i]->Write();
 
-      hmT[j][i]->Write();
+  //     hmT[j][i]->Write();
       
-      hLepPt[j][i]->Write();
-      hLepEta[j][i]->Write();
-      hLepPhi[j][i]->Write();
+  //     hLepPt[j][i]->Write();
+  //     hLepEta[j][i]->Write();
+  //     hLepPhi[j][i]->Write();
       
-      hNJets[j][i]->Write();
-      hNBtagJets[j][i]->Write();            
+  //     hNJets[j][i]->Write();
+  //     hNBtagJets[j][i]->Write();            
 
-      h2DCSV_23Jet[j][i]->Write();
-      h2DCSV_45Jet[j][i]->Write();
-      h2DCSV_24Jet[j][i]->Write();
-      h2DCSV_25Jet[j][i]->Write();
-      h2DCSV_34Jet[j][i]->Write();
-      h2DCSV_35Jet[j][i]->Write();
+  //     h2DCSV_23Jet[j][i]->Write();
+  //     h2DCSV_45Jet[j][i]->Write();
+  //     h2DCSV_24Jet[j][i]->Write();
+  //     h2DCSV_25Jet[j][i]->Write();
+  //     h2DCSV_34Jet[j][i]->Write();
+  //     h2DCSV_35Jet[j][i]->Write();
       
-      h2DSFbtag_Global[j][i]->Write();
-      hSFbtag_Global[j][i]->Write();
-      hSFbtag_Global_var[j][i]->Write();
+  //     h2DSFbtag_Global[j][i]->Write();
+  //     hSFbtag_Global[j][i]->Write();
+  //     hSFbtag_Global_var[j][i]->Write();
 
-      for(int ij=0; ij<6; ij++){
-  	hJetPt[ij][j][i]->Write();
-  	hCSV  [ij][j][i]->Write();
-  	// hCvsL [ij][j][i]->Write();
-  	// hCvsB [ij][j][i]->Write();
-      }
+  //     for(int ij=0; ij<6; ij++){
+  // 	hJetPt[ij][j][i]->Write();
+  // 	hCSV  [ij][j][i]->Write();
+  // 	// hCvsL [ij][j][i]->Write();
+  // 	// hCvsB [ij][j][i]->Write();
+  //     }
 
-      for(int ja=0; ja<5; ja++){
-  	for(int jb=ja+1; jb<6; jb++){
-  	  hMassJet[ja][jb][j][i]->Write();
-  	}
-      }      
-      hInvMassjj[j][i]->Write();
+  //     for(int ja=0; ja<5; ja++){
+  // 	for(int jb=ja+1; jb<6; jb++){
+  // 	  hMassJet[ja][jb][j][i]->Write();
+  // 	}
+  //     }      
+  //     hInvMassjj[j][i]->Write();
       
-      hSFIDISO[j][i]->Write();
-      hSFIDISOError[j][i]->Write();
-      hSFTrigger[j][i]->Write();
-      hSFTriggerError[j][i]->Write();
+  //     hSFIDISO[j][i]->Write();
+  //     hSFIDISOError[j][i]->Write();
+  //     hSFTrigger[j][i]->Write();
+  //     hSFTriggerError[j][i]->Write();
       
-      h2DSFbtag_b[j][i]->Write();
-      h2DSFbtag_c[j][i]->Write();
-      h2DSFbtag_l[j][i]->Write();
+  //     h2DSFbtag_b[j][i]->Write();
+  //     h2DSFbtag_c[j][i]->Write();
+  //     h2DSFbtag_l[j][i]->Write();
 
-      h2DSFbtag_btag_b[j][i]->Write();
-      h2DSFbtag_btag_c[j][i]->Write();
-      h2DSFbtag_btag_l[j][i]->Write();
+  //     h2DSFbtag_btag_b[j][i]->Write();
+  //     h2DSFbtag_btag_c[j][i]->Write();
+  //     h2DSFbtag_btag_l[j][i]->Write();
 
-    }//for(i)
+  //   }//for(i)
 
-  }//for(j)
+  // }//for(j)
 
-  hTJetPosition->Write();
-  hWJetPosition->Write();
-  hOJetPosition->Write();
+  // hTJetPosition->Write();
+  // hWJetPosition->Write();
+  // hOJetPosition->Write();
 
-  h2DWJetPosition->Write();
-  h2DTJetPosition->Write();
+  // h2DWJetPosition->Write();
+  // h2DTJetPosition->Write();
     
   target->Close();
 

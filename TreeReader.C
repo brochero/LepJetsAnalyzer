@@ -50,7 +50,7 @@ public:
 void print_progress(int TreeEntries, Long64_t ievt);
 const TString currentDateTime();
 float DiJetMassCorrection(std::vector<ComJet> &Jets, bool ReArrange);
-
+bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id);
 
 void display_usage()
 {
@@ -214,7 +214,7 @@ int main(int argc, const char* argv[]){
   std::vector<int> *GenConeCat=0;
   float DRAddJets;
   float GenLep_pT;
-  std::vector<float> *GenJet_pT=0;
+  std::vector<float> *GenJet_px=0, *GenJet_py=0, *GenJet_pz=0, *GenJet_E=0;
 
   // Scale Syst. Unc.
   std::vector<float> *ScaleWeight=0;
@@ -246,9 +246,9 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "jet_CSV",          &Jet_CSV );
   theTree.SetBranchAddress( "jet_SF_CSV",       &Jet_SF_CSV );
   theTree.SetBranchAddress( "jet_partonFlavour",&Jet_partonFlavour );
-  theTree.SetBranchAddress( "jet_iCSVCvsL",      &Jet_CSVCvsL );
-  theTree.SetBranchAddress( "jet_CCvsLT",        &Jet_CvsL );
-  theTree.SetBranchAddress( "jet_CCvBLT",        &Jet_CvsB );
+  theTree.SetBranchAddress( "jet_iCSVCvsL",     &Jet_CSVCvsL );
+  theTree.SetBranchAddress( "jet_CCvsLT",       &Jet_CvsL );
+  theTree.SetBranchAddress( "jet_CCvBLT",       &Jet_CvsB );
 
 
   if(!fname.Contains("Data")){
@@ -292,6 +292,10 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress("genlepton_pT",          &GenLep_pT);
     theTree.SetBranchAddress("jet_MatchedGenJetIndex",&Jet_GENmatched);
     theTree.SetBranchAddress("genjet_mom",            &GenJet_Mom);
+    theTree.SetBranchAddress("genjet_px",             &GenJet_px);
+    theTree.SetBranchAddress("genjet_py",             &GenJet_py);
+    theTree.SetBranchAddress("genjet_pz",             &GenJet_pz);
+    theTree.SetBranchAddress("genjet_E",              &GenJet_E);
   }
 
   /*********************************
@@ -714,8 +718,12 @@ int main(int argc, const char* argv[]){
     *******************************************/    
     int NGenJets = 0;
     if (_ttbar_cat){
-      for(int igenjet=0; igenjet < GenJet_pT->size(); igenjet++){
-	if( (*GenJet_pT)[igenjet] > 20 ) NGenJets++;
+      for(int igenjet=0; igenjet < GenJet_px->size(); igenjet++){
+	TLorentzVector TLGenJet((*GenJet_px)[igenjet],
+				(*GenJet_py)[igenjet],
+				(*GenJet_pz)[igenjet],
+				(*GenJet_E)[igenjet]); 
+	if( TLGenJet.Pt() > 20 ) NGenJets++;
       }
     }
 
@@ -772,75 +780,38 @@ int main(int argc, const char* argv[]){
             Selection
     ***************************/
     
-    int                            cut = 0; // Single Lepton (from Tree)
-    if(NJets > 5)                  cut = 1; // + 6 Jets 
-    if(NJets > 5 && NBtagJets > 1) cut = 2; // + 2 b-tag
-    if(NJets > 5 && NBtagJets > 2) cut = 3; // + 3 b-tag
+    bool JumpCutEvent[Nhcuts];
+    for(unsigned int bcut=0; bcut<Nhcuts; bcut++) JumpCutEvent[bcut] = true;
+
+    JumpCutEvent[0] = false;                               // Single Lepton (from Tree)
+    if(NJets > 5)                  JumpCutEvent[1]= false; // lep + 6 Jets 
+    if(NJets > 5 && NBtagJets > 1) JumpCutEvent[2]= false; // lep + 6 Jets + 2 b-tag
+    if(NJets > 5 && NBtagJets > 2) JumpCutEvent[3]= false; // lep + 6 Jets + 3 b-tag
+
+
+    bool JumpEvent = false;
     
     /***************************
         ttbar Categorization
-     ***************************/
-    if (_ttbar_cat){
-      // Categorization using Cone DeltaR
-      // Visible Phase Space: 
-      int cone_NJets  = (*GenConeCat)[1];
-      int cone_NbJets = (*GenConeCat)[2];
-      int cone_NcJets = (*GenConeCat)[3];
-      
-      int cone_NbJetsNoTop = (*GenConeCat)[4];
-      
-      // Full Phase Space:
-      int cone_NaddJets  = (*GenConeCat)[5];
-      int cone_NaddbJets = (*GenConeCat)[6];
-      int cone_NaddcJets = (*GenConeCat)[7];
-      
-      bool Isttjj = false;
-      bool Isttbb = false;
-      bool Isttcc = false;
-      bool Isttb  = false;
-      bool IsttLF = false;
-      bool Istt   = false;
-      
-      if(cone_NbJets > 1 && cone_NJets > 5) Isttjj = true;
-      
-      // Categorization based in the Visible Ph-Sp
-      if      (cone_NbJets > 3  && cone_NJets > 5) Isttbb = true;
-      else if (cone_NbJets > 2  && cone_NJets > 5) Isttb  = true;
-      else if (cone_NbJets > 1  && cone_NJets > 5 && cone_NcJets > 1) Isttcc = true;
-      else if (cone_NbJets > 1  && cone_NJets > 5) IsttLF = true;
-      else Istt = true;
-
-      // Categorization based in the Full Ph-Sp
-      // if      (cone_NaddJets > 1) Isttjj = true;
-
-      // if      (cone_NaddbJets > 1) Isttbb = true;
-      // else if (cone_NaddbJets > 0) Isttb  = true;
-      // else if (cone_NaddcJets > 1) Isttcc = true;
-      // else if (cone_NaddJets  > 0) IsttLF = true;
-      // else Istt = true;
-
-
-      if(ttbar_id == "ttjj" && !Isttjj) cut = -1;
-      if(ttbar_id == "ttbb" && !Isttbb) cut = -1;
-      if(ttbar_id == "ttb"  && !Isttb ) cut = -1;
-      if(ttbar_id == "ttcc" && !Isttcc) cut = -1;
-      if(ttbar_id == "ttLF" && !IsttLF) cut = -1;
-      if(ttbar_id == "tt"   && !Istt)   cut = -1;
-
-    }// if(_ttbar_cat)
+    ***************************/
+    if (_ttbar_cat) JumpEvent = !IsSelectedttbarCategory(GenConeCat, ttbar_id);
     
     /********************************
       Exclusive Data and QCD Samples
     *********************************/
-    if (fname.Contains("DataSingleMu") && Channel==1)  cut = -1;
-    if (fname.Contains("DataSingleEG") && Channel==0)  cut = -1;
-    if (fname.Contains("QCD_MuEnr")    && Channel==1)  cut = -1;
-    if (fname.Contains("QCD_EGEnr")    && Channel==0)  cut = -1;
+    if (fname.Contains("DataSingleMu") && Channel==1)  JumpEvent = true;
+    if (fname.Contains("DataSingleEG") && Channel==0)  JumpEvent = true;
+    if (fname.Contains("QCD_MuEnr")    && Channel==1)  JumpEvent = true;
+    if (fname.Contains("QCD_EGEnr")    && Channel==0)  JumpEvent = true;
     
+    if (JumpEvent) continue;
+
     /***************************
           Loop over cuts
     ***************************/
-    for(int icut = 0; icut < (cut+1); icut++){
+    for(int icut = 0; icut < Nhcuts; icut++){
+
+      if(JumpCutEvent[icut]) continue;
       
       /*******************
         Fill Histograms
@@ -1108,6 +1079,58 @@ float DiJetMassCorrection(std::vector<ComJet>  &Jets, bool ReArrange = false){
   } // if(ReArrange)
 
   return Mjj;
+}
+
+
+bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id){
+  
+  // Categorization using Cone DeltaR
+  // Visible Phase Space: 
+  int cone_NJets  = (*GenConeCat)[1];
+  int cone_NbJets = (*GenConeCat)[2];
+  int cone_NcJets = (*GenConeCat)[3];
+  
+  int cone_NbJetsNoTop = (*GenConeCat)[4];
+  
+  // Full Phase Space:
+  int cone_NaddJets  = (*GenConeCat)[5];
+  int cone_NaddbJets = (*GenConeCat)[6];
+  int cone_NaddcJets = (*GenConeCat)[7];
+  
+  bool Isttjj = false;
+  bool Isttbb = false;
+  bool Isttcc = false;
+  bool Isttb  = false;
+  bool IsttLF = false;
+  bool Istt   = false;
+  
+  if(cone_NbJets > 1 && cone_NJets > 5) Isttjj = true;
+  
+  // Categorization based in the Visible Ph-Sp
+  if      (cone_NbJets > 3  && cone_NJets > 5) Isttbb = true;
+  else if (cone_NbJets > 2  && cone_NJets > 5) Isttb  = true;
+  else if (cone_NbJets > 1  && cone_NJets > 5 && cone_NcJets > 1) Isttcc = true;
+  else if (cone_NbJets > 1  && cone_NJets > 5) IsttLF = true;
+  else Istt = true;
+  
+  // Categorization based in the Full Ph-Sp
+  // if      (cone_NaddJets > 1) Isttjj = true;
+  
+  // if      (cone_NaddbJets > 1) Isttbb = true;
+  // else if (cone_NaddbJets > 0) Isttb  = true;
+  // else if (cone_NaddcJets > 1) Isttcc = true;
+  // else if (cone_NaddJets  > 0) IsttLF = true;
+  // else Istt = true;
+  
+  bool IsttbarCat = true;
+  if(ttbar_id == "ttjj" && !Isttjj) IsttbarCat = false;
+  if(ttbar_id == "ttbb" && !Isttbb) IsttbarCat = false;
+  if(ttbar_id == "ttb"  && !Isttb ) IsttbarCat = false;
+  if(ttbar_id == "ttcc" && !Isttcc) IsttbarCat = false;
+  if(ttbar_id == "ttLF" && !IsttLF) IsttbarCat = false;
+  if(ttbar_id == "tt"   && !Istt)   IsttbarCat = false;
+  
+  return IsttbarCat;
 }
 
 #endif

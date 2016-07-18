@@ -300,68 +300,68 @@ int main(int argc, const char* argv[]){
 
   //Correct Statistical Uncertainty Treatment
   TH1::SetDefaultSumw2(kTRUE);  
-  
-  TH1F *hPV[4][2];
-  TH1F *hMET[4][2], *hMET_Phi[4][2], *hHT[4][2];
-  TH1F *hmT[4][2];
-  TH1F *hNJets[4][2], *hNBtagJets[4][2];
-  TH1F *hEvtCatego[4][2];
 
-  TH1F *hLepPt[4][2], *hLepEta[4][2], *hLepPhi[4][2];
+  // To define arrange size --> 4X faster than MAPS
+  unsigned int Nhcuts = 4;
+  unsigned int Nhch   = 2;
+  unsigned int NhJets = 6; 
+  typedef TH1F *HistosJet    [NhJets][Nhcuts][Nhch];  
+  typedef TH2F *HistosJet2D  [NhJets][Nhcuts][Nhch];  
+  typedef TH1F *HistosDiJet  [NhJets][NhJets-1][Nhcuts][Nhch];  
+  typedef TH2F *HistosDiJet2D[NhJets][NhJets-1][Nhcuts][Nhch];  
+  typedef TH1F *Histos       [Nhcuts][Nhch];  
+  typedef TH2F *Histos2D     [Nhcuts][Nhch];  
 
-  TH1F *hCSV[6][4][2], *hJetPt[6][4][2], *hJetpTUncVar[6][4][2];
-  TH1F *hCvsL[6][4][2], *hCvsB[6][4][2]; 
-  TH2F *h2DCSV_23Jet[4][2], *h2DCSV_45Jet[4][2]; 
-  TH2F *h2DCSV_24Jet[4][2], *h2DCSV_25Jet[4][2];
-  TH2F *h2DCSV_34Jet[4][2], *h2DCSV_35Jet[4][2];
-  TH1F *hMassJet[5][6][4][2];
-  TH1F *hInvMassjj[4][2];
-
-  TH1F *hSFIDISO[4][2], *hSFIDISOError[4][2];
-  TH1F *hSFTrigger[4][2], *hSFTriggerError[4][2];
-  TH2F *h2DSFbtag_Global[4][2];
-  TH1F *hSFbtag_Global[4][2], *hSFbtag_Global_var[4][2];
-  TH2F *h2DSFbtag_b[4][2], *h2DSFbtag_c[4][2], *h2DSFbtag_l[4][2], *h2DSFbtag_btag_b[4][2], *h2DSFbtag_btag_c[4][2], *h2DSFbtag_btag_l[4][2]; 
-
-  TH1F *hTJetPosition, *hWJetPosition, *hOJetPosition;
-  TH2F *h2DTJetPosition, *h2DWJetPosition;
-
-  TString namech[3];
+  TString namech[Nhch + 1];
   namech[0]="mujets";
   namech[1]="ejets";
-  namech[2]="lepjets";
-  
-  TString namecut[4];
+  namech[2]="lepjets";  
+  TString titlenamech[Nhch];
+  titlenamech[0]="#mu+Jets";
+  titlenamech[1]="e+Jets";
+  TString namecut[Nhcuts];
   namecut[0]="lepton";
   namecut[1]="6Jets";
   namecut[2]="2btag";
   namecut[3]="3btag";
-  
-  TString titlenamech[2];
-  titlenamech[0]="#mu+Jets";
-  titlenamech[1]="e+Jets";
-  
-  for(int j=0; j<4; j++){   // Cut
-    for(int i=0; i<2; i++){ // Channel
-      hPV[j][i]         = new TH1F("hPV_"+namech[i]+"_"+namecut[j],"PV Distribution  " + titlenamech[i],15,0,30);
-      hPV[j][i]->GetXaxis()->SetTitle("PV");      
-      hMET[j][i]        = new TH1F("hMET_"+ namech[i]+"_"+namecut[j],"#slash{E}_{T} " + titlenamech[i],10,0,200);
-      hMET[j][i]->GetXaxis()->SetTitle("#slash{E}_{T}[GeV]");      
-      hMET_Phi[j][i]    = new TH1F("hMET_Phi_"+ namech[i]+"_"+namecut[j],"#Phi_{#slash{E}_{T}} " + titlenamech[i],160,-4,4);
-      hMET_Phi[j][i]->GetXaxis()->SetTitle("#Phi_{#slash{E}_{T}}[rad]");      
 
-      hmT[j][i]    = new TH1F("hmT_"+ namech[i]+"_"+namecut[j],"transverse Mass Lepton/MET " + titlenamech[i],40,0,160);
-      hmT[j][i]->GetXaxis()->SetTitle("m_{T}[GeV]");      
+  Histos hPV;
+  Histos hMET, hMET_Phi, hHT;
+  Histos hmT;
+  Histos hNJets, hNBtagJets;
+  Histos hEvtCatego;
+
+  Histos hLepPt, hLepEta, hLepPhi;
+
+  HistosJet hCSV, hJetPt, hJetpTUncVar;
+  HistosJet hCvsL, hCvsB; 
+  HistosDiJet2D h2DCSV; 
+  HistosDiJet hMassJet;
+  Histos hInvMassjj;
+
+  Histos hSFIDISO, hSFIDISOError;
+  Histos hSFTrigger, hSFTriggerError;
+  Histos2D h2DSFbtag_Global;
+  Histos hSFbtag_Global, hSFbtag_Global_var;
+  Histos2D h2DSFbtag_b, h2DSFbtag_c, h2DSFbtag_l, h2DSFbtag_btag_b, h2DSFbtag_btag_c, h2DSFbtag_btag_l; 
+
+  TH1F *hTJetPosition, *hWJetPosition, *hOJetPosition;
+  TH2F *h2DTJetPosition, *h2DWJetPosition;
+
+  
+  for(int j=0; j<Nhcuts; j++){   // Cut
+    for(int i=0; i<Nhch; i++){ // Channel
+      hPV[j][i]         = new TH1F("hPV_"+namech[i]+"_"+namecut[j],"PV Distribution  " + titlenamech[i] + ";PV",15,0,30);
+      hMET[j][i]        = new TH1F("hMET_"+ namech[i]+"_"+namecut[j],"#slash{E}_{T} " + titlenamech[i] + ";#slash{E}_{T}[GeV]",10,0,200);
+      hMET_Phi[j][i]    = new TH1F("hMET_Phi_"+ namech[i]+"_"+namecut[j],"#Phi_{#slash{E}_{T}} " + titlenamech[i] + ";#Phi_{#slash{E}_{T}}[rad]",160,-4,4);
+      hmT[j][i]         = new TH1F("hmT_"+ namech[i]+"_"+namecut[j],"transverse Mass Lepton/MET " + titlenamech[i] + ";m_{T}[GeV]",40,0,160);
+      hHT[j][i]         = new TH1F("hHT_"+namech[i]+"_"+namecut[j],"H_{T} " + titlenamech[i] + ";HT[GeV]",100,0,600);
       
-      hLepPt [j][i]    = new TH1F("hLepPt_"  + namech[i] + "_" + namecut[j], "Lepton p_{T} " + titlenamech[i],20,0.0,200.0);
-      hLepPt[j][i]->GetXaxis()->SetTitle("Lepton p_{T}[GeV]");      
-      hLepEta[j][i]    = new TH1F("hLepEta_" + namech[i] + "_" + namecut[j], "#eta_{Lep} " + titlenamech[i],12,0.0,2.2);
-      hLepEta[j][i]->GetXaxis()->SetTitle("Lepton #eta");      
-      hLepPhi[j][i]    = new TH1F("hLepPhi_" + namech[i] + "_" + namecut[j], "#phi_{Lep} " + titlenamech[i],16,0.0,3.2);
-      hLepPhi[j][i]->GetXaxis()->SetTitle("lepton #Phi[rad]");      
+      hLepPt [j][i]    = new TH1F("hLepPt_"  + namech[i] + "_" + namecut[j], "Lepton p_{T} " + titlenamech[i] + ";Lepton p_{T}[GeV]",20,0.0,200.0);
+      hLepEta[j][i]    = new TH1F("hLepEta_" + namech[i] + "_" + namecut[j], "#eta_{Lep} "   + titlenamech[i] + ";Lepton #eta",12,0.0,2.2);
+      hLepPhi[j][i]    = new TH1F("hLepPhi_" + namech[i] + "_" + namecut[j], "#phi_{Lep} "   + titlenamech[i] + ";Lepton #Phi[rad]",16,0.0,3.2);
       
-      hNJets[j][i]      = new TH1F("hNJets_" + namech[i] + "_" + namecut[j], "Jet multiplicity " + titlenamech[i],9,-0.5,8.5);
-      hNJets[j][i]->GetXaxis()->SetTitle("Number of jets");      
+      hNJets[j][i]      = new TH1F("hNJets_" + namech[i] + "_" + namecut[j], "Jet multiplicity " + titlenamech[i] + ";Number of jets",9,-0.5,8.5);
       hNJets[j][i]->GetXaxis()->SetBinLabel(1,"0");
       hNJets[j][i]->GetXaxis()->SetBinLabel(2,"1");
       hNJets[j][i]->GetXaxis()->SetBinLabel(3,"2");
@@ -373,8 +373,7 @@ int main(int argc, const char* argv[]){
       hNJets[j][i]->GetXaxis()->SetBinLabel(9,"#geq 8");
       if(j>0) hNJets[j][i]->GetXaxis()->SetRange(7,9);
 
-      hNBtagJets[j][i]  = new TH1F("hNBtagJets_"+namech[i]+"_"+namecut[j],"b-tag jet multiplicity " + titlenamech[i],6,-0.5,5.5);
-      hNBtagJets[j][i]->GetXaxis()->SetTitle("Number of b-jets");      
+      hNBtagJets[j][i]  = new TH1F("hNBtagJets_"+namech[i]+"_"+namecut[j],"b-tag jet multiplicity " + titlenamech[i] + ";Number of b-jets",6,-0.5,5.5);
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(1,"0");
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(2,"1");
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(3,"2");
@@ -384,16 +383,6 @@ int main(int argc, const char* argv[]){
       if(j == 2) hNBtagJets[j][i]->GetXaxis()->SetRange(3,6);
       if(j == 3) hNBtagJets[j][i]->GetXaxis()->SetRange(5,6);
       
-      h2DCSV_23Jet[j][i] = new TH2F("h2DCSV_23Jet_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 3rd and 4th Jets " + titlenamech[i], 20,0,1,20,0,1);
-      h2DCSV_45Jet[j][i] = new TH2F("h2DCSV_45Jet_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 5th and 6th Jets " + titlenamech[i], 20,0,1,20,0,1);
-      h2DCSV_24Jet[j][i] = new TH2F("h2DCSV_24Jet_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 3rd and 5th Jets " + titlenamech[i], 20,0,1,20,0,1);
-      h2DCSV_25Jet[j][i] = new TH2F("h2DCSV_25Jet_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 3rd and 6th Jets " + titlenamech[i], 20,0,1,20,0,1);
-      h2DCSV_34Jet[j][i] = new TH2F("h2DCSV_34Jet_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 4th and 5th Jets " + titlenamech[i], 20,0,1,20,0,1);
-      h2DCSV_35Jet[j][i] = new TH2F("h2DCSV_35Jet_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 4th and 6th Jets " + titlenamech[i], 20,0,1,20,0,1);
-
-      hHT[j][i]         = new TH1F("hHT_"+namech[i]+"_"+namecut[j],"H_{T} " + titlenamech[i],100,0,600);
-      hHT[j][i]->GetXaxis()->SetTitle("HT[GeV]");      
-
       /***************************
           SF(ID,ISO & Trigger)
       ***************************/
@@ -410,59 +399,42 @@ int main(int argc, const char* argv[]){
       hSFbtag_Global_var[j][i] = new TH1F("hSFbtag_Global_var_"+namech[i]+"_"+namecut[j], "Global #Delta SF_{b-tag} " + titlenamech[i],20.0, 0.0, 1.0);
 
       // B-tag efficiency histograms
-      h2DSFbtag_b[j][i]    = new TH2F("hSFbtag_b_"+namech[i]+"_"+namecut[j], "N^{b}(p_{T} vs #eta) " + titlenamech[i],7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_b[j][i]->GetXaxis()->SetTitle("p_{T}[GeV]");
-      h2DSFbtag_b[j][i]->GetYaxis()->SetTitle("#eta");
-      h2DSFbtag_c[j][i]    = new TH2F("hSFbtag_c_"+namech[i]+"_"+namecut[j], "N^{c}(p_{T} vs #eta) " + titlenamech[i],7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_c[j][i]->GetXaxis()->SetTitle("p_{T}[GeV]");
-      h2DSFbtag_c[j][i]->GetYaxis()->SetTitle("#eta");
-      h2DSFbtag_l[j][i]    = new TH2F("hSFbtag_l_"+namech[i]+"_"+namecut[j], "N^{l}(p_{T} vs #eta) " + titlenamech[i],7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_l[j][i]->GetXaxis()->SetTitle("p_{T}[GeV]");
-      h2DSFbtag_l[j][i]->GetYaxis()->SetTitle("#eta");
+      h2DSFbtag_b[j][i]    = new TH2F("hSFbtag_b_"+namech[i]+"_"+namecut[j], "N^{b}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
+      h2DSFbtag_c[j][i]    = new TH2F("hSFbtag_c_"+namech[i]+"_"+namecut[j], "N^{c}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
+      h2DSFbtag_l[j][i]    = new TH2F("hSFbtag_l_"+namech[i]+"_"+namecut[j], "N^{l}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
 
-      h2DSFbtag_btag_b[j][i]    = new TH2F("hSFbtag_btag_b_"+namech[i]+"_"+namecut[j], "N_{btag}^{b}(p_{T} vs #eta) " + titlenamech[i],7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_btag_b[j][i]->GetXaxis()->SetTitle("p_{T}[GeV]");
-      h2DSFbtag_btag_b[j][i]->GetYaxis()->SetTitle("#eta");
-      h2DSFbtag_btag_c[j][i]    = new TH2F("hSFbtag_btag_c_"+namech[i]+"_"+namecut[j], "N_{btag}^{c}(p_{T} vs #eta) " + titlenamech[i],7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_btag_c[j][i]->GetXaxis()->SetTitle("p_{T}[GeV]");
-      h2DSFbtag_btag_c[j][i]->GetYaxis()->SetTitle("#eta");
-      h2DSFbtag_btag_l[j][i]    = new TH2F("hSFbtag_btag_l_"+namech[i]+"_"+namecut[j], "N_{btag}^{l}(p_{T} vs #eta) " + titlenamech[i],7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_btag_l[j][i]->GetXaxis()->SetTitle("p_{T}[GeV]");
-      h2DSFbtag_btag_l[j][i]->GetYaxis()->SetTitle("#eta");
+      h2DSFbtag_btag_b[j][i]    = new TH2F("hSFbtag_btag_b_"+namech[i]+"_"+namecut[j], "N_{btag}^{b}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
+      h2DSFbtag_btag_c[j][i]    = new TH2F("hSFbtag_btag_c_"+namech[i]+"_"+namecut[j], "N_{btag}^{c}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
+      h2DSFbtag_btag_l[j][i]    = new TH2F("hSFbtag_btag_l_"+namech[i]+"_"+namecut[j], "N_{btag}^{l}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
       
-      for(int ij=0; ij<6; ij++){
+      for(int ij=0; ij<NhJets; ij++){
 	TString jetn;
 	std::ostringstream jni;
 	jni << ij;
 	jetn = "Jet-" + jni.str();	
 	
-	hCSV[ij][j][i] = new TH1F("hCSV_" + jetn + "_" + namech[i] + "_" + namecut[j],"CSV " + jetn + " " + titlenamech[i],10,0,1);
-	hCSV[ij][j][i]->GetXaxis()->SetTitle("CSVv2");      
-	hCvsL[ij][j][i] = new TH1F("hCvsL_" + jetn + "_" + namech[i] + "_" + namecut[j],"CvsL " + jetn + " " + titlenamech[i],10,0,1);
-	hCvsL[ij][j][i]->GetXaxis()->SetTitle("CvsL");      
-	hCvsB[ij][j][i] = new TH1F("hCvsB_" + jetn + "_" + namech[i] + "_" + namecut[j],"CvsB " + jetn + " " + titlenamech[i],10,0,1);
-	hCvsB[ij][j][i]->GetXaxis()->SetTitle("CvsB");      
-	hJetPt[ij][j][i] = new TH1F("hJetPt_" + jetn + "_" + namech[i] + "_" + namecut[j],"p_{T}^{Jet} " + jetn + " " + titlenamech[i],10,0,200);
-	hJetPt[ij][j][i]->GetXaxis()->SetTitle("p_{T}[GeV]");      
+	hCSV[ij][j][i]   = new TH1F("hCSV_"   + jetn + "_" + namech[i] + "_" + namecut[j],"CSV " + jetn + " " + titlenamech[i] + ";CSVv2",10,0,1);
+	hCvsL[ij][j][i]  = new TH1F("hCvsL_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsL " + jetn + " " + titlenamech[i] + ";CvsL",10,0,1);
+	hCvsB[ij][j][i]  = new TH1F("hCvsB_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsB " + jetn + " " + titlenamech[i] + ";CvsB",10,0,1);
+	hJetPt[ij][j][i] = new TH1F("hJetPt_" + jetn + "_" + namech[i] + "_" + namecut[j],"p_{T}^{Jet} " + jetn + " " + titlenamech[i] + ";p_{T}[GeV]",10,0,200);
 
 	hJetpTUncVar[ij][j][i] = new TH1F("hJetpTUncVar_" + jetn + "_" + namech[i] + "_" + namecut[j], "#Delta pT^{Jet} " + jetn + " " + titlenamech[i], 20.0, 0.0, 2.0);
-      }
-
-      for(int ja=0; ja<5; ja++){
-	for(int jb=ja+1; jb<6; jb++){
+	
+	for(int jj=ij+1; jj<NhJets; jj++){
 	  TString jetMassn;
 	  std::ostringstream jni, jnj;
-	  jni << ja;
-	  jnj << jb;
-	  jetMassn = "Jet" + jnj.str() + jni.str();
-
-	  hMassJet[ja][jb][j][i]    = new TH1F("hMassJet_" + jetMassn + "_" + namech[i]+"_"+namecut[j],"transverse Mass of Dijets "+ jetMassn + " " + titlenamech[i],80,0,400);
+	  jni << ij;
+	  jnj << jj;
+	  jetMassn = "Jet" + jni.str() + jnj.str();
+	  
+	  hMassJet[ij][jj][j][i]  = new TH1F("hMassJet_" + jetMassn + "_" + namech[i] + "_" + namecut[j],"Mass of Dijets "+ jetMassn + " " + titlenamech[i] + "; M_{jj}[GeV]",80,0,400);
+	  h2DCSV[ij][jj][j][i]    = new TH2F("h2DCSV_"   + jetMassn + "_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 3rd and 4th Jets " + titlenamech[i], 20,0,1,20,0,1);
 	}
+	
       }
-
+      
       hInvMassjj[j][i]  = new TH1F("hInvMassjj_" + namech[i]+"_"+namecut[j],"Compatible Inv. Mass " + titlenamech[i],80,0,400);
-      hEvtCatego[j][i]  = new TH1F("hEvtCatego_"+namech[i]+"_"+namecut[j],"ttbar Event Categorization " + titlenamech[i],4,-0.5,3.5);
-      hEvtCatego[j][i]->GetXaxis()->SetTitle("ttbar");      
+      hEvtCatego[j][i]  = new TH1F("hEvtCatego_"+namech[i]+"_"+namecut[j],"ttbar Event Categorization " + titlenamech[i] + ";ttbar Cat",4,-0.5,3.5);
 
     }//for(i)
   }//for(j)
@@ -629,7 +601,7 @@ int main(int argc, const char* argv[]){
     if (_syst && syst_varname.Contains("ScaleR"))
       PUWeight = PUWeight*(*ScaleWeight)[scaleSysPar];
     
-    int NJets,NBtagJets;
+    unsigned int NJets,NBtagJets;
     
     TLorentzVector Lep;
     
@@ -907,28 +879,9 @@ int main(int argc, const char* argv[]){
       hSFbtag_Global_var[icut][Channel]->Fill(btagUnc_val,                     PUWeight);
       h2DSFbtag_Global  [icut][Channel]->Fill((*Jet_SF_CSV)[btagUnc::CENTRAL], btagUnc_val, PUWeight);
       
-      // 2D CSV discriminant plot for all Jets
-      if(Jets.size() > 3){
-	h2DCSV_23Jet[icut][Channel]->Fill(Jets[2].CSV, Jets[3].CSV, PUWeight);
-	if(Jets.size() > 4){  
-	  h2DCSV_24Jet[icut][Channel]->Fill(Jets[2].CSV, Jets[4].CSV, PUWeight);
-	  h2DCSV_34Jet[icut][Channel]->Fill(Jets[3].CSV, Jets[4].CSV, PUWeight);
-	  if(Jets.size() > 5){
-	    h2DCSV_25Jet[icut][Channel]->Fill(Jets[2].CSV, Jets[5].CSV, PUWeight);
-	    h2DCSV_35Jet[icut][Channel]->Fill(Jets[3].CSV, Jets[5].CSV, PUWeight);
-	  }
-	}
-      }// if(Jets.size() > 3
-
       // Jet Variables
       for(int ijet=0; ijet < Jets.size(); ijet++){
 	ComJet jet = Jets[ijet];
-	if (ijet < 6){	  
-	  hJetPt[ijet][icut][Channel]->Fill(jet.Pt(), PUWeight);
-	  hCSV  [ijet][icut][Channel]->Fill(jet.CSV,  PUWeight);
-	  //hCvsL [ijet][icut][Channel]->Fill(jet.CvsL, PUWeight);
-	  //hCvsB [ijet][icut][Channel]->Fill(jet.CvsB, PUWeight);
-	}
 	// b-Jet Efficiencies
 	if(jet.Flavour == 5){
 	  h2DSFbtag_b[icut][Channel]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight); // b-Flavour
@@ -943,12 +896,20 @@ int main(int argc, const char* argv[]){
 	  if(jet.CSV > CSV_WP) h2DSFbtag_btag_l[icut][Channel]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight);  
 	}
 	
+	if (ijet < NhJets){	  
+	  hJetPt[ijet][icut][Channel]->Fill(jet.Pt(), PUWeight);
+	  hCSV  [ijet][icut][Channel]->Fill(jet.CSV,  PUWeight);
+	  //hCvsL [ijet][icut][Channel]->Fill(jet.CvsL, PUWeight);
+	  //hCvsB [ijet][icut][Channel]->Fill(jet.CvsB, PUWeight);
+	}
 	//Dijet Invariant Mass 
-	int jbmax = std::min(6,NJets);
+	int jbmax = std::min(NhJets,NJets);
 	for(int jjet=ijet+1; jjet < jbmax; jjet++){
 	  ComJet jet_ = Jets[jjet];
 	  float DijetInvMass = (jet+jet_).M(); 
 	  hMassJet[ijet][jjet][icut][Channel]->Fill(DijetInvMass, PUWeight);
+	  // 2D CSV discriminant plot for all DiJets system	  
+	  h2DCSV[ijet][jjet][icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
 	}// for(jjet)
 	
       }//for(ijet)     
@@ -970,11 +931,11 @@ int main(int argc, const char* argv[]){
   Yields = new TH1F("Yields", "Yields",12,0,12);
   int nbin = 1;
   
-  for(int nc = 0; nc < 4; nc++){
+  for(int nc = 0; nc < Nhcuts; nc++){
     AccEvent[nc][2] = AccEvent[nc][0] + AccEvent[nc][1];
     EffEvent[nc][2] = EffEvent[nc][0] + EffEvent[nc][1];
     
-    for(int nch = 0; nch < 3; nch++){            
+    for(int nch = 0; nch < Nhch+1; nch++){            
       float EffError;
       if (AccEvent[nc][nch] != 0.0) EffError = sqrt(AccEvent[nc][nch])*EffEvent[nc][nch]/AccEvent[nc][nch];
       else EffError = 0.0;
@@ -1000,8 +961,8 @@ int main(int argc, const char* argv[]){
   
   Yields->Write();
 
-  for(int j=0; j<4; j++){
-    for(int i=0; i<2; i++){
+  for(int j=0; j<Nhcuts; j++){
+    for(int i=0; i<Nhch; i++){
       
       hEvtCatego[j][i]->Write();
       hPV[j][i]->Write();
@@ -1018,29 +979,24 @@ int main(int argc, const char* argv[]){
       hNJets[j][i]->Write();
       hNBtagJets[j][i]->Write();            
 
-      h2DCSV_23Jet[j][i]->Write();
-      h2DCSV_45Jet[j][i]->Write();
-      h2DCSV_24Jet[j][i]->Write();
-      h2DCSV_25Jet[j][i]->Write();
-      h2DCSV_34Jet[j][i]->Write();
-      h2DCSV_35Jet[j][i]->Write();
-      
       h2DSFbtag_Global[j][i]->Write();
       hSFbtag_Global[j][i]->Write();
       hSFbtag_Global_var[j][i]->Write();
 
-      for(int ij=0; ij<6; ij++){
+      for(int ij=0; ij<NhJets; ij++){
   	hJetPt[ij][j][i]->Write();
   	hCSV  [ij][j][i]->Write();
-  	// hCvsL [ij][j][i]->Write();
-  	// hCvsB [ij][j][i]->Write();
+  	hCvsL [ij][j][i]->Write();
+  	hCvsB [ij][j][i]->Write();
       }
 
-      for(int ja=0; ja<5; ja++){
-  	for(int jb=ja+1; jb<6; jb++){
+      for(int ja=0; ja<NhJets; ja++){
+  	for(int jb=ja+1; jb<NhJets; jb++){
   	  hMassJet[ja][jb][j][i]->Write();
+	  h2DCSV  [ja][jb][j][i]->Write();
   	}
-      }      
+      }   
+   
       hInvMassjj[j][i]->Write();
       
       hSFIDISO[j][i]->Write();

@@ -9,7 +9,7 @@
 #include<set>
 #include<vector>
 #include <sys/stat.h>
-#include <map>
+#include <unordered_map>
 
 #endif
 
@@ -314,15 +314,15 @@ int main(int argc, const char* argv[]){
   //Correct Statistical Uncertainty Treatment
   TH1::SetDefaultSumw2(kTRUE);  
   
-  typedef std::map<unsigned int, std::map<unsigned int, std::map<TString, TH1F *> > > Histos; // [Cut][channel]["Histo"]
-  typedef std::map<unsigned int, std::map<unsigned int, std::map<TString, TH2F *> > > Histos2D; // [Cut][channel]["Histo"]
+  typedef std::unordered_map<unsigned int, std::unordered_map<unsigned int, std::unordered_map<std::string, TH1F *> > > Histos; // [Cut][channel]["Histo"]
+  typedef std::unordered_map<unsigned int, std::unordered_map<unsigned int, std::unordered_map<std::string, TH2F *> > > Histos2D; // [Cut][channel]["Histo"]
 
   Histos h_EvtVar; 
   Histos h_LepVar; 
   Histos2D h2D_EvtVar; 
-  std::map<unsigned int, Histos > h_JetVar; // [Jet][Cut][channel]["Histo"]
-  std::map<unsigned int, std::map<unsigned int, Histos > >   h_DiJetVar;   // [Jet 1][Jet 2][Cut][channel]["Histo"]
-  std::map<unsigned int, std::map<unsigned int, Histos2D > > h2D_DiJetVar; // [Jet 1][Jet 2][Cut][channel]["Histo2D"]
+  std::unordered_map<unsigned int, Histos > h_JetVar; // [Jet][Cut][channel]["Histo"]
+  std::unordered_map<unsigned int, std::unordered_map<unsigned int, Histos > >   h_DiJetVar;   // [Jet 1][Jet 2][Cut][channel]["Histo"]
+  std::unordered_map<unsigned int, std::unordered_map<unsigned int, Histos2D > > h2D_DiJetVar; // [Jet 1][Jet 2][Cut][channel]["Histo2D"]
   
   TString namecut[4];
   namecut[0]="lepton";

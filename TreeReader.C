@@ -1,56 +1,11 @@
-#ifndef __CINT__
+//#ifndef __CINT__
 
-#include<string>
-#include<iostream>
-#include<sstream>
-#include<stdio.h>
-#include<stdlib.h>
-#include<cmath>
-#include<set>
-#include<vector>
-#include <sys/stat.h>
+#include "TreeReader.h"
 
-#endif
-
-// Root
-#include "TString.h"
-#include "TRegexp.h"
-#include "TDirectory.h"
-#include "TROOT.h"
-#include "TObject.h"
-#include "TCanvas.h"
-#include "TStopwatch.h"
-#include "TH1F.h"
-#include "TH2F.h"
-#include "TProfile.h"
-#include "TFile.h"
-#include "TChain.h"
-#include "TLorentzVector.h"
-#include "TSystem.h"
-#include "TTree.h"
-//#include "TKey.h"
-//#include "TPrint.h"
-//#include <exception>
-#include "TError.h"
-
-// TopCode
-#include <SFIDISOTrigger.h> // SF_ID-ISO-Trigger
-#include <ttbar_category.h> // Event Categorization
-#include <SFLumi.h>         // Normalization SF
+//#endif
 
 #ifndef __CINT__
 
-// Jet Class
-class ComJet: public TLorentzVector{
-public:
-  float CSV, CvsL, CvsB;
-  int Flavour, pTIndex, Mom;
-};
-
-void print_progress(int TreeEntries, Long64_t ievt);
-const TString currentDateTime();
-float DiJetMassCorrection(std::vector<ComJet> &Jets, bool ReArrange);
-bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id);
 
 void display_usage()
 {
@@ -67,20 +22,6 @@ void display_usage()
   std::cout << "    -h                 displays this help message and exits " << std::endl;
   std::cout << "" << std::endl;
 }
-
-// b-tagging SF
-struct btagUnc{
-  enum:unsigned int{CENTRAL=0,
-      JES_UP,     JES_DN,
-      LF_UP,       LF_DN,
-      HF_UP,       HF_DN,
-      HFSTAT1_UP,  HFSTAT1_DN, 
-      HFSTAT2_UP,  HFSTAT2_DN,
-      LFSTAT1_UP,  LFSTAT1_DN, 
-      LFSTAT2_UP,  LFSTAT2_DN,
-      CFERR1_UP,   CFERR1_DN, 
-      CFERR2_UP,   CFERR2_DN};
-};
 
 
 int main(int argc, const char* argv[]){
@@ -304,30 +245,34 @@ int main(int argc, const char* argv[]){
 
   //Correct Statistical Uncertainty Treatment
   TH1::SetDefaultSumw2(kTRUE);  
-
-  // To define arrange size --> 4X faster than MAPS
+   
   unsigned int Nhcuts = 4;
   unsigned int Nhch   = 2;
   unsigned int NhJets = 6; 
+  
+ // To define arrange size --> 4X faster than MAPS
   typedef TH1F *HistosJet    [NhJets][Nhcuts][Nhch];  
   typedef TH2F *HistosJet2D  [NhJets][Nhcuts][Nhch];  
   typedef TH1F *HistosDiJet  [NhJets][NhJets-1][Nhcuts][Nhch];  
   typedef TH2F *HistosDiJet2D[NhJets][NhJets-1][Nhcuts][Nhch];  
   typedef TH1F *Histos       [Nhcuts][Nhch];  
   typedef TH2F *Histos2D     [Nhcuts][Nhch];  
-
+ 
   TString namech[Nhch + 1];
   namech[0]="mujets";
   namech[1]="ejets";
   namech[2]="lepjets";  
+  
   TString titlenamech[Nhch];
   titlenamech[0]="#mu+Jets";
   titlenamech[1]="e+Jets";
+  
   TString namecut[Nhcuts];
   namecut[0]="lepton";
   namecut[1]="6Jets";
   namecut[2]="2btag";
   namecut[3]="3btag";
+  
 
   Histos hPV;
   Histos hMET, hMET_Phi, hHT;

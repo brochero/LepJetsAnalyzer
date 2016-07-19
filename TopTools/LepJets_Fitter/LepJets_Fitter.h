@@ -8,10 +8,13 @@ class ComJet: public TLorentzVector{
   int Flavour, pTIndex, Mom;
 };
 
-double jetEresolution (double energy);
-double metphiresolution (double met);
-double metresolution (double met);
-double twoobjectmassresolution(TLorentzVector &j1, double releres1, TLorentzVector &j2, double releres2);
-double twojetmassresolution   (TLorentzVector &j1, TLorentzVector &j2);// relative mass resolution
-double solvettbarljets (double &nupz, double &metscale, double &blscale, double &bjscale, double &j1scale, double &j2scale);
-void findhadronictop (TLorentzVector &lepton, std::vector<ComJet> &jets, TLorentzVector met, bool usebtaginfo, std::vector<int> &bestindices, float &bestchi2, TLorentzVector &nusol, TLorentzVector &blrefit, TLorentzVector &bjrefit, TLorentzVector &j1refit, TLorentzVector &j2refit);
+float JetEResolution         (float energy);
+float METPhiResolution       (float met);
+float METResolution          (float met);
+float TwoObjectMassResolution(TLorentzVector &j1, float releres1, TLorentzVector &j2, float releres2);
+float twojetmassresolution   (TLorentzVector &j1, TLorentzVector &j2);// relative mass resolution
+float SolvettbarLepJets      (float &nupz, float &metscale, float &blscale, float &bjscale, float &j1scale, float &j2scale);
+void   FindHadronicTop        (TLorentzVector &lepton, std::vector<ComJet> &jets, TLorentzVector met, bool usebtaginfo, std::vector<int> &bestindices, float &bestchi2, TLorentzVector &nusol, TLorentzVector &blrefit, TLorentzVector &bjrefit, TLorentzVector &j1refit, TLorentzVector &j2refit);
+
+void fcnfull(int &npar, float *gin, float &f, float *par, int iflag);
+void fcn(int &npar, float *gin, float &f, float *par, int iflag);

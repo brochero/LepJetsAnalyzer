@@ -5,6 +5,8 @@ TMinuit *tm=0;
 TLorentzVector tmplep, tmpnu, tmpbl, tmpbj, tmpj1, tmpj2;
 float blres, bjres, j1res, j2res, metres;
 
+float CSVWP = 0.800;
+
 // relative jet energy resolution
 float JetEResolution(float energy){ 
   return TMath::Sqrt(TMath::Power(0.05*energy,2.0) + TMath::Power(1.5*sqrt(energy),2.0))/energy;
@@ -75,13 +77,13 @@ void fcnfull(int &npar, float *gin, float &f, float *par, int iflag){
 }
 
 void InitMinuit(){
-  tm= new TMinuit(6);
-  tm->SetFCN(fcnfull);
+  //tm= new TMinuit(6);
+  //---- tm->SetFCN(fcnfull);
   float arglist[10];
   int ierflg = 0;
   
   arglist[0] = 1;
-  gMinuit->mnexcm("SET ERR", arglist, 1, ierflg);
+  //----gMinuit->mnexcm("SET ERR", arglist, 1, ierflg);
 }
 
 
@@ -94,32 +96,32 @@ float SolvettbarLepJets(float &nupz, float &metscale, float &blscale, float &bjs
   static float step  [6] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
   int ierflg;
 
-  tm->mnparm(0, "nupz",    vstart[0], step[0], 0,0, ierflg);
-  tm->mnparm(1, "metsf",   vstart[1], step[1], 0,0, ierflg);
-  tm->mnparm(2, "bjetlsf", vstart[2], step[2], 0,0, ierflg);
-  tm->mnparm(3, "bjethsf", vstart[3], step[3], 0,0, ierflg);
-  tm->mnparm(4, "wjet1",   vstart[4], step[4], 0,0, ierflg);
-  tm->mnparm(5, "wjet2",   vstart[5], step[5], 0,0, ierflg);
+  // tm->mnparm(0, "nupz",    vstart[0], step[0], 0,0, ierflg);
+  // tm->mnparm(1, "metsf",   vstart[1], step[1], 0,0, ierflg);
+  // tm->mnparm(2, "bjetlsf", vstart[2], step[2], 0,0, ierflg);
+  // tm->mnparm(3, "bjethsf", vstart[3], step[3], 0,0, ierflg);
+  // tm->mnparm(4, "wjet1",   vstart[4], step[4], 0,0, ierflg);
+  // tm->mnparm(5, "wjet2",   vstart[5], step[5], 0,0, ierflg);
   
   // Now ready for minimization step
   float arglist[10];
   arglist[0] = 500;
   arglist[1] = 1.;
-  tm->mnexcm("MIGRAD", arglist ,2,ierflg);
+  //---- tm->mnexcm("MIGRAD", arglist ,2,ierflg);
   
   // Print results
   float amin,edm,errdef;
   int nvpar,nparx,icstat;
   float err;
 
-  tm->mnstat(amin,edm,errdef,nvpar,nparx,icstat);
+  //---- tm->mnstat(amin,edm,errdef,nvpar,nparx,icstat);
 
-  tm->GetParameter(0, nupz,     err);
-  tm->GetParameter(1, metscale, err);
-  tm->GetParameter(2, blscale,  err);
-  tm->GetParameter(3, bjscale,  err);
-  tm->GetParameter(4, j1scale,  err);
-  tm->GetParameter(5, j2scale,  err);
+  // tm->GetParameter(0, nupz,     err);
+  // tm->GetParameter(1, metscale, err);
+  // tm->GetParameter(2, blscale,  err);
+  // tm->GetParameter(3, bjscale,  err);
+  // tm->GetParameter(4, j1scale,  err);
+  // tm->GetParameter(5, j2scale,  err);
   
   return amin;
 }
@@ -215,7 +217,7 @@ void FindHadronicTop(TLorentzVector &lepton, std::vector<ComJet> &jets, TLorentz
     if (njets>=4){
       int nbjets=0;
       for (int i1=0; i1<njets; i1++){
-	if (jets[i1]->BTag==1) nbjets++;
+	if (jets[i1].CSV > CSVWP) nbjets++;
       }
       
       for (int i1=0; i1<njets; i1++){
@@ -224,11 +226,11 @@ void FindHadronicTop(TLorentzVector &lepton, std::vector<ComJet> &jets, TLorentz
 	    for (int i4=0; i4<njets; i4++){
 	      if (i2 != i1 && i3 != i1 && i4!=i1 && i4 != i2 && i4 != i3
 		  && ((lepton + jets[i4]).M() < 170.0)
-		  && ( nbjets==0 
-		       ||  (nbjets==1 && (jets[i2]->BTag==0 && jets[i3]->BTag==0))
-		       ||  (nbjets==2 && (jets[i2]->BTag==0 && jets[i3]->BTag==0))
-		       ||  (nbjets==3 && (jets[i2]->BTag==0 || jets[i3]->BTag==0))
-		       ||  (nbjets>3  && (jets[i2]->BTag==1 || jets[i3]->BTag==1))
+		  && ( nbjets==0 // To be checked
+		       ||  (nbjets==1 && (jets[i2].CSV < CSVWP && jets[i3].CSV < CSVWP))
+		       ||  (nbjets==2 && (jets[i2].CSV < CSVWP && jets[i3].CSV < CSVWP))
+		       ||  (nbjets==3 && (jets[i2].CSV < CSVWP || jets[i3].CSV < CSVWP))
+		       ||  (nbjets>3  && (jets[i2].CSV > CSVWP || jets[i3].CSV > CSVWP))
 		       )
 		  ){
 		
@@ -250,10 +252,10 @@ void FindHadronicTop(TLorentzVector &lepton, std::vector<ComJet> &jets, TLorentz
 		tmpj1  = trialWjet1;
 		tmpj2  = trialWjet2;
 		
-		blres  = jetEresolution(tmpbl.E());
-		bjres  = jetEresolution(tmpbj.E());
-		j1res  = jetEresolution(tmpj1.E());
-		j2res  = jetEresolution(tmpj2.E());
+		blres  = JetEResolution(tmpbl.E());
+		bjres  = JetEResolution(tmpbj.E());
+		j1res  = JetEResolution(tmpj1.E());
+		j2res  = JetEResolution(tmpj2.E());
 		
 
 		float nupz, metscale, blscale, bjscale, j1scale, j2scale;
@@ -287,3 +289,4 @@ void FindHadronicTop(TLorentzVector &lepton, std::vector<ComJet> &jets, TLorentz
   }
   
 }
+

@@ -1,8 +1,6 @@
-//#ifndef __CINT__
-
+#ifndef __CINT__
 #include "TreeReader.h"
-
-//#endif
+#endif
 
 #ifndef __CINT__
 
@@ -826,11 +824,67 @@ int main(int argc, const char* argv[]){
 	  hMassJet[ijet][jjet][icut][Channel]->Fill(DijetInvMass, PUWeight);
 	  // 2D CSV discriminant plot for all DiJets system	  
 	  h2DCSV[ijet][jjet][icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
+
+
 	}// for(jjet)
 	
       }//for(ijet)     
-
+      
     }//for(icuts)     
+    
+    /***************************
+          Loop over cuts
+    ***************************/
+    if(!JumpCutEvent[2]){ // lep + 6 Jets + 2 b-tag
+	    
+      TLorentzVector Kinnu, Kinblrefit, Kinbjrefit, Kinj1refit, Kinj2refit;
+      Kinnu.SetPxPyPzE(0,0,0,0); 
+      Kinblrefit.SetPxPyPzE(0,0,0,0); 
+      Kinbjrefit.SetPxPyPzE(0,0,0,0);
+      Kinj1refit.SetPxPyPzE(0,0,0,0);
+      Kinj2refit.SetPxPyPzE(0,0,0,0);
+      TLorentzVector KinLep = Lep;
+      TLorentzVector KinMET = METv;
+      std::vector<ComJet> KinJets = Jets;
+      std::vector<int> KinBestIndices;
+      KinBestIndices.push_back(0);
+      KinBestIndices.push_back(0);
+      KinBestIndices.push_back(0);
+      KinBestIndices.push_back(0);
+      bool KinUsebtag = true;
+      float bestchi2=0;
+      
+      // FindHadronicTop(&KinLep, &KinJets, &KinMET, KinUsebtag, &KinBestIndices, &bestchi2, &Kinnu, &Kinblrefit, &Kinbjrefit, &Kinj1refit, &Kinj2refit);
+      FindHadronicTop(KinLep, KinJets, KinMET, KinUsebtag, KinBestIndices, bestchi2, Kinnu, Kinblrefit, Kinbjrefit, Kinj1refit, Kinj2refit);
+      
+
+      
+      for (int iin =0; iin<KinBestIndices.size(); iin++) std::cout << KinBestIndices.at(iin) << std::endl;
+      std::cout << "Best Chi2 = " << bestchi2 << std::endl;
+      std::cout << "Lep pT = " << Lep.Pt() << std::endl;
+      std::cout << "Lep pT (NEW) = " << KinLep.Pt() << std::endl;
+
+      std::cout << "\nJet[0] pT = " << Jets[0].Pt() << std::endl;
+      std::cout << "Jet[1] pT = " << Jets[1].Pt() << std::endl;
+      std::cout << "Jet[2] pT = " << Jets[2].Pt() << std::endl;
+      std::cout << "Jet[3] pT = " << Jets[3].Pt() << std::endl;
+      std::cout << "Jet[4] pT = " << Jets[4].Pt() << std::endl;
+      std::cout << "Jet[5] pT = " << Jets[5].Pt() << std::endl;
+
+      std::cout << "\nMET = " << METv.Et() << std::endl;
+      std::cout << "\nMET = " << MET << std::endl;
+      std::cout << "nu pT = " << Kinnu.Pt() << std::endl;
+      std::cout << "nu ET = " << Kinnu.Et() << std::endl;
+      std::cout << "nu E = " << Kinnu.E() << std::endl;
+
+      std::cout << "\nb from lep leg = " << Kinblrefit.Pt() << std::endl;
+      std::cout << "b from jet leg = "   << Kinbjrefit.Pt() << std::endl;
+      std::cout << "jet[0] from W = "    << Kinj1refit.Pt() << std::endl;
+      std::cout << "jet[1] from W = "    << Kinj2refit.Pt() << std::endl;
+      std::cout << "------------______________----------------" << std::endl;
+      
+    } // if(JumpCutEvent[2])
+    
     
     Jets.clear();
 

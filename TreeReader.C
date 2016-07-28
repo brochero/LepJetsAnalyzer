@@ -11,6 +11,7 @@ void display_usage()
   std::cout << "" << std::endl;
   std::cout << "Options:" << std::endl;
   std::cout << "    -i inputfile  Input file without .root" << std::endl;
+  std::cout << "    -eos input files located in eos lxplus" << std::endl;
   std::cout << "    -o name in the output file \"h_\"" << std::endl;
   std::cout << "    -s create a file with the systematic uncertainty yields" << std::endl;
   std::cout << "    -tr SF Trigger Uncertainty" << std::endl;
@@ -29,6 +30,7 @@ int main(int argc, const char* argv[]){
   gSystem->Load("libTree");
   gROOT->ProcessLine("#include <vector>");
   
+  bool   _eos       = false;
   bool   _ttbar_cat = false;
   bool   _syst      = false;
   bool	 _tr_unc    = false;
@@ -56,6 +58,9 @@ int main(int argc, const char* argv[]){
       if( strcmp(argv[i],"-i") == 0 ){
 	_input = argv[i+1];
 	i++;
+      }
+      if( strcmp(argv[i],"-eos") == 0 ){
+	_eos = true;
       }
       if( strcmp(argv[i],"-d") == 0 ){
 	_dir = argv[i+1];
@@ -106,7 +111,10 @@ int main(int argc, const char* argv[]){
   TString TrUnc(_tr);
   TString IDISOUnc(_idiso);
   TString ttbar_id(_ttbar_id);
-  
+
+  // eos directory
+  if(_eos) fdir = "root://eoscms.cern.ch//eos/cms/store/user/brochero/" + fdir + "/";
+
   //Output Dir
   TString dirname="TopResults";   
   // make a dir if it does not exist!!
@@ -145,7 +153,7 @@ int main(int argc, const char* argv[]){
   std::vector<float> *Jet_CSV=0;
   std::vector<float> *Jet_SF_CSV=0;
   std::vector<float> *Jet_CSVCvsL=0;
-  std::vector<float> *Jet_CvsL=0, *Jet_CvsB=0;
+  std::vector<float> *Jet_CvsB=0, *Jet_CvsL=0;
   std::vector<float> *Jet_JER_Up=0, *Jet_JER_Nom=0, *Jet_JER_Down=0;
   std::vector<float> *Jet_JES_Up=0, *Jet_JES_Down=0;
 
@@ -185,10 +193,11 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "jet_CSV",          &Jet_CSV );
   theTree.SetBranchAddress( "jet_SF_CSV",       &Jet_SF_CSV );
   theTree.SetBranchAddress( "jet_partonFlavour",&Jet_partonFlavour );
-  theTree.SetBranchAddress( "jet_iCSVCvsL",     &Jet_CSVCvsL );
-  theTree.SetBranchAddress( "jet_CCvsLT",       &Jet_CvsL );
-  theTree.SetBranchAddress( "jet_CCvBLT",       &Jet_CvsB );
 
+  //theTree.SetBranchAddress( "jet_CvsB",         &Jet_CvsB );
+  theTree.SetBranchAddress( "jet_CvsB",     &Jet_CvsB );
+  theTree.SetBranchAddress( "jet_CvsL",     &Jet_CvsL );
+  theTree.SetBranchAddress( "jet_iCSVCvsL",     &Jet_CSVCvsL );
 
   if(!fname.Contains("Data")){
     theTree.SetBranchAddress( "jet_JES_Up",  &Jet_JES_Up );
@@ -829,7 +838,7 @@ int main(int argc, const char* argv[]){
 	}// for(jjet)
 	
       }//for(ijet)     
-      
+       
     }//for(icuts)     
     
     /***************************
@@ -854,8 +863,7 @@ int main(int argc, const char* argv[]){
       bool KinUsebtag = true;
       float bestchi2=0;
       
-      // FindHadronicTop(&KinLep, &KinJets, &KinMET, KinUsebtag, &KinBestIndices, &bestchi2, &Kinnu, &Kinblrefit, &Kinbjrefit, &Kinj1refit, &Kinj2refit);
-      FindHadronicTop(KinLep, KinJets, KinMET, KinUsebtag, KinBestIndices, bestchi2, Kinnu, Kinblrefit, Kinbjrefit, Kinj1refit, Kinj2refit);
+      // FindHadronicTop(KinLep, KinJets, KinMET, KinUsebtag, KinBestIndices, bestchi2, Kinnu, Kinblrefit, Kinbjrefit, Kinj1refit, Kinj2refit);
       
 
       

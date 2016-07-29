@@ -135,17 +135,20 @@ int main(int argc, const char* argv[]){
     std::exit(0);
   }
 
-
+  // Global event
   int Event,Run,Channel, GoodPV;
   float PUWeight, GENWeight; 
   std::vector<float> *PUWeight_sys=0;
 
+  // MET
   float MET,MET_Phi;
 
+  // Leptons
   float Lep_px, Lep_py, Lep_pz, Lep_E;
   std::vector<float> *Lep_SF=0;
   float Lep_LES=0;
 
+  // Jets
   std::vector<float> *Jet_px=0, *Jet_py=0, *Jet_pz=0, *Jet_E=0;
   std::vector<int>   *Jet_partonFlavour=0;
   std::vector<int>   *Jet_pTIndex=0;
@@ -162,9 +165,16 @@ int main(int argc, const char* argv[]){
   float DRAddJets;
   float GenLep_pT;
   std::vector<float> *GenJet_px=0, *GenJet_py=0, *GenJet_pz=0, *GenJet_E=0;
+  float GenNu_px, GenNu_py, GenNu_pz, GenNu_E;
 
   // Scale Syst. Unc.
   std::vector<float> *ScaleWeight=0;
+
+  // Kinematic Reconstruction
+  float Kin_Chi2;
+  std::vector<int>   *KinJet_Index=0;
+  std::vector<float> *KinJet_px=0, *KinJet_py=0, *KinJet_pz=0, *KinJet_E=0;
+  float KinNu_px, KinNu_py, KinNu_pz, KinNu_E;
    
  /*********************************
            Tree Branches
@@ -194,7 +204,6 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "jet_SF_CSV",       &Jet_SF_CSV );
   theTree.SetBranchAddress( "jet_partonFlavour",&Jet_partonFlavour );
 
-  //theTree.SetBranchAddress( "jet_CvsB",         &Jet_CvsB );
   theTree.SetBranchAddress( "jet_CvsB",     &Jet_CvsB );
   theTree.SetBranchAddress( "jet_CvsL",     &Jet_CvsL );
   theTree.SetBranchAddress( "jet_iCSVCvsL",     &Jet_CSVCvsL );
@@ -244,7 +253,27 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress("genjet_py",             &GenJet_py);
     theTree.SetBranchAddress("genjet_pz",             &GenJet_pz);
     theTree.SetBranchAddress("genjet_E",              &GenJet_E);
+    theTree.SetBranchAddress("gennu_px",              &GenNu_px);
+    theTree.SetBranchAddress("gennu_py",              &GenNu_py);
+    theTree.SetBranchAddress("gennu_pz",              &GenNu_pz);
+    theTree.SetBranchAddress("gennu_E",               &GenNu_E);
+
   }
+
+  // Kinematic Reconstruction Variables
+  theTree.SetBranchAddress("kin_chi2",     &Kin_Chi2);
+  // Neutrino
+  theTree.SetBranchAddress("kinnu_px",     &KinNu_px);
+  theTree.SetBranchAddress("kinnu_py",     &KinNu_py);
+  theTree.SetBranchAddress("kinnu_pz",     &KinNu_pz);
+  theTree.SetBranchAddress("kinnu_E",      &KinNu_E);
+  // Jets
+  theTree.SetBranchAddress("kinjet_px",    &KinJet_px);
+  theTree.SetBranchAddress("kinjet_py",    &KinJet_py);
+  theTree.SetBranchAddress("kinjet_pz",    &KinJet_pz);
+  theTree.SetBranchAddress("kinjet_E",     &KinJet_E);
+  theTree.SetBranchAddress("kinjet_index", &KinJet_Index);
+ 
 
   /*********************************
              Histograms
@@ -253,7 +282,7 @@ int main(int argc, const char* argv[]){
   //Correct Statistical Uncertainty Treatment
   TH1::SetDefaultSumw2(kTRUE);  
    
-  unsigned int Nhcuts = 4;
+  unsigned int Nhcuts = 5;
   unsigned int Nhch   = 2;
   unsigned int NhJets = 6; 
   
@@ -264,6 +293,7 @@ int main(int argc, const char* argv[]){
   typedef TH2F *HistosDiJet2D[NhJets][NhJets-1][Nhcuts][Nhch];  
   typedef TH1F *Histos       [Nhcuts][Nhch];  
   typedef TH2F *Histos2D     [Nhcuts][Nhch];  
+  typedef TEfficiency *Eff   [Nhcuts][Nhch];  
  
   TString namech[Nhch + 1];
   namech[0]="mujets";
@@ -279,8 +309,8 @@ int main(int argc, const char* argv[]){
   namecut[1]="6Jets";
   namecut[2]="2btag";
   namecut[3]="3btag";
+  namecut[4]="4Jets";
   
-
   Histos hPV;
   Histos hMET, hMET_Phi, hHT;
   Histos hmT;
@@ -300,6 +330,11 @@ int main(int argc, const char* argv[]){
   Histos2D h2DSFbtag_Global;
   Histos hSFbtag_Global, hSFbtag_Global_var;
   Histos2D h2DSFbtag_b, h2DSFbtag_c, h2DSFbtag_l, h2DSFbtag_btag_b, h2DSFbtag_btag_c, h2DSFbtag_btag_l; 
+
+  Histos    hKinChi2; 
+  Eff       effKinGenIndex;
+  HistosJet hKinJetPt, hGENJetPt;
+
 
   TH1F *hTJetPosition, *hWJetPosition, *hOJetPosition;
   TH2F *h2DTJetPosition, *h2DWJetPosition;
@@ -389,11 +424,28 @@ int main(int argc, const char* argv[]){
 	
       }
       
-      hInvMassjj[j][i]  = new TH1F("hInvMassjj_" + namech[i]+"_"+namecut[j],"Compatible Inv. Mass " + titlenamech[i],80,0,400);
-      hEvtCatego[j][i]  = new TH1F("hEvtCatego_"+namech[i]+"_"+namecut[j],"ttbar Event Categorization " + titlenamech[i] + ";ttbar Cat",4,-0.5,3.5);
+      hInvMassjj[j][i]  = new TH1F("hInvMassjj_" + namech[i] + "_"+namecut[j],"Compatible Inv. Mass " + titlenamech[i],80,0,400);
+      hEvtCatego[j][i]  = new TH1F("hEvtCatego_"+namech[i] + "_"+namecut[j],"ttbar Event Categorization " + titlenamech[i] + ";ttbar Cat",4,-0.5,3.5);
 
-    }//for(i)
-  }//for(j)
+      // Kinematic Reconstruction
+      hKinChi2 [j][i] = new TH1F("hKinChi2_" + namech[i] + "_" + namecut[j], "#Chi^{2} for Kin. RECO " + titlenamech[i], 100,0,20);
+      effKinGenIndex [j][i] = new TEfficiency("effKinGenIndex_" + namech[i] + "_" + namecut[j], "Kin. RECO vs GEN " + titlenamech[i] + "; ; Match Eff.", 4,0,4);
+      // effKinGenIndex [j][i]->GetXaxis()->SetBinLabel(1,"b jet from H");
+      // effKinGenIndex [j][i]->GetXaxis()->SetBinLabel(2,"W jet");
+      // effKinGenIndex [j][i]->GetXaxis()->SetBinLabel(3,"W jet");
+      // effKinGenIndex [j][i]->GetXaxis()->SetBinLabel(4,"b jet from L");
+
+      TString kinJetname[4];
+      kinJetname[0] = "bFromH";
+      kinJetname[1] = "W1";
+      kinJetname[2] = "W2";
+      kinJetname[3] = "bFromL";
+      for(unsigned int ikj=0; ikj<4; ikj++){
+	hKinJetPt[ikj][j][i] = new TH1F ("hKinJetPt_" + kinJetname[ikj] + "_"  + namech[i] + "_" + namecut[j], "pT KIN Assignment" + titlenamech[i] + "; p_{T}^{j}[GeV]", 50,0,150);
+	hGENJetPt[ikj][j][i] = new TH1F ("hGENJetPt_" + kinJetname[ikj] + "_"  + namech[i] + "_" + namecut[j], "pT GEN Assignment" + titlenamech[i] + "; p_{T}^{j}[GeV]", 50,0,150);
+      }
+    }//for(i->channel)
+  }//for(j->cut)
   
   // BEST escenario plots
   hTJetPosition = new TH1F("hTJetPosition","CSV Position for jets from Top",  7,0,7);
@@ -411,6 +463,20 @@ int main(int argc, const char* argv[]){
   ///////////////////////////////////////
   TCanvas *mydummycanvas=new TCanvas();// 
   ///////////////////////////////////////
+
+  /************************
+  Acceptance and Efficiency
+  *************************/
+  // Number of events for acceptance
+  //          [Cut][Channel]
+  int AccEvent[Nhcuts][Nhch+1];
+  // Sum of weights for Efficiency
+  float EffEvent[Nhcuts][Nhch+1];  
+
+  for(unsigned int iAEc=0; iAEc<Nhcuts; iAEc++){
+    for(unsigned int iAEch=0; iAEch<(Nhch+1); iAEch++){ AccEvent[iAEc][iAEch] = 0 ; EffEvent[iAEc][iAEch] = 0.0; }
+  }
+  
     
   /************************
      SF Parametrization
@@ -459,17 +525,6 @@ int main(int argc, const char* argv[]){
   // Jet uncertainties (btag, JES and JER)
   if(_syst) fname += "_SYS_" + syst_varname;
 
-
-  // Number de events for acceptance
-  //          [Cut][Channel]
-  int AccEvent[4][3]={0,0,0,0,
-		      0,0,0,0,
-		      0,0,0,0};
-  // Number de events for acceptance
-  //          [Cut][Channel]
-  float EffEvent[4][3]={0.0,0.0,0.0,0.0,
-			0.0,0.0,0.0,0.0,
-			0.0,0.0,0.0,0.0};  
 
   /***************************
      ttbar Categorization
@@ -627,8 +682,8 @@ int main(int argc, const char* argv[]){
 		     (*Jet_E)[ijet]);
       jet.Flavour = (*Jet_partonFlavour)[ijet];
       jet.CSV     = (*Jet_CSV)[ijet];
-      //jet.CvsL    = (*Jet_CvsL)[ijet];
-      //jet.CvsB    = (*Jet_CvsB)[ijet];
+      // jet.CvsL    = (*Jet_CvsL)[ijet];
+      // jet.CvsB    = (*Jet_CvsB)[ijet];
       jet.Mom     = -1;
       if((fname.Contains("ttbar")  && !fname.Contains("Bkg")) && 
 	 (*Jet_GENmatched)[ijet] != -999) jet.Mom = (*GenJet_Mom)[(*Jet_GENmatched)[ijet]];
@@ -663,7 +718,40 @@ int main(int argc, const char* argv[]){
       Mjj = DiJetMassCorrection(Jets, ReArrangeMjj);      
             
     } //if (6jets && 1btag)    
-    
+
+    // Kinematic Reconstruction
+    // At least 4 Jets
+    TLorentzVector KinNu(0.,0.,0.,0.);
+    // Order for Jets: 
+    // [0] b from hadronic leg 
+    // [1] j from W
+    // [2] j from W
+    // [3] b from leptonic leg
+    ComJet KinJet[4];
+    ComJet GenttbarJet[4];
+    for(unsigned int ikj=0; ikj<4; ikj++) KinJet[ikj].SetPxPyPzE(0.,0.,0.,0.);
+    int KinJetIndex[4]={-99,-99,-99,-99};
+
+    int TJet = 0, WJet = 0, AddJet = 0;
+    if(NJets > 4){ 
+      KinNu.SetPxPyPzE(KinNu_px, KinNu_py, KinNu_pz, KinNu_E);
+      for(unsigned int ikj=0; ikj<4; ikj++){
+	KinJetIndex[ikj] = (*KinJet_Index)[ikj];
+	KinJet[ikj].SetPxPyPzE((*KinJet_px)[ikj],(*KinJet_py)[ikj],(*KinJet_pz)[ikj],(*KinJet_E)[ikj]);
+      }
+
+      // Check ttbar system at GEN level
+      if(fname.Contains("ttbar")  && !fname.Contains("Bkg")){
+	for (unsigned int ij = 0; ij < NJets; ij ++){
+	  ComJet jetcand = Jets[ij]; 
+	  if (jetcand.Mom == 6   && std::abs(jetcand.Flavour) == 5) TJet++;
+	  else if (jetcand.Mom == 24  && std::abs(jetcand.Flavour) != 5) WJet++;
+	  else if (jetcand.Mom != 24  && jetcand.Mom != 6) AddJet++;
+	} // for(ij)
+      }
+
+
+    } // if(NJets > 4)
     
     /*******************************************
                 Number of GENJets
@@ -739,6 +827,7 @@ int main(int argc, const char* argv[]){
     if(NJets > 5)                  JumpCutEvent[1]= false; // lep + 6 Jets 
     if(NJets > 5 && NBtagJets > 1) JumpCutEvent[2]= false; // lep + 6 Jets + 2 b-tag
     if(NJets > 5 && NBtagJets > 2) JumpCutEvent[3]= false; // lep + 6 Jets + 3 b-tag
+    if(NJets > 3)                  JumpCutEvent[4]= false; // lep + 4 Jets 
 
 
     bool JumpEvent = false;
@@ -774,7 +863,7 @@ int main(int argc, const char* argv[]){
       //hSFTriggerError[icut][Channel]->Fill(SF_ID_ISO_Tr[4],PUWeight);
     
       /******************
-          Acceptace
+          Acc. / Eff. 
       ******************/
       AccEvent[icut][Channel]++;
       EffEvent[icut][Channel]= EffEvent[icut][Channel] + PUWeight;
@@ -839,60 +928,14 @@ int main(int argc, const char* argv[]){
 	
       }//for(ijet)     
        
+      // Kinematic Reconstruction
+      hKinChi2 [icut][Channel]->Fill(Kin_Chi2,PUWeight);
+      bool IsKinGenMatch = false;
+      for(int ikj=0; ikj < 4; ikj++){
+	hKinJetPt[ikj][icut][Channel]->Fill(KinJet[ikj].Pt(), PUWeight);
+	effKinGenIndex[icut][Channel]->Fill(ikj, IsKinGenMatch, PUWeight);
+      }
     }//for(icuts)     
-    
-    /***************************
-          Loop over cuts
-    ***************************/
-    if(!JumpCutEvent[2]){ // lep + 6 Jets + 2 b-tag
-	    
-      TLorentzVector Kinnu, Kinblrefit, Kinbjrefit, Kinj1refit, Kinj2refit;
-      Kinnu.SetPxPyPzE(0,0,0,0); 
-      Kinblrefit.SetPxPyPzE(0,0,0,0); 
-      Kinbjrefit.SetPxPyPzE(0,0,0,0);
-      Kinj1refit.SetPxPyPzE(0,0,0,0);
-      Kinj2refit.SetPxPyPzE(0,0,0,0);
-      TLorentzVector KinLep = Lep;
-      TLorentzVector KinMET = METv;
-      std::vector<ComJet> KinJets = Jets;
-      std::vector<int> KinBestIndices;
-      KinBestIndices.push_back(0);
-      KinBestIndices.push_back(0);
-      KinBestIndices.push_back(0);
-      KinBestIndices.push_back(0);
-      bool KinUsebtag = true;
-      float bestchi2=0;
-      
-      // FindHadronicTop(KinLep, KinJets, KinMET, KinUsebtag, KinBestIndices, bestchi2, Kinnu, Kinblrefit, Kinbjrefit, Kinj1refit, Kinj2refit);
-      
-
-      
-      for (int iin =0; iin<KinBestIndices.size(); iin++) std::cout << KinBestIndices.at(iin) << std::endl;
-      std::cout << "Best Chi2 = " << bestchi2 << std::endl;
-      std::cout << "Lep pT = " << Lep.Pt() << std::endl;
-      std::cout << "Lep pT (NEW) = " << KinLep.Pt() << std::endl;
-
-      std::cout << "\nJet[0] pT = " << Jets[0].Pt() << std::endl;
-      std::cout << "Jet[1] pT = " << Jets[1].Pt() << std::endl;
-      std::cout << "Jet[2] pT = " << Jets[2].Pt() << std::endl;
-      std::cout << "Jet[3] pT = " << Jets[3].Pt() << std::endl;
-      std::cout << "Jet[4] pT = " << Jets[4].Pt() << std::endl;
-      std::cout << "Jet[5] pT = " << Jets[5].Pt() << std::endl;
-
-      std::cout << "\nMET = " << METv.Et() << std::endl;
-      std::cout << "\nMET = " << MET << std::endl;
-      std::cout << "nu pT = " << Kinnu.Pt() << std::endl;
-      std::cout << "nu ET = " << Kinnu.Et() << std::endl;
-      std::cout << "nu E = " << Kinnu.E() << std::endl;
-
-      std::cout << "\nb from lep leg = " << Kinblrefit.Pt() << std::endl;
-      std::cout << "b from jet leg = "   << Kinbjrefit.Pt() << std::endl;
-      std::cout << "jet[0] from W = "    << Kinj1refit.Pt() << std::endl;
-      std::cout << "jet[1] from W = "    << Kinj2refit.Pt() << std::endl;
-      std::cout << "------------______________----------------" << std::endl;
-      
-    } // if(JumpCutEvent[2])
-    
     
     Jets.clear();
 
@@ -906,7 +949,7 @@ int main(int argc, const char* argv[]){
 
   //Acceptance-Efficiency
   TH1F *Yields;
-  Yields = new TH1F("Yields", "Yields",12,0,12);
+  Yields = new TH1F("Yields", "Yields",(Nhcuts)*(Nhch+1),0,(Nhcuts)*(Nhch+1));
   int nbin = 1;
   
   for(int nc = 0; nc < Nhcuts; nc++){

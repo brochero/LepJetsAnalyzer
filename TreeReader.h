@@ -20,6 +20,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TProfile.h"
+#include "TEfficiency.h"
 #include "TFile.h"
 #include "TChain.h"
 #include "TLorentzVector.h"

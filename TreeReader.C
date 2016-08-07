@@ -347,6 +347,7 @@ int main(int argc, const char* argv[]){
   Histos2D h2DSFbtag_b, h2DSFbtag_c, h2DSFbtag_l, h2DSFbtag_btag_b, h2DSFbtag_btag_c, h2DSFbtag_btag_l; 
 
   Histos    hKinChi2; 
+  Histos2D  h2DKinChi2_JetMatch;
   Histos    hKinWlTransMass, hKinWlMass, hKinWlpT, hKintlMass, hKintlpT;
   Histos    hKinWhMass, hKinWhpT, hKinthMass, hKinthpT;
   Eff       effKinGenIndex;
@@ -446,6 +447,7 @@ int main(int argc, const char* argv[]){
 
       // Kinematic Reconstruction
       hKinChi2 [j][i] = new TH1F("hKinChi2_" + namech[i] + "_" + namecut[j], "#Chi^{2} for Kin. RECO " + titlenamech[i], 100,0,20);
+      h2DKinChi2_JetMatch[j][i] = new TH2F("hKinChi2_JetMatch_" + namech[i] + "_" + namecut[j], "#Chi^{2} Vs # of Jet Matches for Kin. RECO " + titlenamech[i], 100,0,20,5,0,5);
       effKinGenIndex [j][i] = new TEfficiency("effKinGenIndex_" + namech[i] + "_" + namecut[j], "Kin. RECO vs GEN " + titlenamech[i] + "; ; Match Eff.", 4,0,4);
       // effKinGenIndex [j][i]->GetXaxis()->SetBinLabel(1,"b jet from H");
       // effKinGenIndex [j][i]->GetXaxis()->SetBinLabel(2,"W jet");
@@ -973,6 +975,7 @@ int main(int argc, const char* argv[]){
 	// Kinematic Reconstruction
 	TLorentzVector KinWl, KinWh, Kintl, Kinth;
 	hKinChi2 [icut][Channel]->Fill(Kin_Chi2,PUWeight);
+	h2DKinChi2_JetMatch[icut][Channel]->Fill(Kin_Chi2, kinGenConeMatch, PUWeight);
 	
 	KinWl = Lep + KinNu;
 	KinWh = KinJet[1] + KinJet[2];
@@ -999,6 +1002,7 @@ int main(int argc, const char* argv[]){
 	for(int ikj=0; ikj < 4; ikj++){
 	  hKinJetPt[ikj][icut][Channel]->Fill(KinJet[ikj].Pt(), PUWeight);
 	}
+
       } //if(NJet > 3)
     }//for(icuts)     
     
@@ -1105,6 +1109,7 @@ int main(int argc, const char* argv[]){
 
       // Kinematic Reconstruction
       hKinChi2       [j][i]->Write();
+      h2DKinChi2_JetMatch[j][i]->Write();
       hKinWlMass     [j][i]->Write();
       hKinWlTransMass[j][i]->Write();
       hKinWlpT       [j][i]->Write();

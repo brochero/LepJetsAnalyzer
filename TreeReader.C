@@ -13,9 +13,8 @@ void display_usage()
   std::cout << "    -i inputfile  Input file without .root" << std::endl;
   std::cout << "    -eos input files located in eos lxplus" << std::endl;
   std::cout << "    -o name in the output file \"h_\"" << std::endl;
+  std::cout << "    -n number of events" << std::endl;
   std::cout << "    -s create a file with the systematic uncertainty yields" << std::endl;
-  std::cout << "    -tr SF Trigger Uncertainty" << std::endl;
-  std::cout << "    -idiso SF ID/ISO Uncertainty" << std::endl;
   std::cout << "    -cat ttbar categorization" << std::endl;
   std::cout << "    -d Input file directory. Default directory: InputTrees" << std::endl;
   std::cout << "    -h                 displays this help message and exits " << std::endl;
@@ -30,18 +29,15 @@ int main(int argc, const char* argv[]){
   gSystem->Load("libTree");
   gROOT->ProcessLine("#include <vector>");
   
-  bool   _eos       = false;
-  bool   _ttbar_cat = false;
-  bool   _syst      = false;
-  bool	 _tr_unc    = false;
-  bool	 _idiso_unc = false;
+  bool _eos       = false;
+  bool _ttbar_cat = false;
+  bool _syst      = false;
+  int  _NUserEvt  = 0;
   const char * _output   = 0;
   const char * _input    = 0;
   // TopTrees directory
   const char * _dir      = "../v8-0-0/";
   const char * _syst_var = 0;
-  const char * _tr       = 0;
-  const char * _idiso    = 0;
   const char * _ttbar_id = 0;
   
   // Arguments used
@@ -70,19 +66,13 @@ int main(int argc, const char* argv[]){
 	_output= argv[i+1];
 	i++;
       }
+      if( strcmp(argv[i],"-n") == 0 ){
+	_NUserEvt= atoi(argv[i+1]);
+	i++;
+      }
       if( strcmp(argv[i],"-s") == 0 ){
 	_syst= true;
 	_syst_var = argv[i+1];
-      }
-      if( strcmp(argv[i],"-tr") == 0 ){
-	_tr_unc= true;
-	_tr= argv[i+1];
-	i++;
-      }
-      if( strcmp(argv[i],"-idiso") == 0 ){
-	_idiso_unc= true;
-	_idiso= argv[i+1];
-	i++;
       }
       if( strcmp(argv[i],"-cat") == 0 ){
 	_ttbar_cat = true;
@@ -108,19 +98,13 @@ int main(int argc, const char* argv[]){
   TString hname(_output);
   TString syst_varname(_syst_var);
   TString fdir(_dir);
-  TString TrUnc(_tr);
-  TString IDISOUnc(_idiso);
   TString ttbar_id(_ttbar_id);
 
   // eos directory
   if(_eos) fdir = "root://eoscms.cern.ch//eos/cms/store/user/brochero/" + fdir + "/";
-
-  //Output Dir
-  TString dirname="TopResults";   
-  // make a dir if it does not exist!!
+  //make a dir if output does not exist!!
   struct stat st;
   if(stat(dirname,&st) != 0) system("mkdir " + dirname);
-
 
   TChain theTree("ttbbLepJets/tree"); 
   
@@ -134,59 +118,10 @@ int main(int argc, const char* argv[]){
     std::cerr << "Input file not found!!!"  << std::endl;
     std::exit(0);
   }
-
-  // Global event
-  int Event,Run,Channel, GoodPV;
-  float PUWeight, GENWeight; 
-  std::vector<float> *PUWeight_sys=0;
-
-  // MET
-  float MET,MET_Phi;
-
-  // Leptons
-  float Lep_px, Lep_py, Lep_pz, Lep_E;
-  std::vector<float> *Lep_SF=0;
-  float Lep_LES=0;
-
-  // Jets
-  std::vector<float> *Jet_px=0, *Jet_py=0, *Jet_pz=0, *Jet_E=0;
-  std::vector<int>   *Jet_partonFlavour=0;
-  std::vector<int>   *Jet_pTIndex=0;
-  std::vector<int>   *Jet_GENmatched=0; 
-  std::vector<int>   *Jet_Mom=0; // From GenCone
-  std::vector<float> *Jet_CSV=0;
-  std::vector<float> *Jet_SF_CSV=0;
-  std::vector<float> *Jet_CvsB=0, *Jet_CvsL=0;
-  std::vector<float> *Jet_JER_Up=0, *Jet_JER_Nom=0, *Jet_JER_Down=0;
-  std::vector<float> *Jet_JES_Up=0, *Jet_JES_Down=0;
-
-  // GEN Info
-  std::vector<int>    *GenConeCat=0;
-  std::vector <float> *GenCone_pT=0;
-  std::vector <float> *GenCone_eta=0;
-  std::vector <float> *GenCone_phi=0;
-  std::vector <float> *GenCone_E=0;
-  std::vector <int>   *GenCone_gjetMom=0; // From GenCone
-  int GenCone_NgjetsW;
-
-  float DRAddJets;
-  float GenLep_pT;
-  std::vector<float> *GenJet_px=0, *GenJet_py=0, *GenJet_pz=0, *GenJet_E=0;
-  float GenNu_px, GenNu_py, GenNu_pz, GenNu_E;
-
-  // Scale Syst. Unc.
-  std::vector<float> *ScaleWeight=0;
-
-  // Kinematic Reconstruction
-  float Kin_Chi2;
-  std::vector<int>   *KinJet_Index=0;
-  std::vector<float> *KinJet_px=0, *KinJet_py=0, *KinJet_pz=0, *KinJet_E=0;
-  float KinNu_px, KinNu_py, KinNu_pz, KinNu_E;
    
  /*********************************
            Tree Branches
-  **********************************/
-  
+  **********************************/  
   theTree.SetBranchAddress( "event",   &Event );
   theTree.SetBranchAddress( "run",     &Run );
   theTree.SetBranchAddress( "PUWeight",&PUWeight_sys );
@@ -207,10 +142,10 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "jet_pz",           &Jet_pz );
   theTree.SetBranchAddress( "jet_E",            &Jet_E );
   theTree.SetBranchAddress( "jet_index",        &Jet_pTIndex );
+
   theTree.SetBranchAddress( "jet_CSV",          &Jet_CSV );
   theTree.SetBranchAddress( "jet_SF_CSV",       &Jet_SF_CSV );
   theTree.SetBranchAddress( "jet_partonFlavour",&Jet_partonFlavour );
-
   theTree.SetBranchAddress( "jet_CvsB",     &Jet_CvsB );
   theTree.SetBranchAddress( "jet_CvsL",     &Jet_CvsL );
 
@@ -221,35 +156,10 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress( "jet_JER_Nom", &Jet_JER_Nom );
     theTree.SetBranchAddress( "jet_JER_Down",&Jet_JER_Down );
   }
-  
-  // Number of Events and Weights (MC@NLO)
-  TFile *fileEntries = NULL;
-  fileEntries = TFile::Open(fdir + fname + ".root");
-  TH1F *h_NumberEvt, *h_ScaleWeights;
-  h_NumberEvt    = (TH1F*)fileEntries->Get("ttbbLepJets/EventInfo");
-  h_ScaleWeights = (TH1F*)fileEntries->Get("ttbbLepJets/ScaleWeights");
-
-  float NTotal_Event, NTotal_Weight, nNorm_Event, NTotal_ScalemuRF_Weight[6];
-  NTotal_Event  = h_NumberEvt->GetBinContent(1);
-  NTotal_Weight = h_NumberEvt->GetBinContent(2);
-  for (unsigned int ibin = 1; ibin< 7; ibin++) NTotal_ScalemuRF_Weight[ibin]= h_ScaleWeights->GetBinContent(ibin);
-
-
-  /************************
-      MCatNLO Weights
-  *************************/
-  if(fname.Contains("aMCatNLO")){
-    theTree.SetBranchAddress( "genweight", &GENWeight );
-    nNorm_Event = NTotal_Weight;    
-  }
-  else{
-    GENWeight = 1.0;
-    nNorm_Event = NTotal_Event;
-  }
-
   // ttbar event categorization
   if(fname.Contains("ttbar") && !fname.Contains("Bkg")){
     theTree.SetBranchAddress("scaleweight",       &ScaleWeight );
+
     theTree.SetBranchAddress("genconecatid",      &GenConeCat);
     theTree.SetBranchAddress("gencone_gjet_pT",   &GenCone_pT);
     theTree.SetBranchAddress("gencone_gjet_eta",  &GenCone_eta);
@@ -257,8 +167,8 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress("gencone_gjet_E",    &GenCone_E);
     theTree.SetBranchAddress("gencone_gjetIndex", &GenCone_gjetMom);
     theTree.SetBranchAddress("gencone_NgjetsW",   &GenCone_NgjetsW);
-
     theTree.SetBranchAddress("draddjets",             &DRAddJets);
+
     theTree.SetBranchAddress("genlepton_pT",          &GenLep_pT);
     theTree.SetBranchAddress("jet_MatchedGenJetIndex",&Jet_GENmatched);
     theTree.SetBranchAddress("jet_gencone_mom",       &Jet_Mom);
@@ -270,9 +180,7 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress("gennu_py",              &GenNu_py);
     theTree.SetBranchAddress("gennu_pz",              &GenNu_pz);
     theTree.SetBranchAddress("gennu_E",               &GenNu_E);
-
   }
-
   // Kinematic Reconstruction Variables
   theTree.SetBranchAddress("kin_chi2",     &Kin_Chi2);
   // Neutrino
@@ -286,79 +194,35 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress("kinjet_pz",    &KinJet_pz);
   theTree.SetBranchAddress("kinjet_E",     &KinJet_E);
   theTree.SetBranchAddress("kinjet_index", &KinJet_Index);
- 
+  
+  // Number of Events and Weights (MC@NLO) from Histograms
+  TFile *fileEntries = NULL;
+  fileEntries = TFile::Open(fdir + fname + ".root");
+  TH1F *h_NumberEvt, *h_ScaleWeights;
+  h_NumberEvt    = (TH1F*)fileEntries->Get("ttbbLepJets/EventInfo");
+  h_ScaleWeights = (TH1F*)fileEntries->Get("ttbbLepJets/ScaleWeights");
+
+  float NTotal_Event, NTotal_Weight, nNorm_Event, NTotal_ScalemuRF_Weight[6];
+  NTotal_Event  = h_NumberEvt->GetBinContent(1);
+  NTotal_Weight = h_NumberEvt->GetBinContent(2);
+  for (unsigned int ibin = 1; ibin< 7; ibin++) NTotal_ScalemuRF_Weight[ibin]= h_ScaleWeights->GetBinContent(ibin);
+
+  // MCatNLO Weights
+  if(fname.Contains("aMCatNLO")){
+    theTree.SetBranchAddress( "genweight", &GENWeight );
+    nNorm_Event = NTotal_Weight;    
+  }
+  else{
+    GENWeight = 1.0;
+    nNorm_Event = NTotal_Event;
+  }
 
   /*********************************
              Histograms
   **********************************/
-
   //Correct Statistical Uncertainty Treatment
   TH1::SetDefaultSumw2(kTRUE);  
-   
-  unsigned int Nhcuts = 7;
-  unsigned int Nhch   = 2;
-  unsigned int NhJets = 6; 
-  
- // To define arrange size --> 4X faster than MAPS
-  typedef TH1F *HistosJet    [NhJets][Nhcuts][Nhch];  
-  typedef TH2F *HistosJet2D  [NhJets][Nhcuts][Nhch];  
-  typedef TH1F *HistosDiJet  [NhJets][NhJets-1][Nhcuts][Nhch];  
-  typedef TH2F *HistosDiJet2D[NhJets][NhJets-1][Nhcuts][Nhch];  
-  typedef TH1F *Histos       [Nhcuts][Nhch];  
-  typedef TH2F *Histos2D     [Nhcuts][Nhch];  
-  typedef TEfficiency *Eff   [Nhcuts][Nhch];  
- 
-  TString namech[Nhch + 1];
-  namech[0]="mujets";
-  namech[1]="ejets";
-  namech[2]="lepjets";  
-  
-  TString titlenamech[Nhch];
-  titlenamech[0]="#mu+Jets";
-  titlenamech[1]="e+Jets";
-  
-  TString namecut[Nhcuts];
-  namecut[0]="lepton";
-  namecut[1]="6Jets";
-  namecut[2]="2btag";
-  namecut[3]="3btag";
-  namecut[4]="4Jets";
-  namecut[5]="4Jets2btag";
-  namecut[6]="Only2btag";
-  
-  Histos hPV;
-  Histos hMET, hMET_Phi, hHT;
-  Histos hmT;
-  Histos hNJets, hNBtagJets;
-  Histos hEvtCatego;
-
-  Histos hLepPt, hLepEta, hLepPhi;
-
-  HistosJet hCSV, hJetPt, hJetpTUncVar;
-  HistosJet hCvsL, hCvsB; 
-  HistosDiJet2D h2DCSV; 
-  HistosDiJet hMassJet;
-  Histos hInvMassjj;
-
-  Histos hSFIDISO, hSFIDISOError;
-  Histos hSFTrigger, hSFTriggerError;
-  Histos2D h2DSFbtag_Global;
-  Histos hSFbtag_Global, hSFbtag_Global_var;
-  Histos2D h2DSFbtag_b, h2DSFbtag_c, h2DSFbtag_l, h2DSFbtag_btag_b, h2DSFbtag_btag_c, h2DSFbtag_btag_l; 
-
-  Histos    hKinChi2; 
-  Histos2D  h2DKinChi2_JetMatch;
-  Histos    hKinWlTransMass, hKinWlMass, hKinWlpT, hKintlMass, hKintlpT;
-  Histos    hKinWhMass, hKinWhpT, hKinthMass, hKinthpT;
-  Histos    hKinWMass, hKinWpT, hKinTagWMass, hKinTagWpT;
-  Eff       effKinGenIndex;
-  HistosJet hKinJetPt, hGENJetPt;
-
-  Histos hTJetPosition, hWJetPosition, hOJetPosition, hGenTagWMass;
-  Eff    effTagCSV;
-  TH2F *h2DTJetPosition, *h2DWJetPosition, *h2DttbarNGenJets;
-
-  
+    
   for(int j=0; j<Nhcuts; j++){   // Cut
     for(int i=0; i<Nhch; i++){ // Channel
       hPV[j][i]         = new TH1F("hPV_"+namech[i]+"_"+namecut[j],"PV Distribution  " + titlenamech[i] + ";PV",15,0,30);
@@ -396,10 +260,12 @@ int main(int argc, const char* argv[]){
       /***************************
           SF(ID,ISO & Trigger)
       ***************************/
-      hSFIDISO[j][i]           = new TH1F("hSFIDISO_"+namech[i]+"_"+namecut[j],"SF_{ID,ISO} " + titlenamech[i],400,0.8,1.2);    
-      hSFIDISOError[j][i]      = new TH1F("hSFIDISOError_"+namech[i]+"_"+namecut[j],"#Delta SF_{ID,ISO} " + titlenamech[i],400,0,0.05); 
-      hSFTrigger[j][i]         = new TH1F("hSFTrigger_"+namech[i]+"_"+namecut[j],"SF^{Trigger} " + titlenamech[i],400,0.8,1.2);    
-      hSFTriggerError[j][i]    = new TH1F("hSFTriggerError_"+namech[i]+"_"+namecut[j],"#Delta SF^{Trigger} " + titlenamech[i],400,0,0.05);
+      hSFIDISOTr[j][i]       = new TH1F("hSFIDISOTr_"+namech[i]+"_"+namecut[j],"SF_{ID,ISO}^{Tr} " + titlenamech[i],400,0.8,1.2);    
+      hSFIDISOTrError[j][i]  = new TH1F("hSFIDISOTrError_"+namech[i]+"_"+namecut[j],"#Delta SF_{ID,ISO}^{Tr} " + titlenamech[i],400,0,0.1); 
+      hSFIDISO[j][i]         = new TH1F("hSFIDISO_"+namech[i]+"_"+namecut[j],"SF_{ID,ISO} " + titlenamech[i],400,0.8,1.2);    
+      hSFIDISOError[j][i]    = new TH1F("hSFIDISOError_"+namech[i]+"_"+namecut[j],"#Delta SF_{ID,ISO} " + titlenamech[i],400,0,0.1); 
+      hSFTrigger[j][i]       = new TH1F("hSFTrigger_"+namech[i]+"_"+namecut[j],"SF^{Trigger} " + titlenamech[i],400,0.8,1.2);    
+      hSFTriggerError[j][i]  = new TH1F("hSFTriggerError_"+namech[i]+"_"+namecut[j],"#Delta SF^{Trigger} " + titlenamech[i],400,0,0.1);
 
       /***************************
               SF(b-tag)
@@ -450,10 +316,6 @@ int main(int argc, const char* argv[]){
       hKinChi2 [j][i] = new TH1F("hKinChi2_" + namech[i] + "_" + namecut[j], "#Chi^{2} for Kin. RECO " + titlenamech[i], 100,0,20);
       h2DKinChi2_JetMatch[j][i] = new TH2F("hKinChi2_JetMatch_" + namech[i] + "_" + namecut[j], "#Chi^{2} Vs # of Jet Matches for Kin. RECO " + titlenamech[i], 100,0,20,5,0,5);
       effKinGenIndex [j][i] = new TEfficiency("effKinGenIndex_" + namech[i] + "_" + namecut[j], "Kin. RECO vs GEN " + titlenamech[i] + "; [0]->All 4 jets, [1]->Top, [2]->W, [3]->Add; Match Eff.", 4,0,4);
-      // effKinGenIndex [j][i]->GetXaxis()->SetBinLabel(1,"b jet from H");
-      // effKinGenIndex [j][i]->GetXaxis()->SetBinLabel(2,"W jet");
-      // effKinGenIndex [j][i]->GetXaxis()->SetBinLabel(3,"W jet");
-      // effKinGenIndex [j][i]->GetXaxis()->SetBinLabel(4,"b jet from L");
 
       hKinWlTransMass[j][i] = new TH1F("hKinWlTransMass_" + namech[i] + "_" + namecut[j], "Inv. Trans. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{T}^{W#to l#nu} [GeV]", 50,0,150);
       hKinWlMass[j][i]      = new TH1F("hKinWlMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{W#to l#nu} [GeV]", 80,40,120);
@@ -514,64 +376,22 @@ int main(int argc, const char* argv[]){
   /************************
   Acceptance and Efficiency
   *************************/
-  // Number of events for acceptance
-  //          [Cut][Channel]
-  int AccEvent[Nhcuts][Nhch+1];
-  // Sum of weights for Efficiency
-  float EffEvent[Nhcuts][Nhch+1];  
-
   for(unsigned int iAEc=0; iAEc<Nhcuts; iAEc++){
     for(unsigned int iAEch=0; iAEch<(Nhch+1); iAEch++){ AccEvent[iAEc][iAEch] = 0 ; EffEvent[iAEc][iAEch] = 0.0; }
   }
-  
-    
+      
   /************************
      SF Parametrization
   *************************/
-
-  TString fSFdir = "ScaleFactors/";
-  
   TH2F *hmuIDISOSF, *hmuTriggerSF;
   TH2F *heIDISOSF,  *heTriggerSF;
 
-  // Lepton SFs: ID and ISO with stat. + syst. Errors
-  //TFile *MuSF = TFile::Open(fSFdir + "SF_muon_IDISO_13TeV_v2.root"); 
-  TFile *MuSF = TFile::Open(fSFdir + "MuonSF_IDISO_Trigger_POG25ns.root"); 
-  TFile *ElSF = TFile::Open(fSFdir + "ElectronSF_IDISO_Trigger_POG25ns.root"); 
-
-  if(!MuSF || !ElSF){
-    std::cerr << "ERROR [SF]: Could not open SF files!!!"  << std::endl;
-    std::exit(0);
-  }
-
-  hmuIDISOSF = (TH2F*) MuSF->Get("GlobalSF")->Clone("muIDISOSF");
-  hmuTriggerSF = (TH2F*) MuSF->Get("TriggerSF")->Clone("muTriggerSF"); 
-  if(!hmuIDISOSF || !hmuTriggerSF){
-    std::cerr << "ERROR [MuonSF]: Could not find histogram for SF reweighting" << std::endl;
-  }
-
-  heIDISOSF = (TH2F*) ElSF->Get("GlobalSF")->Clone("eIDISOSF");
-  heTriggerSF = (TH2F*) ElSF->Get("TriggerSF")->Clone("eTriggerSF"); 
-  if(!heIDISOSF || !heTriggerSF){
-    std::cerr << "ERROR [ElectronSF]: Could not find histogram for SF reweighting" << std::endl;
-  }
-
-  // Trigger and ID-ISO uncertainties
-  if(_idiso_unc){
-    if(IDISOUnc=="Up")        fname += "_SYS_IDISO_Up";      
-    else if(IDISOUnc=="Down") fname += "_SYS_IDISO_Down";
-    else if(IDISOUnc=="Nom")  fname += "_SYS_IDISO_Nom";
-  } // if(_idiso_unc)
-  
-  if(_tr_unc){
-    if(TrUnc=="Up")        fname += "_SYS_Trigger_Up";
-    else if(TrUnc=="Down") fname += "_SYS_Trigger_Down";
-    else if(TrUnc=="Nom")  fname += "_SYS_Trigger_Nom";
-  }// if(_tr_unc) 
+  GetSFHistogram ("ScaleFactors/", 
+		  "IDISO_Trigger_POG25ns",
+		  hmuIDISOSF, hmuTriggerSF, heIDISOSF,  heTriggerSF);
 
   // Jet uncertainties (btag, JES and JER)
   if(_syst) fname += "_SYS_" + syst_varname;
-
 
   /***************************
      ttbar Categorization
@@ -640,10 +460,13 @@ int main(int argc, const char* argv[]){
   /********************************
              Event Loop
   ********************************/
-  std::cout << "--- Processing: " << theTree.GetEntries() << " events" << std::endl;
+  // Number of events
+  int MaxEvt = theTree.GetEntries();
+  if(_NUserEvt > 0) MaxEvt = std::min(MaxEvt, _NUserEvt);
+
+  std::cout << "--- Processing: " << MaxEvt << " events" << std::endl;
   
-  //for (Long64_t ievt=0; ievt<theTree.GetEntries();ievt++) {
-  for (Long64_t ievt=0; ievt<50000; ievt++) {
+  for (Long64_t ievt=0; ievt<MaxEvt;ievt++) {
     
     theTree.GetEntry(ievt);  
     print_progress(theTree.GetEntries(), ievt);
@@ -660,7 +483,7 @@ int main(int argc, const char* argv[]){
     if (_syst && syst_varname.Contains("ScaleR"))
       PUWeight = PUWeight*(*ScaleWeight)[scaleSysPar];
     
-    unsigned int NJets,NBtagJets;
+    unsigned int NJets, NBtagJets;
     
     TLorentzVector Lep;
     
@@ -689,36 +512,29 @@ int main(int argc, const char* argv[]){
     // Global SF_b-tag
     // From: https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration
     float btagUnc_val = 0.0;
-    
     if (!fname.Contains("Data")){
       if(_syst && syst_varname.Contains("btag_Up"))
 	btagUnc_val = 1.0 * (*Jet_SF_CSV)[btagSysPar];
       else if(_syst && syst_varname.Contains("btag_Down")) 
-	btagUnc_val = -1.0 * (*Jet_SF_CSV)[btagSysPar];
-      
+	btagUnc_val = -1.0 * (*Jet_SF_CSV)[btagSysPar];      
       // SF estimated for jets with pT > 25GeV
       PUWeight = PUWeight * ((*Jet_SF_CSV)[btagUnc::CENTRAL] + btagUnc_val);
     }// if(!data)
     
-    // Kinematic Reconstruction
-    // At least 4 Jets
-
+    // Kinematic Reconstruction (at least 4 Jets)
     // Order for Jets: 
     // [0] b from hadronic leg 
     // [1] j from W
     // [2] j from W
     // [3] b from leptonic leg
-    int KinJetIndex[4] = {-99,-99,-99,-99};
-    TLorentzVector KinNu(0.,0.,0.,0.);
+    int KinJetIndex[4];
+    TLorentzVector KinNu;
     ComJet KinJet[4];
-    for(unsigned int ikj=0; ikj<4; ikj++) KinJet[ikj].SetPxPyPzE(0,0,0,0);
-    
     KinNu.SetPxPyPzE(KinNu_px, KinNu_py, KinNu_pz, KinNu_E);
     for(unsigned int ikj=0; ikj<4; ikj++){
       KinJetIndex[ikj] = (*KinJet_Index)[ikj];
       KinJet[ikj].SetPxPyPzE((*KinJet_px)[ikj],(*KinJet_py)[ikj],(*KinJet_pz)[ikj],(*KinJet_E)[ikj]);
     }
-      
     bool isKinEvt = true; // TEMPORAL SOLUTION -> Change default indexes from 0 to -999
     if (KinJetIndex[0] == 0 && KinJetIndex[1] == 0 &&
 	KinJetIndex[2] == 0 && KinJetIndex[3] == 0 ) isKinEvt = false;
@@ -818,11 +634,13 @@ int main(int argc, const char* argv[]){
     std::vector<float> SF_ID_ISO_Tr;
     
     if (fname.Contains("Data")){
-      SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Tr    [0] 
-      SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO       [1] 
-      SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Error [2] 
-      SF_ID_ISO_Tr.push_back(1.0); // SF_Tr           [3] 
-      SF_ID_ISO_Tr.push_back(1.0); // SF_Tr_Error     [4] 
+      SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Tr      [0] 
+      SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Tr_Up   [1] 
+      SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Tr_Down [2] 
+      SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO         [3] 
+      SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Error   [4] 
+      SF_ID_ISO_Tr.push_back(1.0); // SF_Tr             [5] 
+      SF_ID_ISO_Tr.push_back(1.0); // SF_Tr_Error       [6] 
     }
     
     else {
@@ -841,23 +659,7 @@ int main(int argc, const char* argv[]){
 	if(syst_varname.Contains("Down")) PUWeight = PUWeight * (SF_ID_ISO_Tr[2] - SFSystUnc);
       }
       else PUWeight = PUWeight * SF_ID_ISO_Tr[0]; // Central
-
-      // if(_idiso_unc){
-      // 	if     (IDISOUnc == "Up")   PUWeight = PUWeight * (SF_ID_ISO_Tr[1] + SF_ID_ISO_Tr[2]);
-      // 	else if(IDISOUnc == "Down") PUWeight = PUWeight * (SF_ID_ISO_Tr[1] - SF_ID_ISO_Tr[2]);
-      // 	else if(IDISOUnc == "Nom")  PUWeight = PUWeight * (SF_ID_ISO_Tr[1]);
-      // } // if(_idiso_unc)
-      
-      // else if(_tr_unc){
-      // 	if     (TrUnc=="Up")   PUWeight=PUWeight*(SF_ID_ISO_Tr[3] + SF_ID_ISO_Tr[4]);
-      // 	else if(TrUnc=="Down") PUWeight=PUWeight*(SF_ID_ISO_Tr[3] - SF_ID_ISO_Tr[4]);
-      // 	else if(TrUnc=="Nom")  PUWeight=PUWeight*(SF_ID_ISO_Tr[3]);	
-      // }// if(_tr_unc) 
-      
-      // // Check the SF_e implementation
-      // // If the electron is in the transition region, SF = 1
-      // else  if(SF_ID_ISO_Tr[0] != 0.0)  PUWeight=PUWeight*(SF_ID_ISO_Tr[0]); 
-      
+     
     }// else(Contain("Data"))
     
 
@@ -904,6 +706,8 @@ int main(int argc, const char* argv[]){
       /*******************
         Fill Histograms
       *******************/
+      hSFIDISO[icut][Channel]->Fill(SF_ID_ISO_Tr[0],PUWeight);
+      hSFIDISOError[icut][Channel]->Fill((SF_ID_ISO_Tr[1] - SF_ID_ISO_Tr[0]),PUWeight);
       //hSFIDISO[icut][Channel]->Fill(SF_ID_ISO_Tr[1],PUWeight);
       //hSFIDISOError[icut][Channel]->Fill(SF_ID_ISO_Tr[2],PUWeight);
       //hSFTrigger[icut][Channel]->Fill(SF_ID_ISO_Tr[3],PUWeight);
@@ -971,7 +775,7 @@ int main(int argc, const char* argv[]){
 	  hMassJet[ijet][jjet][icut][Channel]->Fill(DijetInvMass, PUWeight);
 	  // 2D CSV discriminant plot for all DiJets system	  
 	  h2DCSV[ijet][jjet][icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
-	  if(jet.Mom == 24 && jet_.Mom ==24) hGenTagWMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
+	  if(jet.Mom == 24 && jet_.Mom ==24)       hGenTagWMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
 	  if(jet.KinMom == 24 && jet_.KinMom ==24) hKinTagWMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
 	}// for(jjet)
 
@@ -1142,6 +946,8 @@ int main(int argc, const char* argv[]){
    
       hInvMassjj[j][i]->Write();
       
+      hSFIDISOTr[j][i]->Write();
+      hSFIDISOTrError[j][i]->Write();
       hSFIDISO[j][i]->Write();
       hSFIDISOError[j][i]->Write();
       hSFTrigger[j][i]->Write();

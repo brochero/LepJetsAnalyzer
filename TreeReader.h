@@ -64,4 +64,104 @@ const TString currentDateTime();
 float DiJetMassCorrection(std::vector<ComJet> &Jets, bool ReArrange);
 bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id);
 
+// Output Dir
+TString dirname="TopResults";
+// Number of Histograms
+const unsigned int Nhcuts = 7;
+const unsigned int Nhch   = 2;
+const unsigned int NhJets = 6;
+// Channel and cut names 
+TString namech     [Nhch + 1] = {"mujets","ejets","lepjets"};
+TString titlenamech[Nhch]     = {"#mu+Jets","e+Jets"};
+TString namecut    [Nhcuts]   = {"lepton","6Jets","2btag","3btag","4Jets","4Jets2btag","Only2btag"};
+// Acceptancies and Efficiencies
+int   AccEvent[Nhcuts][Nhch+1];
+float EffEvent[Nhcuts][Nhch+1];
+// Histograms definitions
+typedef TH1F *HistosJet    [NhJets][Nhcuts][Nhch];
+typedef TH2F *HistosJet2D  [NhJets][Nhcuts][Nhch];
+typedef TH1F *HistosDiJet  [NhJets][NhJets-1][Nhcuts][Nhch];
+typedef TH2F *HistosDiJet2D[NhJets][NhJets-1][Nhcuts][Nhch];
+typedef TH1F *Histos       [Nhcuts][Nhch];
+typedef TH2F *Histos2D     [Nhcuts][Nhch];
+typedef TEfficiency *Eff   [Nhcuts][Nhch];
 
+//----------------------------------------
+//            Histograms
+//----------------------------------------
+// Event variables
+Histos hPV;
+Histos hMET, hMET_Phi, hHT;
+Histos hmT;
+Histos hNJets, hNBtagJets;
+Histos hEvtCatego;
+// Lepton
+Histos hLepPt, hLepEta, hLepPhi;
+// Jets
+HistosJet hCSV, hJetPt, hJetpTUncVar;
+HistosJet hCvsL, hCvsB;
+HistosDiJet2D h2DCSV;
+HistosDiJet hMassJet;
+Histos hInvMassjj;
+// Lepton, trigger SF and b-tag eff.
+Histos hSFIDISOTr, hSFIDISOTrError, hSFIDISO, hSFIDISOError, hSFTrigger, hSFTriggerError;
+Histos2D h2DSFbtag_Global;
+Histos hSFbtag_Global, hSFbtag_Global_var;
+Histos2D h2DSFbtag_b, h2DSFbtag_c, h2DSFbtag_l, h2DSFbtag_btag_b, h2DSFbtag_btag_c, h2DSFbtag_btag_l;
+// Kinematic Fitter
+Histos    hKinChi2;
+Histos2D  h2DKinChi2_JetMatch;
+Histos    hKinWlTransMass, hKinWlMass, hKinWlpT, hKintlMass, hKintlpT;
+Histos    hKinWhMass, hKinWhpT, hKinthMass, hKinthpT;
+Histos    hKinWMass, hKinWpT, hKinTagWMass, hKinTagWpT;
+Eff       effKinGenIndex;
+HistosJet hKinJetPt, hGENJetPt;
+// GenCone
+Histos hTJetPosition, hWJetPosition, hOJetPosition, hGenTagWMass;
+Eff    effTagCSV;
+TH2F *h2DTJetPosition, *h2DWJetPosition, *h2DttbarNGenJets;
+
+//----------------------------------------
+//           Tree branches
+//----------------------------------------
+// Global event
+int Event,Run,Channel, GoodPV;
+float PUWeight, GENWeight;
+std::vector<float> *PUWeight_sys=0;
+// MET
+float MET,MET_Phi;
+// Leptons
+float Lep_px, Lep_py, Lep_pz, Lep_E;
+std::vector<float> *Lep_SF=0;
+float Lep_LES=0;
+// Jets
+std::vector<float> *Jet_px=0, *Jet_py=0, *Jet_pz=0, *Jet_E=0;
+std::vector<int>   *Jet_partonFlavour=0;
+std::vector<int>   *Jet_pTIndex=0;
+std::vector<int>   *Jet_GENmatched=0;
+std::vector<int>   *Jet_Mom=0; // From GenCone
+std::vector<float> *Jet_CSV=0;
+std::vector<float> *Jet_SF_CSV=0;
+std::vector<float> *Jet_CvsB=0, *Jet_CvsL=0;
+std::vector<float> *Jet_JER_Up=0, *Jet_JER_Nom=0, *Jet_JER_Down=0;
+std::vector<float> *Jet_JES_Up=0, *Jet_JES_Down=0;
+// GenCone Info
+std::vector<int>    *GenConeCat=0;
+std::vector <float> *GenCone_pT=0;
+std::vector <float> *GenCone_eta=0;
+std::vector <float> *GenCone_phi=0;
+std::vector <float> *GenCone_E=0;
+std::vector <int>   *GenCone_gjetMom=0; // From GenCone
+int GenCone_NgjetsW;
+float DRAddJets;
+// Gen Info
+float GenLep_pT;
+std::vector<float> *GenJet_px=0, *GenJet_py=0, *GenJet_pz=0, *GenJet_E=0;
+float GenNu_px, GenNu_py, GenNu_pz, GenNu_E;
+// Scale Syst. Unc.
+std::vector<float> *ScaleWeight=0;
+// Kinematic Reconstruction
+float Kin_Chi2;
+std::vector<int>   *KinJet_Index=0;
+std::vector<float> *KinJet_px=0, *KinJet_py=0, *KinJet_pz=0, *KinJet_E=0;
+float KinNu_px, KinNu_py, KinNu_pz, KinNu_E;

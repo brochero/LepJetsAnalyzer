@@ -706,8 +706,8 @@ int main(int argc, const char* argv[]){
       /*******************
         Fill Histograms
       *******************/
-      hSFIDISO[icut][Channel]->Fill(SF_ID_ISO_Tr[0],PUWeight);
-      hSFIDISOError[icut][Channel]->Fill((SF_ID_ISO_Tr[1] - SF_ID_ISO_Tr[0]),PUWeight);
+      hSFIDISOTr[icut][Channel]->Fill(SF_ID_ISO_Tr[0],PUWeight);
+      hSFIDISOTrError[icut][Channel]->Fill((SF_ID_ISO_Tr[1] - SF_ID_ISO_Tr[0]),PUWeight);
       //hSFIDISO[icut][Channel]->Fill(SF_ID_ISO_Tr[1],PUWeight);
       //hSFIDISOError[icut][Channel]->Fill(SF_ID_ISO_Tr[2],PUWeight);
       //hSFTrigger[icut][Channel]->Fill(SF_ID_ISO_Tr[3],PUWeight);

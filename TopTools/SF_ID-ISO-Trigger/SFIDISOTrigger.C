@@ -1,15 +1,38 @@
-#include<vector>
-#include "TH1.h"
-#include "TH1F.h"
-#include "TH2F.h"
-#include "TLorentzVector.h"
-#include<iostream>
+#include "SFIDISOTrigger.h"
 
+void GetSFHistogram (TString fSFdir, TString fSFname, TH2F *hmuIDISOSF, TH2F *hmuTriggerSF, TH2F *heIDISOSF,  TH2F *heTriggerSF){
+  // Lepton SFs: ID and ISO with stat. + syst. Errors
+  TString MuFile = fSFdir + "MuonSF_" + fSFname + ".root";
+  TString ElFile = fSFdir + "ElectronSF_" + fSFname + ".root";
+
+  TFile *MuSF = TFile::Open(MuFile);
+  TFile *ElSF = TFile::Open(ElFile);
+  
+  std::cout << "Reading SF files: " << std::endl;
+  std::cout << MuFile << std::endl;
+  std::cout << ElFile << std::endl;
+
+  if(!MuSF || !ElSF){
+    std::cerr << "ERROR [SF]: Could not open SF files!!!"  << std::endl;
+    std::exit(0);
+  }
+  
+  hmuIDISOSF = (TH2F*) MuSF->Get("GlobalSF")->Clone("muIDISOSF");
+  hmuTriggerSF = (TH2F*) MuSF->Get("TriggerSF")->Clone("muTriggerSF");
+  if(!hmuIDISOSF || !hmuTriggerSF){
+    std::cerr << "ERROR [MuonSF]: Could not find " << MuFile << " for SF reweighting" << std::endl;
+  }
+  
+  heIDISOSF = (TH2F*) ElSF->Get("GlobalSF")->Clone("eIDISOSF");
+  heTriggerSF = (TH2F*) ElSF->Get("TriggerSF")->Clone("eTriggerSF");
+  if(!heIDISOSF || !heTriggerSF){
+    std::cerr << "ERROR [ElectronSF]: Could not find " << ElFile <<  " for SF reweighting" << std::endl;
+  }
+}
 
 /***************************
   SF: ID, ISO and Trigger
-***************************/
-      
+***************************/      
 void SFIDISOTrigger(std::vector<float> &result,
 		    TLorentzVector Lep, int channel,
 		    TH2F *hmuIDISOSF, TH2F *hmuTriggerSF,
@@ -185,10 +208,12 @@ void SFIDISOTrigger(std::vector<float> &result,
   //std::cout << "Channel = " << channel << '\n' << "Lep.eta = " << Lep.Eta() << " -- Lep.pT = " << Lep.Pt() << '\n' << "SF = " << SF_ID_ISO << std::endl;
   
   result.push_back(SF_ID_ISO*SF_Tr); //[0]  
-  result.push_back(SF_ID_ISO);       //[1]  
-  result.push_back(SF_ID_ISO_Error); //[2]  
-  result.push_back(SF_Tr);           //[3]  
-  result.push_back(SF_Tr_Error);     //[4]  
+  result.push_back((SF_ID_ISO + SF_ID_ISO_Error)*(SF_Tr + SF_Tr_Error)); //[1]  
+  result.push_back((SF_ID_ISO - SF_ID_ISO_Error)*(SF_Tr - SF_Tr_Error)); //[2]  
+  result.push_back(SF_ID_ISO);       //[3]  
+  result.push_back(SF_ID_ISO_Error); //[4]  
+  result.push_back(SF_Tr);           //[5]  
+  result.push_back(SF_Tr_Error);     //[6]  
   
 }
  

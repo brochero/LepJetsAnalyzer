@@ -64,6 +64,8 @@ const TString currentDateTime();
 float DiJetMassCorrection(std::vector<ComJet> &Jets, bool ReArrange);
 bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id);
 
+// Luminosity
+float LuminNorm = 15920; //[pb-1]
 // Output Dir
 TString dirname="TopResults";
 // Number of Histograms
@@ -94,14 +96,13 @@ Histos hPV;
 Histos hMET, hMET_Phi, hHT;
 Histos hmT;
 Histos hNJets, hNBtagJets;
-Histos hEvtCatego;
 // Lepton
 Histos hLepPt, hLepEta, hLepPhi;
 // Jets
 HistosJet hCSV, hJetPt, hJetpTUncVar;
 HistosJet hCvsL, hCvsB;
 HistosDiJet2D h2DCSV;
-HistosDiJet hMassJet;
+HistosDiJet hMassJet, hDRJet;
 Histos hInvMassjj;
 // Lepton, trigger SF and b-tag eff.
 Histos hSFIDISOTr, hSFIDISOTrError, hSFIDISO, hSFIDISOError, hSFTrigger, hSFTriggerError;
@@ -113,12 +114,13 @@ Histos    hKinChi2;
 Histos2D  h2DKinChi2_JetMatch;
 Histos    hKinWlTransMass, hKinWlMass, hKinWlpT, hKintlMass, hKintlpT;
 Histos    hKinWhMass, hKinWhpT, hKinthMass, hKinthpT;
-Histos    hKinWMass, hKinWpT, hKinTagWMass, hKinTagWpT;
-Eff       effKinGenIndex;
+Histos    hKinWMass, hKinWpT, hKinTagWMass, hKinTagAddMass, hKinTagAddDR;
+Eff       effKinGenIndex, purKinGenIndex;
 HistosJet hKinJetPt, hGENJetPt;
 // GenCone
-Histos hTJetPosition, hWJetPosition, hOJetPosition, hGenTagWMass;
-Eff    effTagCSV;
+Histos hTJetPosition, hWJetPosition, hOJetPosition;
+Histos hGenTagWMass, hGenTagAddMass, hGenTagAddDR;
+Eff    effTagCSV, purTagCSV;
 TH2F *h2DTJetPosition, *h2DWJetPosition, *h2DttbarNGenJets;
 
 //----------------------------------------
@@ -131,11 +133,11 @@ std::vector<float> *PUWeight_sys=0;
 // MET
 float MET,MET_Phi;
 // Leptons
-float Lep_px, Lep_py, Lep_pz, Lep_E;
+float Lep_pT, Lep_eta, Lep_phi, Lep_E;
 std::vector<float> *Lep_SF=0;
 float Lep_LES=0;
 // Jets
-std::vector<float> *Jet_px=0, *Jet_py=0, *Jet_pz=0, *Jet_E=0;
+std::vector<float> *Jet_pT=0, *Jet_eta=0, *Jet_phi=0, *Jet_E=0;
 std::vector<int>   *Jet_partonFlavour=0;
 std::vector<int>   *Jet_pTIndex=0;
 std::vector<int>   *Jet_GENmatched=0;
@@ -156,12 +158,12 @@ int GenCone_NgjetsW;
 float DRAddJets;
 // Gen Info
 float GenLep_pT;
-std::vector<float> *GenJet_px=0, *GenJet_py=0, *GenJet_pz=0, *GenJet_E=0;
-float GenNu_px, GenNu_py, GenNu_pz, GenNu_E;
+std::vector<float> *GenJet_pT=0, *GenJet_eta=0, *GenJet_phi=0, *GenJet_E=0;
+float GenNu_pT, GenNu_eta, GenNu_phi, GenNu_E;
 // Scale Syst. Unc.
 std::vector<float> *ScaleWeight=0;
 // Kinematic Reconstruction
 float Kin_Chi2;
 std::vector<int>   *KinJet_Index=0;
-std::vector<float> *KinJet_px=0, *KinJet_py=0, *KinJet_pz=0, *KinJet_E=0;
-float KinNu_px, KinNu_py, KinNu_pz, KinNu_E;
+std::vector<float> *KinJet_pT=0, *KinJet_eta=0, *KinJet_phi=0, *KinJet_E=0;
+float KinNu_pT, KinNu_eta, KinNu_phi, KinNu_E;

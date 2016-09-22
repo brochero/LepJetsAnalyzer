@@ -36,7 +36,7 @@ int main(int argc, const char* argv[]){
   const char * _output   = 0;
   const char * _input    = 0;
   // TopTrees directory
-  const char * _dir      = "../v8-0-0/";
+  const char * _dir      = "../v8-0-1/";
   const char * _syst_var = 0;
   const char * _ttbar_id = 0;
   
@@ -122,32 +122,32 @@ int main(int argc, const char* argv[]){
  /*********************************
            Tree Branches
   **********************************/  
-  theTree.SetBranchAddress( "event",   &Event );
-  theTree.SetBranchAddress( "run",     &Run );
-  theTree.SetBranchAddress( "PUWeight",&PUWeight_sys );
-  theTree.SetBranchAddress( "channel", &Channel );
-  theTree.SetBranchAddress( "GoodPV",  &GoodPV );
-  theTree.SetBranchAddress( "MET",     &MET );
-  theTree.SetBranchAddress( "MET_phi", &MET_Phi );
+  theTree.SetBranchAddress( "event",    &Event );
+  theTree.SetBranchAddress( "run",      &Run );
+  theTree.SetBranchAddress( "PUWeight", &PUWeight_sys );
+  theTree.SetBranchAddress( "channel",  &Channel );
+  theTree.SetBranchAddress( "GoodPV",   &GoodPV );
+  theTree.SetBranchAddress( "MET",      &MET );
+  theTree.SetBranchAddress( "MET_phi",  &MET_Phi );
 
-  theTree.SetBranchAddress( "lepton_px", &Lep_px );
-  theTree.SetBranchAddress( "lepton_py", &Lep_py );
-  theTree.SetBranchAddress( "lepton_pz", &Lep_pz );
-  theTree.SetBranchAddress( "lepton_E",  &Lep_E );
-  theTree.SetBranchAddress( "lepton_SF", &Lep_SF );
-  theTree.SetBranchAddress( "lepton_LES",&Lep_LES );
+  theTree.SetBranchAddress( "lepton_pT",  &Lep_pT );
+  theTree.SetBranchAddress( "lepton_eta", &Lep_eta );
+  theTree.SetBranchAddress( "lepton_phi", &Lep_phi );
+  theTree.SetBranchAddress( "lepton_E",   &Lep_E );
+  theTree.SetBranchAddress( "lepton_SF",  &Lep_SF );
+  theTree.SetBranchAddress( "lepton_LES", &Lep_LES );
 
-  theTree.SetBranchAddress( "jet_px",           &Jet_px );
-  theTree.SetBranchAddress( "jet_py",           &Jet_py );
-  theTree.SetBranchAddress( "jet_pz",           &Jet_pz );
-  theTree.SetBranchAddress( "jet_E",            &Jet_E );
-  theTree.SetBranchAddress( "jet_index",        &Jet_pTIndex );
+  theTree.SetBranchAddress( "jet_pT",    &Jet_pT );
+  theTree.SetBranchAddress( "jet_eta",   &Jet_eta );
+  theTree.SetBranchAddress( "jet_phi",   &Jet_phi );
+  theTree.SetBranchAddress( "jet_E",     &Jet_E );
+  theTree.SetBranchAddress( "jet_index", &Jet_pTIndex );
 
-  theTree.SetBranchAddress( "jet_CSV",          &Jet_CSV );
-  theTree.SetBranchAddress( "jet_SF_CSV",       &Jet_SF_CSV );
-  theTree.SetBranchAddress( "jet_partonFlavour",&Jet_partonFlavour );
-  theTree.SetBranchAddress( "jet_CvsB",     &Jet_CvsB );
-  theTree.SetBranchAddress( "jet_CvsL",     &Jet_CvsL );
+  theTree.SetBranchAddress( "jet_CSV",           &Jet_CSV );
+  theTree.SetBranchAddress( "jet_SF_CSV",        &Jet_SF_CSV );
+  theTree.SetBranchAddress( "jet_partonFlavour", &Jet_partonFlavour );
+  theTree.SetBranchAddress( "jet_CvsB",          &Jet_CvsB );
+  theTree.SetBranchAddress( "jet_CvsL",          &Jet_CvsL );
 
   if(!fname.Contains("Data")){
     theTree.SetBranchAddress( "jet_JES_Up",  &Jet_JES_Up );
@@ -172,26 +172,26 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress("genlepton_pT",          &GenLep_pT);
     theTree.SetBranchAddress("jet_MatchedGenJetIndex",&Jet_GENmatched);
     theTree.SetBranchAddress("jet_gencone_mom",       &Jet_Mom);
-    theTree.SetBranchAddress("genjet_px",             &GenJet_px);
-    theTree.SetBranchAddress("genjet_py",             &GenJet_py);
-    theTree.SetBranchAddress("genjet_pz",             &GenJet_pz);
+    theTree.SetBranchAddress("genjet_pT",             &GenJet_pT);
+    theTree.SetBranchAddress("genjet_eta",            &GenJet_eta);
+    theTree.SetBranchAddress("genjet_phi",            &GenJet_phi);
     theTree.SetBranchAddress("genjet_E",              &GenJet_E);
-    theTree.SetBranchAddress("gennu_px",              &GenNu_px);
-    theTree.SetBranchAddress("gennu_py",              &GenNu_py);
-    theTree.SetBranchAddress("gennu_pz",              &GenNu_pz);
+    theTree.SetBranchAddress("gennu_pT",              &GenNu_pT);
+    theTree.SetBranchAddress("gennu_eta",             &GenNu_eta);
+    theTree.SetBranchAddress("gennu_phi",             &GenNu_phi);
     theTree.SetBranchAddress("gennu_E",               &GenNu_E);
   }
   // Kinematic Reconstruction Variables
-  theTree.SetBranchAddress("kin_chi2",     &Kin_Chi2);
+  theTree.SetBranchAddress("kin_chi2",  &Kin_Chi2);
   // Neutrino
-  theTree.SetBranchAddress("kinnu_px",     &KinNu_px);
-  theTree.SetBranchAddress("kinnu_py",     &KinNu_py);
-  theTree.SetBranchAddress("kinnu_pz",     &KinNu_pz);
-  theTree.SetBranchAddress("kinnu_E",      &KinNu_E);
+  theTree.SetBranchAddress("kinnu_pT",  &KinNu_pT);
+  theTree.SetBranchAddress("kinnu_eta", &KinNu_eta);
+  theTree.SetBranchAddress("kinnu_phi", &KinNu_phi);
+  theTree.SetBranchAddress("kinnu_E",   &KinNu_E);
   // Jets
-  theTree.SetBranchAddress("kinjet_px",    &KinJet_px);
-  theTree.SetBranchAddress("kinjet_py",    &KinJet_py);
-  theTree.SetBranchAddress("kinjet_pz",    &KinJet_pz);
+  theTree.SetBranchAddress("kinjet_pT",    &KinJet_pT);
+  theTree.SetBranchAddress("kinjet_eta",   &KinJet_eta);
+  theTree.SetBranchAddress("kinjet_phi",   &KinJet_phi);
   theTree.SetBranchAddress("kinjet_E",     &KinJet_E);
   theTree.SetBranchAddress("kinjet_index", &KinJet_Index);
   
@@ -227,7 +227,7 @@ int main(int argc, const char* argv[]){
     for(int i=0; i<Nhch; i++){ // Channel
       hPV[j][i]         = new TH1F("hPV_"+namech[i]+"_"+namecut[j],"PV Distribution  " + titlenamech[i] + ";PV",15,0,30);
       hMET[j][i]        = new TH1F("hMET_"+ namech[i]+"_"+namecut[j],"#slash{E}_{T} " + titlenamech[i] + ";#slash{E}_{T}[GeV]",10,0,200);
-      hMET_Phi[j][i]    = new TH1F("hMET_Phi_"+ namech[i]+"_"+namecut[j],"#Phi_{#slash{E}_{T}} " + titlenamech[i] + ";#Phi_{#slash{E}_{T}}[rad]",160,-4,4);
+      hMET_Phi[j][i]    = new TH1F("hMET_Phi_"+ namech[i]+"_"+namecut[j],"#Phi_{#slash{E}_{T}} " + titlenamech[i] + ";#Phi_{#slash{E}_{T}}[rad]",16,0,3.2);
       hmT[j][i]         = new TH1F("hmT_"+ namech[i]+"_"+namecut[j],"transverse Mass Lepton/MET " + titlenamech[i] + ";m_{T}[GeV]",40,0,160);
       hHT[j][i]         = new TH1F("hHT_"+namech[i]+"_"+namecut[j],"H_{T} " + titlenamech[i] + ";HT[GeV]",100,0,600);
       
@@ -271,8 +271,8 @@ int main(int argc, const char* argv[]){
               SF(b-tag)
       ***************************/
       h2DSFbtag_Global[j][i]   = new TH2F("h2DSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} Vs  #Delta SF_{b-tag} " + titlenamech[i], 40, 0.0, 4.0, 50, 0.0, 0.5);
-      hSFbtag_Global[j][i]     = new TH1F("hSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} " + titlenamech[i],40.0, 0.0, 4.0);
-      hSFbtag_Global_var[j][i] = new TH1F("hSFbtag_Global_var_"+namech[i]+"_"+namecut[j], "Global #Delta SF_{b-tag} " + titlenamech[i],20.0, 0.0, 1.0);
+      hSFbtag_Global[j][i]     = new TH1F("hSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} " + titlenamech[i],40, 0.0, 4.0);
+      hSFbtag_Global_var[j][i] = new TH1F("hSFbtag_Global_var_"+namech[i]+"_"+namecut[j], "Global #Delta SF_{b-tag} " + titlenamech[i], 20, 0.0, 0.10);
 
       // B-tag efficiency histograms
       h2DSFbtag_b[j][i]    = new TH2F("hSFbtag_b_"+namech[i]+"_"+namecut[j], "N^{b}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
@@ -290,8 +290,8 @@ int main(int argc, const char* argv[]){
 	jetn = "Jet-" + jni.str();	
 	
 	hCSV[ij][j][i]   = new TH1F("hCSV_"   + jetn + "_" + namech[i] + "_" + namecut[j],"CSV " + jetn + " " + titlenamech[i] + ";CSVv2",10,0,1);
-	hCvsL[ij][j][i]  = new TH1F("hCvsL_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsL " + jetn + " " + titlenamech[i] + ";CvsL",10,0,1);
-	hCvsB[ij][j][i]  = new TH1F("hCvsB_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsB " + jetn + " " + titlenamech[i] + ";CvsB",10,0,1);
+	hCvsL[ij][j][i]  = new TH1F("hCvsL_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsL " + jetn + " " + titlenamech[i] + ";CvsL",20,-1,1);
+	hCvsB[ij][j][i]  = new TH1F("hCvsB_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsB " + jetn + " " + titlenamech[i] + ";CvsB",20,-1,1);
 	hJetPt[ij][j][i] = new TH1F("hJetPt_" + jetn + "_" + namech[i] + "_" + namecut[j],"p_{T}^{Jet} " + jetn + " " + titlenamech[i] + ";p_{T}[GeV]",10,0,200);
 
 	hJetpTUncVar[ij][j][i] = new TH1F("hJetpTUncVar_" + jetn + "_" + namech[i] + "_" + namecut[j], "#Delta pT^{Jet} " + jetn + " " + titlenamech[i], 20.0, 0.0, 2.0);
@@ -303,19 +303,20 @@ int main(int argc, const char* argv[]){
 	  jnj << jj;
 	  jetMassn = "Jet" + jni.str() + jnj.str();
 	  
-	  hMassJet[ij][jj][j][i]  = new TH1F("hMassJet_" + jetMassn + "_" + namech[i] + "_" + namecut[j],"Mass of Dijets "+ jetMassn + " " + titlenamech[i] + "; M_{jj}[GeV]",80,0,400);
-	  h2DCSV[ij][jj][j][i]    = new TH2F("h2DCSV_"   + jetMassn + "_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 3rd and 4th Jets " + titlenamech[i], 20,0,1,20,0,1);
+	  hMassJet[ij][jj][j][i] = new TH1F("hMassJet_" + jetMassn + "_" + namech[i] + "_" + namecut[j],"Mass of Dijets "+ jetMassn + " " + titlenamech[i] + "; M_{jj}[GeV]",150,0,300);
+	  hDRJet[ij][jj][j][i]   = new TH1F("hDRJet_"   + jetMassn + "_" + namech[i] + "_" + namecut[j],"#Delta R of Dijets "+ jetMassn + " " + titlenamech[i] + "; #Delta R_{jj}",25,0,5);
+	  h2DCSV[ij][jj][j][i]   = new TH2F("h2DCSV_"   + jetMassn + "_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 3rd and 4th Jets " + titlenamech[i], 20,0,1,20,0,1);
 	}
 	
       }
       
-      hInvMassjj[j][i]  = new TH1F("hInvMassjj_" + namech[i] + "_"+namecut[j],"Compatible Inv. Mass " + titlenamech[i],80,40,120);
-      hEvtCatego[j][i]  = new TH1F("hEvtCatego_"+namech[i] + "_"+namecut[j],"ttbar Event Categorization " + titlenamech[i] + ";ttbar Cat",4,-0.5,3.5);
+      hInvMassjj[j][i]  = new TH1F("hInvMassjj_" + namech[i] + "_"+namecut[j], "Compatible Inv. Mass " + titlenamech[i],80,40,120);
 
       // Kinematic Reconstruction
-      hKinChi2 [j][i] = new TH1F("hKinChi2_" + namech[i] + "_" + namecut[j], "#Chi^{2} for Kin. RECO " + titlenamech[i], 100,0,20);
-      h2DKinChi2_JetMatch[j][i] = new TH2F("hKinChi2_JetMatch_" + namech[i] + "_" + namecut[j], "#Chi^{2} Vs # of Jet Matches for Kin. RECO " + titlenamech[i], 100,0,20,5,0,5);
+      hKinChi2 [j][i] = new TH1F("hKinChi2_" + namech[i] + "_" + namecut[j], "#chi^{2} for Kin. RECO " + titlenamech[i] + ";#chi^{2}", 100,0,20);
+      h2DKinChi2_JetMatch[j][i] = new TH2F("hKinChi2_JetMatch_" + namech[i] + "_" + namecut[j], "#chi^{2} Vs # of Jet Matches for Kin. RECO " + titlenamech[i], 100,0,20,5,0,5);
       effKinGenIndex [j][i] = new TEfficiency("effKinGenIndex_" + namech[i] + "_" + namecut[j], "Kin. RECO vs GEN " + titlenamech[i] + "; [0]->All 4 jets, [1]->Top, [2]->W, [3]->Add; Match Eff.", 4,0,4);
+      purKinGenIndex [j][i] = new TEfficiency("purKinGenIndex_" + namech[i] + "_" + namecut[j], "Kin. RECO vs GEN Purity " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add; Purity", 3,0,3);
 
       hKinWlTransMass[j][i] = new TH1F("hKinWlTransMass_" + namech[i] + "_" + namecut[j], "Inv. Trans. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{T}^{W#to l#nu} [GeV]", 50,0,150);
       hKinWlMass[j][i]      = new TH1F("hKinWlMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{W#to l#nu} [GeV]", 80,40,120);
@@ -327,8 +328,9 @@ int main(int argc, const char* argv[]){
       hKinWMass[j][i] = new TH1F("hKinWMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W from Kin Reco " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
       hKinWpT[j][i]   = new TH1F("hKinWpT_"   + namech[i] + "_" + namecut[j], "p_{T} of W from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
 
-      hKinTagWMass [j][i] = new TH1F("hKinTagWMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W boson " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
-      hKinTagWpT[j][i]    = new TH1F("hKinTagWpT_"  + namech[i] + "_" + namecut[j], "p_{T} of W from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
+      hKinTagWMass [j][i]  = new TH1F("hKinTagWMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W_{jj} boson " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
+      hKinTagAddMass[j][i] = new TH1F("hKinTagAddMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Additional Jets " + titlenamech[i] + "; M [GeV]", 150, 0, 300);
+      hKinTagAddDR  [j][i] = new TH1F("hKinTagAddDR_" + namech[i] + "_" + namecut[j], "#Delta R of Additional Jets " + titlenamech[i] + "; #Delta R", 25, 0, 5);
 
       hKintlMass[j][i] = new TH1F("hKintlMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Top(lep) from Kin Reco " + titlenamech[i] + "; M_{t_{l}} [GeV]", 100, 100, 300);
       hKintlpT[j][i]   = new TH1F("hKintlpT_"   + namech[i] + "_" + namecut[j], "p_{T} of Top(lep) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
@@ -346,11 +348,14 @@ int main(int argc, const char* argv[]){
 	hGENJetPt[ikj][j][i] = new TH1F ("hGENJetPt_" + kinJetname[ikj] + "_"  + namech[i] + "_" + namecut[j], "pT GEN Assignment " + titlenamech[i] + "; p_{T}^{j}[GeV]", 50,0,150);
       }
       
-      hTJetPosition[j][i] = new TH1F ("hTJetPosition" + namech[i] + "_" + namecut[j], "CSV Position for jets from Top "   + titlenamech[i] + "; CSV Jet Index", 7,0,7);
-      hWJetPosition[j][i] = new TH1F ("hWJetPosition" + namech[i] + "_" + namecut[j], "CSV Position for jets from W "     + titlenamech[i] + "; CSV Jet Index", 7,0,7);
-      hOJetPosition[j][i] = new TH1F ("hOJetPosition" + namech[i] + "_" + namecut[j], "CSV Position for additional jets " + titlenamech[i] + "; CSV Jet Index", 7,0,7);
-      effTagCSV    [j][i] = new TEfficiency ("effTagCSV" + namech[i] + "_" + namecut[j], "CSV Tag Eff. " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add", 3,0,3);
-      hGenTagWMass [j][i] = new TH1F("hGenTagMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W boson " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
+      hTJetPosition[j][i] = new TH1F ("hTJetPosition_" + namech[i] + "_" + namecut[j], "CSV Position for jets from Top "   + titlenamech[i] + "; CSV Jet Index", 7,0,7);
+      hWJetPosition[j][i] = new TH1F ("hWJetPosition_" + namech[i] + "_" + namecut[j], "CSV Position for jets from W "     + titlenamech[i] + "; CSV Jet Index", 7,0,7);
+      hOJetPosition[j][i] = new TH1F ("hOJetPosition_" + namech[i] + "_" + namecut[j], "CSV Position for additional jets " + titlenamech[i] + "; CSV Jet Index", 7,0,7);
+      effTagCSV    [j][i] = new TEfficiency ("effTagCSV_" + namech[i] + "_" + namecut[j], "CSV Tag Eff. " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add; Match Eff.", 3,0,3);
+      purTagCSV    [j][i] = new TEfficiency ("purTagCSV_" + namech[i] + "_" + namecut[j], "CSV Purity " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add; Purity", 3,0,3);
+      hGenTagWMass  [j][i] = new TH1F("hGenTagWMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W boson " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
+      hGenTagAddMass[j][i] = new TH1F("hGenTagAddMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Add Jets " + titlenamech[i] + "; M [GeV]", 150, 0, 300);
+      hGenTagAddDR  [j][i] = new TH1F("hGenTagAddDR_" + namech[i] + "_" + namecut[j], "#Delta R of Add Jets " + titlenamech[i] + "; #Delta R", 25, 0, 5);
 
     }//for(i->channel)
   }//for(j->cut)
@@ -450,7 +455,7 @@ int main(int argc, const char* argv[]){
   *************************/  
   float NormWeight = 0.0;
   // NormWeight = Lumi*(1.0/N_Gen_events)*(Xsec)
-  NormWeight = SFLumi(fname, 5913., nNorm_Event);  
+  NormWeight = SFLumi(fname, LuminNorm, nNorm_Event);  
 
   std::cout << "-----------------------                                 -------------------------" << std::endl;
   std::cout << "Number of Events     = " << nNorm_Event << std::endl;
@@ -466,7 +471,7 @@ int main(int argc, const char* argv[]){
 
   std::cout << "--- Processing: " << MaxEvt << " events" << std::endl;
   
-  for (Long64_t ievt=0; ievt<MaxEvt;ievt++) {
+  for (Long64_t ievt=0; ievt<MaxEvt; ievt++) {
     
     theTree.GetEntry(ievt);  
     print_progress(theTree.GetEntries(), ievt);
@@ -487,15 +492,15 @@ int main(int argc, const char* argv[]){
     
     TLorentzVector Lep;
     
-    if (_syst && syst_varname.Contains("LES_Up"))        Lep.SetPxPyPzE(Lep_px+(Lep_px*Lep_LES),
-									Lep_py+(Lep_py*Lep_LES),
-									Lep_pz+(Lep_pz*Lep_LES),
-									Lep_E);
-    else if (_syst && syst_varname.Contains("LES_Down")) Lep.SetPxPyPzE(Lep_px-(Lep_px*Lep_LES),
-									Lep_py-(Lep_py*Lep_LES),
-									Lep_pz-(Lep_pz*Lep_LES),
-									Lep_E);
-    else Lep.SetPxPyPzE(Lep_px,Lep_py,Lep_pz,Lep_E);    
+    if (_syst && syst_varname.Contains("LES_Up"))        Lep.SetPtEtaPhiE(Lep_pT + (Lep_pT*Lep_LES),
+									  Lep_eta,
+									  Lep_phi,
+									  Lep_E);
+    else if (_syst && syst_varname.Contains("LES_Down")) Lep.SetPtEtaPhiE(Lep_pT - (Lep_pT*Lep_LES),
+									  Lep_eta,
+									  Lep_phi,
+									  Lep_E);
+    else Lep.SetPtEtaPhiE(Lep_pT,Lep_eta,Lep_phi,Lep_E);    
 
     // Lep pT >30GeV
     if(Lep.Pt() < 30)  continue; 
@@ -530,17 +535,17 @@ int main(int argc, const char* argv[]){
     int KinJetIndex[4];
     TLorentzVector KinNu;
     ComJet KinJet[4];
-    KinNu.SetPxPyPzE(KinNu_px, KinNu_py, KinNu_pz, KinNu_E);
+    KinNu.SetPtEtaPhiE(KinNu_pT, KinNu_eta, KinNu_phi, KinNu_E);
     for(unsigned int ikj=0; ikj<4; ikj++){
       KinJetIndex[ikj] = (*KinJet_Index)[ikj];
-      KinJet[ikj].SetPxPyPzE((*KinJet_px)[ikj],(*KinJet_py)[ikj],(*KinJet_pz)[ikj],(*KinJet_E)[ikj]);
+      KinJet[ikj].SetPtEtaPhiE((*KinJet_pT)[ikj],(*KinJet_eta)[ikj],(*KinJet_phi)[ikj],(*KinJet_E)[ikj]);
     }
     bool isKinEvt = true; // TEMPORAL SOLUTION -> Change default indexes from 0 to -999
     if (KinJetIndex[0] == 0 && KinJetIndex[1] == 0 &&
 	KinJetIndex[2] == 0 && KinJetIndex[3] == 0 ) isKinEvt = false;
  
     std::vector<ComJet> Jets;    
-    for(int ijet=0; ijet < Jet_px->size(); ijet++){
+    for(int ijet=0; ijet < Jet_pT->size(); ijet++){
 
       float JetSystVar = 1.0;
       if(_syst){
@@ -562,17 +567,17 @@ int main(int argc, const char* argv[]){
       }
       
       ComJet jet;
-      jet.SetPxPyPzE(JetSystVar * (*Jet_px)[ijet], // Syst. Var affects only pT
-		     JetSystVar * (*Jet_py)[ijet],
-		     (*Jet_pz)[ijet],
-		     (*Jet_E)[ijet]);
+      jet.SetPtEtaPhiE(JetSystVar * (*Jet_pT)[ijet], // Syst. Var affects only pT
+		       (*Jet_eta)[ijet],
+		       (*Jet_phi)[ijet],
+		       (*Jet_E)[ijet]);
       jet.Flavour = (*Jet_partonFlavour)[ijet];
       jet.CSV     = (*Jet_CSV)[ijet];
       jet.CvsL    = (*Jet_CvsL)[ijet];
       jet.CvsB    = (*Jet_CvsB)[ijet];
       jet.Mom     = -1;
       jet.KinMom  = -1;
-
+      
       // Jet Mother
       if((fname.Contains("ttbar")  && !fname.Contains("Bkg"))) jet.Mom = (*Jet_Mom)[ijet];
       // Kin Mother
@@ -619,11 +624,11 @@ int main(int argc, const char* argv[]){
     *******************************************/    
     int NGenJets = 0;
     if (_ttbar_cat){
-      for(int igenjet=0; igenjet < GenJet_px->size(); igenjet++){
-	TLorentzVector TLGenJet((*GenJet_px)[igenjet],
-				(*GenJet_py)[igenjet],
-				(*GenJet_pz)[igenjet],
-				(*GenJet_E)[igenjet]); 
+      for(int igenjet=0; igenjet < GenJet_pT->size(); igenjet++){
+	TLorentzVector TLGenJet((*GenJet_pT) [igenjet],
+				(*GenJet_eta)[igenjet],
+				(*GenJet_phi)[igenjet],
+				(*GenJet_E)  [igenjet]); 
 	if( TLGenJet.Pt() > 20 ) NGenJets++;
       }
     }
@@ -654,7 +659,7 @@ int main(int argc, const char* argv[]){
       SF_ID_ISO_Tr = (*Lep_SF);
       
       if(_syst && syst_varname.Contains("LepSF")){
-	float SFSystUnc = SF_ID_ISO_Tr[0]*0.015; //
+	float SFSystUnc = SF_ID_ISO_Tr[0]*0.015; //Additional??
 	if(syst_varname.Contains("Up"))   PUWeight = PUWeight * (SF_ID_ISO_Tr[1] + SFSystUnc) ;
 	if(syst_varname.Contains("Down")) PUWeight = PUWeight * (SF_ID_ISO_Tr[2] - SFSystUnc);
       }
@@ -744,6 +749,8 @@ int main(int argc, const char* argv[]){
       
       // Jet Variables
       int kinGenConeMatch = 0, TopkinGenConeMatch = 0, WkinGenConeMatch = 0, OkinGenConeMatch = 0;
+      bool fKinAddjj = true;
+      bool fGenAddjj = true;
       for(int ijet=0; ijet < Jets.size(); ijet++){
 	ComJet jet = Jets[ijet];
 	// b-Jet Efficiencies
@@ -772,15 +779,49 @@ int main(int argc, const char* argv[]){
 	for(int jjet=ijet+1; jjet < jbmax; jjet++){
 	  ComJet jet_ = Jets[jjet];
 	  float DijetInvMass = (jet+jet_).M(); 
+	  float DijetDR = jet.DeltaR(jet_); 
 	  hMassJet[ijet][jjet][icut][Channel]->Fill(DijetInvMass, PUWeight);
+	  hDRJet  [ijet][jjet][icut][Channel]->Fill(DijetDR,      PUWeight);
 	  // 2D CSV discriminant plot for all DiJets system	  
 	  h2DCSV[ijet][jjet][icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
-	  if(jet.Mom == 24 && jet_.Mom ==24)       hGenTagWMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
-	  if(jet.KinMom == 24 && jet_.KinMom ==24) hKinTagWMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
+	  // Gen Mass
+	  if(jet.Mom == 24 && jet_.Mom ==24)        hGenTagWMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
+	  if(jet.Mom != 24 && jet_.Mom !=24 &&
+	     jet.Mom != 6  && jet_.Mom != 6 &&
+	     fGenAddjj){
+	    hGenTagAddMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
+	    hGenTagAddDR  [icut][Channel]->Fill(DijetDR,      PUWeight);
+	    fGenAddjj = false;
+	  }
+	  // Kin Mass
+	  if(jet.KinMom == 24 && jet_.KinMom == 24) hKinTagWMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
+	  if(jet.KinMom != 24 && jet_.KinMom !=24 &&
+	     jet.KinMom != 6  && jet_.KinMom != 6 &&
+	     fKinAddjj){
+	    hKinTagAddMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
+	    hKinTagAddDR  [icut][Channel]->Fill(DijetDR,      PUWeight);
+	    fKinAddjj = false;
+	  }
 	}// for(jjet)
 
 	// Jet Tag Efficiencies
 	if(NJets > 3){ 
+	  // -- CSV purity
+	  // Jets from Top
+	  if(ijet < 2)                   purTagCSV[icut][Channel]-> Fill(jet.Mom == 6, 0.5);
+	  // Add jets
+	  else if(ijet > 1 && ijet < 4)  purTagCSV[icut][Channel]-> Fill((jet.Mom != 24 && jet.Mom != 6), 1.5);
+	  // Jets from W
+	  else if(ijet > 3)              purTagCSV[icut][Channel]-> Fill(jet.Mom == 24, 2.5);
+	  // -- Kin. fitter purity
+	  // Jets from Top
+	  if(jet.KinMom == 6)  purKinGenIndex[icut][Channel]->Fill(jet.Mom == 6,  0.5);
+	  // Jets from W
+	  if(jet.KinMom == 24) purKinGenIndex[icut][Channel]->Fill(jet.Mom == 24, 1.5);
+	  // Add Jets
+	  if(jet.KinMom != 24 && jet.KinMom != 6) purKinGenIndex[icut][Channel]->Fill(jet.Mom != 24 && jet.Mom != 6, 2.5);
+
+
 	  // GenCone Vs Kinematic Reconstruction 
 	  if (jet.Mom == 6 || jet.Mom == 24){ 
 	    
@@ -789,24 +830,23 @@ int main(int argc, const char* argv[]){
 	    if(jet.Mom == 6) { effKinGenIndex[icut][Channel]->Fill(jet.KinMom == 6,  1.5); TopkinGenConeMatch++;}
 	    if(jet.Mom == 24){ effKinGenIndex[icut][Channel]->Fill(jet.KinMom == 24, 2.5); WkinGenConeMatch++;}
 	  } // if ((jet.Mom)
-	  
-	  if(jet.Mom != 6 && jet.Mom != 24){ effKinGenIndex[icut][Channel]->Fill((jet.KinMom != 24 && jet.KinMom != 6), 3.5); OkinGenConeMatch++;}
+	  else if(jet.Mom != 6 && jet.Mom != 24){ effKinGenIndex[icut][Channel]->Fill((jet.KinMom != 24 && jet.KinMom != 6), 3.5); OkinGenConeMatch++;}
 
 	  // CSV Jet Postion Eff (No weights)
 	  bool isGoodCSVOrder = false;
 	  int CSVBin;
 	  if(jet.Mom == 6){
-	    CSVBin = 0;
+	    CSVBin = 0.5;
 	    if(ijet < 2) isGoodCSVOrder = true; 
 	    hTJetPosition[icut][Channel]->Fill(ijet);
 	  }
 	  else if(jet.Mom == 24){
-	    CSVBin = 1;
+	    CSVBin = 1.5;
 	    if(ijet > 3) isGoodCSVOrder = true;
 	    hWJetPosition[icut][Channel]->Fill(ijet);
 	  }
 	  else{
-	    CSVBin = 2;
+	    CSVBin = 2.5;
 	    if(ijet > 1 && ijet < 4) isGoodCSVOrder = true;
 	    hOJetPosition[icut][Channel]->Fill(ijet);
 	  }
@@ -912,7 +952,6 @@ int main(int argc, const char* argv[]){
       target->mkdir(namecut[j] + "/" + namech[i]);
       target->cd   (namecut[j] + "/" + namech[i]);
       
-      hEvtCatego[j][i]->Write();      
       hPV[j][i]     ->Write();
       hMET[j][i]    ->Write();
       hMET_Phi[j][i]->Write();
@@ -940,6 +979,7 @@ int main(int argc, const char* argv[]){
       for(int ja=0; ja<NhJets; ja++){
   	for(int jb=ja+1; jb<NhJets; jb++){
   	  hMassJet[ja][jb][j][i]->Write();
+  	  hDRJet  [ja][jb][j][i]->Write();
 	  h2DCSV  [ja][jb][j][i]->Write();
   	}
       }   
@@ -964,16 +1004,18 @@ int main(int argc, const char* argv[]){
       // Kinematic Reconstruction
       hKinChi2       [j][i]->Write();
       h2DKinChi2_JetMatch[j][i]->Write();
+
       hKinWlMass     [j][i]->Write();
       hKinWlTransMass[j][i]->Write();
       hKinWlpT       [j][i]->Write();
       hKinWhMass     [j][i]->Write();
       hKinWhpT       [j][i]->Write();
-
       hKinWMass     [j][i]->Write();
       hKinWpT       [j][i]->Write();
+
       hKinTagWMass  [j][i]->Write();
-      hKinTagWpT    [j][i]->Write();
+      hKinTagAddMass[j][i]->Write();
+      hKinTagAddDR  [j][i]->Write();
 
       hKintlMass     [j][i]->Write();
       hKintlpT       [j][i]->Write();
@@ -988,10 +1030,15 @@ int main(int argc, const char* argv[]){
       hOJetPosition [j][i]->Write();
 
       hGenTagWMass  [j][i]->Write();
+      hGenTagAddMass[j][i]->Write();
+      hGenTagAddDR  [j][i]->Write();
 
+      // Purities and Efficiencies
       effKinGenIndex [j][i]->Write();
+      purKinGenIndex [j][i]->Write();
       
       effTagCSV     [j][i]->Write();
+      purTagCSV     [j][i]->Write();
       
     }//for(i)
 

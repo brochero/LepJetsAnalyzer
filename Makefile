@@ -1,7 +1,7 @@
 all: TreeReader.run AccTreeReader.run TableYields.run 
 
 TreeReader.run: TopTools/SF_ID-ISO-Trigger/SFIDISOTrigger.o TopTools/ttbar_Categorization/ttbar_category.o TopTools/SF_Lumi/SFLumi.o TopTools/SF_btag/BTagCalibrationStandalone.o TreeReader.o TopTools/LepJets_Fitter/LepJets_Fitter.o 
-	g++ -o TreeReader.run TreeReader.o TopTools/SF_ID-ISO-Trigger/SFIDISOTrigger.o TopTools/ttbar_Categorization/ttbar_category.o TopTools/SF_btag/BTagCalibrationStandalone.o TopTools/SF_Lumi/SFLumi.o TopTools/LepJets_Fitter/LepJets_Fitter.o `root-config --libs`
+	g++ -o TreeReader.run TreeReader.o TopTools/SF_ID-ISO-Trigger/SFIDISOTrigger.o TopTools/ttbar_Categorization/ttbar_category.o TopTools/SF_btag/BTagCalibrationStandalone.o TopTools/SF_Lumi/SFLumi.o TopTools/LepJets_Fitter/LepJets_Fitter.o `root-config --libs` -lMinuit
 
 TreeReader.o: TreeReader.C
 	g++ -std=c++11 -static -I`root-config --incdir` -ITopTools/SF_ID-ISO-Trigger -ITopTools/ttbar_Categorization -ITopTools/SF_Lumi -ITopTools/LepJets_Fitter -c -g TreeReader.C

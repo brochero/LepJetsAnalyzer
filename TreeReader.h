@@ -19,6 +19,8 @@
 #include "TStopwatch.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TH1D.h"
+#include "TH2D.h"
 #include "TProfile.h"
 #include "TEfficiency.h"
 #include "TFile.h"
@@ -65,7 +67,7 @@ float DiJetMassCorrection(std::vector<ComJet> &Jets, bool ReArrange);
 bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id);
 
 // Luminosity
-float LuminNorm = 15920; //[pb-1]
+float LuminNorm = 15941.38; //[pb-1]
 // Output Dir
 TString dirname="TopResults";
 // Number of Histograms
@@ -77,15 +79,15 @@ TString namech     [Nhch + 1] = {"mujets","ejets","lepjets"};
 TString titlenamech[Nhch]     = {"#mu+Jets","e+Jets"};
 TString namecut    [Nhcuts]   = {"lepton","6Jets","2btag","3btag","4Jets","4Jets2btag","Only2btag"};
 // Acceptancies and Efficiencies
-int   AccEvent[Nhcuts][Nhch+1];
-float EffEvent[Nhcuts][Nhch+1];
+int    AccEvent[Nhcuts][Nhch+1];
+double EffEvent[Nhcuts][Nhch+1];
 // Histograms definitions
-typedef TH1F *HistosJet    [NhJets][Nhcuts][Nhch];
-typedef TH2F *HistosJet2D  [NhJets][Nhcuts][Nhch];
-typedef TH1F *HistosDiJet  [NhJets][NhJets-1][Nhcuts][Nhch];
-typedef TH2F *HistosDiJet2D[NhJets][NhJets-1][Nhcuts][Nhch];
-typedef TH1F *Histos       [Nhcuts][Nhch];
-typedef TH2F *Histos2D     [Nhcuts][Nhch];
+typedef TH1D *HistosJet    [NhJets][Nhcuts][Nhch];
+typedef TH2D *HistosJet2D  [NhJets][Nhcuts][Nhch];
+typedef TH1D *HistosDiJet  [NhJets][NhJets-1][Nhcuts][Nhch];
+typedef TH2D *HistosDiJet2D[NhJets][NhJets-1][Nhcuts][Nhch];
+typedef TH1D *Histos       [Nhcuts][Nhch];
+typedef TH2D *Histos2D     [Nhcuts][Nhch];
 typedef TEfficiency *Eff   [Nhcuts][Nhch];
 
 //----------------------------------------
@@ -117,11 +119,12 @@ Histos    hKinWhMass, hKinWhpT, hKinthMass, hKinthpT;
 Histos    hKinWMass, hKinWpT, hKinTagWMass, hKinTagAddMass, hKinTagAddDR;
 Eff       effKinGenIndex, purKinGenIndex;
 HistosJet hKinJetPt, hGENJetPt;
+Histos    hKinAdd1CSV, hKinAdd2CSV;
 // GenCone
 Histos hTJetPosition, hWJetPosition, hOJetPosition;
 Histos hGenTagWMass, hGenTagAddMass, hGenTagAddDR;
 Eff    effTagCSV, purTagCSV;
-TH2F *h2DTJetPosition, *h2DWJetPosition, *h2DttbarNGenJets;
+TH2D *h2DTJetPosition, *h2DWJetPosition, *h2DttbarNGenJets;
 
 //----------------------------------------
 //           Tree branches

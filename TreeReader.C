@@ -36,7 +36,7 @@ int main(int argc, const char* argv[]){
   const char * _output   = 0;
   const char * _input    = 0;
   // TopTrees directory
-  const char * _dir      = "../v8-0-1/";
+  const char * _dir      = "/xrootd/store/user/brochero/v8-0-1/";
   const char * _syst_var = 0;
   const char * _ttbar_id = 0;
   
@@ -144,7 +144,7 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "jet_index", &Jet_pTIndex );
 
   theTree.SetBranchAddress( "jet_CSV",           &Jet_CSV );
-  theTree.SetBranchAddress( "jet_SF_CSV",        &Jet_SF_CSV );
+  theTree.SetBranchAddress( "jet_SF_CSV_30",     &Jet_SF_CSV );
   theTree.SetBranchAddress( "jet_partonFlavour", &Jet_partonFlavour );
   theTree.SetBranchAddress( "jet_CvsB",          &Jet_CvsB );
   theTree.SetBranchAddress( "jet_CvsL",          &Jet_CvsL );
@@ -198,9 +198,9 @@ int main(int argc, const char* argv[]){
   // Number of Events and Weights (MC@NLO) from Histograms
   TFile *fileEntries = NULL;
   fileEntries = TFile::Open(fdir + fname + ".root");
-  TH1F *h_NumberEvt, *h_ScaleWeights;
-  h_NumberEvt    = (TH1F*)fileEntries->Get("ttbbLepJets/EventInfo");
-  h_ScaleWeights = (TH1F*)fileEntries->Get("ttbbLepJets/ScaleWeights");
+  TH1D *h_NumberEvt, *h_ScaleWeights;
+  h_NumberEvt    = (TH1D*)fileEntries->Get("ttbbLepJets/EventInfo");
+  h_ScaleWeights = (TH1D*)fileEntries->Get("ttbbLepJets/ScaleWeights");
 
   float NTotal_Event, NTotal_Weight, nNorm_Event, NTotal_ScalemuRF_Weight[6];
   NTotal_Event  = h_NumberEvt->GetBinContent(1);
@@ -225,17 +225,17 @@ int main(int argc, const char* argv[]){
     
   for(int j=0; j<Nhcuts; j++){   // Cut
     for(int i=0; i<Nhch; i++){ // Channel
-      hPV[j][i]         = new TH1F("hPV_"+namech[i]+"_"+namecut[j],"PV Distribution  " + titlenamech[i] + ";PV",15,0,30);
-      hMET[j][i]        = new TH1F("hMET_"+ namech[i]+"_"+namecut[j],"#slash{E}_{T} " + titlenamech[i] + ";#slash{E}_{T}[GeV]",10,0,200);
-      hMET_Phi[j][i]    = new TH1F("hMET_Phi_"+ namech[i]+"_"+namecut[j],"#Phi_{#slash{E}_{T}} " + titlenamech[i] + ";#Phi_{#slash{E}_{T}}[rad]",16,0,3.2);
-      hmT[j][i]         = new TH1F("hmT_"+ namech[i]+"_"+namecut[j],"transverse Mass Lepton/MET " + titlenamech[i] + ";m_{T}[GeV]",40,0,160);
-      hHT[j][i]         = new TH1F("hHT_"+namech[i]+"_"+namecut[j],"H_{T} " + titlenamech[i] + ";HT[GeV]",100,0,600);
+      hPV[j][i]         = new TH1D("hPV_"+namech[i]+"_"+namecut[j],"PV Distribution  " + titlenamech[i] + ";PV",15,0,30);
+      hMET[j][i]        = new TH1D("hMET_"+ namech[i]+"_"+namecut[j],"#slash{E}_{T} " + titlenamech[i] + ";#slash{E}_{T}[GeV]",10,0,200);
+      hMET_Phi[j][i]    = new TH1D("hMET_Phi_"+ namech[i]+"_"+namecut[j],"#Phi_{#slash{E}_{T}} " + titlenamech[i] + ";#Phi_{#slash{E}_{T}}[rad]",16,0,3.2);
+      hmT[j][i]         = new TH1D("hmT_"+ namech[i]+"_"+namecut[j],"transverse Mass Lepton/MET " + titlenamech[i] + ";m_{T}[GeV]",40,0,160);
+      hHT[j][i]         = new TH1D("hHT_"+namech[i]+"_"+namecut[j],"H_{T} " + titlenamech[i] + ";HT[GeV]",100,0,600);
       
-      hLepPt [j][i]    = new TH1F("hLepPt_"  + namech[i] + "_" + namecut[j], "Lepton p_{T} " + titlenamech[i] + ";Lepton p_{T}[GeV]",20,0.0,200.0);
-      hLepEta[j][i]    = new TH1F("hLepEta_" + namech[i] + "_" + namecut[j], "#eta_{Lep} "   + titlenamech[i] + ";Lepton #eta",12,0.0,2.2);
-      hLepPhi[j][i]    = new TH1F("hLepPhi_" + namech[i] + "_" + namecut[j], "#phi_{Lep} "   + titlenamech[i] + ";Lepton #Phi[rad]",16,0.0,3.2);
+      hLepPt [j][i]    = new TH1D("hLepPt_"  + namech[i] + "_" + namecut[j], "Lepton p_{T} " + titlenamech[i] + ";Lepton p_{T}[GeV]",20,0.0,200.0);
+      hLepEta[j][i]    = new TH1D("hLepEta_" + namech[i] + "_" + namecut[j], "#eta_{Lep} "   + titlenamech[i] + ";Lepton #eta",12,0.0,2.2);
+      hLepPhi[j][i]    = new TH1D("hLepPhi_" + namech[i] + "_" + namecut[j], "#phi_{Lep} "   + titlenamech[i] + ";Lepton #Phi[rad]",16,0.0,3.2);
       
-      hNJets[j][i]     = new TH1F("hNJets_" + namech[i] + "_" + namecut[j], "Jet multiplicity " + titlenamech[i] + ";Number of jets",9,-0.5,8.5);
+      hNJets[j][i]     = new TH1D("hNJets_" + namech[i] + "_" + namecut[j], "Jet multiplicity " + titlenamech[i] + ";Number of jets",9,-0.5,8.5);
       hNJets[j][i]->GetXaxis()->SetBinLabel(1,"0");
       hNJets[j][i]->GetXaxis()->SetBinLabel(2,"1");
       hNJets[j][i]->GetXaxis()->SetBinLabel(3,"2");
@@ -245,43 +245,44 @@ int main(int argc, const char* argv[]){
       hNJets[j][i]->GetXaxis()->SetBinLabel(7,"6");
       hNJets[j][i]->GetXaxis()->SetBinLabel(8,"7");
       hNJets[j][i]->GetXaxis()->SetBinLabel(9,"#geq 8");
-      if(j>0) hNJets[j][i]->GetXaxis()->SetRange(7,9);
+      if(namecut[j] != "lepton") hNJets[j][i]->GetXaxis()->SetRange(7,9);
+      if(namecut[j].Contains("4Jets")) hNJets[j][i]->GetXaxis()->SetRange(5,9);
 
-      hNBtagJets[j][i]  = new TH1F("hNBtagJets_"+namech[i]+"_"+namecut[j],"b-tag jet multiplicity " + titlenamech[i] + ";Number of b-jets",6,-0.5,5.5);
+      hNBtagJets[j][i]  = new TH1D("hNBtagJets_"+namech[i]+"_"+namecut[j],"b-tag jet multiplicity " + titlenamech[i] + ";Number of b-jets",6,-0.5,5.5);
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(1,"0");
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(2,"1");
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(3,"2");
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(4,"3");
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(5,"4");
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(6,"#geq 5");
-      if(j == 2) hNBtagJets[j][i]->GetXaxis()->SetRange(3,6);
-      if(j == 3) hNBtagJets[j][i]->GetXaxis()->SetRange(5,6);
+      if(namecut[j].Contains("2btag")) hNBtagJets[j][i]->GetXaxis()->SetRange(3,6);
+      if(namecut[j].Contains("3btag")) hNBtagJets[j][i]->GetXaxis()->SetRange(4,6);
       
       /***************************
           SF(ID,ISO & Trigger)
       ***************************/
-      hSFIDISOTr[j][i]       = new TH1F("hSFIDISOTr_"+namech[i]+"_"+namecut[j],"SF_{ID,ISO}^{Tr} " + titlenamech[i],400,0.8,1.2);    
-      hSFIDISOTrError[j][i]  = new TH1F("hSFIDISOTrError_"+namech[i]+"_"+namecut[j],"#Delta SF_{ID,ISO}^{Tr} " + titlenamech[i],400,0,0.1); 
-      hSFIDISO[j][i]         = new TH1F("hSFIDISO_"+namech[i]+"_"+namecut[j],"SF_{ID,ISO} " + titlenamech[i],400,0.8,1.2);    
-      hSFIDISOError[j][i]    = new TH1F("hSFIDISOError_"+namech[i]+"_"+namecut[j],"#Delta SF_{ID,ISO} " + titlenamech[i],400,0,0.1); 
-      hSFTrigger[j][i]       = new TH1F("hSFTrigger_"+namech[i]+"_"+namecut[j],"SF^{Trigger} " + titlenamech[i],400,0.8,1.2);    
-      hSFTriggerError[j][i]  = new TH1F("hSFTriggerError_"+namech[i]+"_"+namecut[j],"#Delta SF^{Trigger} " + titlenamech[i],400,0,0.1);
+      hSFIDISOTr[j][i]       = new TH1D("hSFIDISOTr_"+namech[i]+"_"+namecut[j],"SF_{ID,ISO}^{Tr} " + titlenamech[i],400,0.8,1.2);    
+      hSFIDISOTrError[j][i]  = new TH1D("hSFIDISOTrError_"+namech[i]+"_"+namecut[j],"#Delta SF_{ID,ISO}^{Tr} " + titlenamech[i],400,0,0.1); 
+      hSFIDISO[j][i]         = new TH1D("hSFIDISO_"+namech[i]+"_"+namecut[j],"SF_{ID,ISO} " + titlenamech[i],400,0.8,1.2);    
+      hSFIDISOError[j][i]    = new TH1D("hSFIDISOError_"+namech[i]+"_"+namecut[j],"#Delta SF_{ID,ISO} " + titlenamech[i],400,0,0.1); 
+      hSFTrigger[j][i]       = new TH1D("hSFTrigger_"+namech[i]+"_"+namecut[j],"SF^{Trigger} " + titlenamech[i],400,0.8,1.2);    
+      hSFTriggerError[j][i]  = new TH1D("hSFTriggerError_"+namech[i]+"_"+namecut[j],"#Delta SF^{Trigger} " + titlenamech[i],400,0,0.1);
 
       /***************************
               SF(b-tag)
       ***************************/
-      h2DSFbtag_Global[j][i]   = new TH2F("h2DSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} Vs  #Delta SF_{b-tag} " + titlenamech[i], 40, 0.0, 4.0, 50, 0.0, 0.5);
-      hSFbtag_Global[j][i]     = new TH1F("hSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} " + titlenamech[i],40, 0.0, 4.0);
-      hSFbtag_Global_var[j][i] = new TH1F("hSFbtag_Global_var_"+namech[i]+"_"+namecut[j], "Global #Delta SF_{b-tag} " + titlenamech[i], 20, 0.0, 0.10);
+      h2DSFbtag_Global[j][i]   = new TH2D("h2DSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} Vs  #Delta SF_{b-tag} " + titlenamech[i], 40, 0.0, 4.0, 50, 0.0, 0.5);
+      hSFbtag_Global[j][i]     = new TH1D("hSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} " + titlenamech[i],40, 0.0, 4.0);
+      hSFbtag_Global_var[j][i] = new TH1D("hSFbtag_Global_var_"+namech[i]+"_"+namecut[j], "Global #Delta SF_{b-tag} " + titlenamech[i], 20, 0.0, 0.10);
 
       // B-tag efficiency histograms
-      h2DSFbtag_b[j][i]    = new TH2F("hSFbtag_b_"+namech[i]+"_"+namecut[j], "N^{b}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_c[j][i]    = new TH2F("hSFbtag_c_"+namech[i]+"_"+namecut[j], "N^{c}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_l[j][i]    = new TH2F("hSFbtag_l_"+namech[i]+"_"+namecut[j], "N^{l}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
+      h2DSFbtag_b[j][i]    = new TH2D("hSFbtag_b_"+namech[i]+"_"+namecut[j], "N^{b}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
+      h2DSFbtag_c[j][i]    = new TH2D("hSFbtag_c_"+namech[i]+"_"+namecut[j], "N^{c}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
+      h2DSFbtag_l[j][i]    = new TH2D("hSFbtag_l_"+namech[i]+"_"+namecut[j], "N^{l}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
 
-      h2DSFbtag_btag_b[j][i]    = new TH2F("hSFbtag_btag_b_"+namech[i]+"_"+namecut[j], "N_{btag}^{b}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_btag_c[j][i]    = new TH2F("hSFbtag_btag_c_"+namech[i]+"_"+namecut[j], "N_{btag}^{c}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_btag_l[j][i]    = new TH2F("hSFbtag_btag_l_"+namech[i]+"_"+namecut[j], "N_{btag}^{l}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
+      h2DSFbtag_btag_b[j][i]    = new TH2D("hSFbtag_btag_b_"+namech[i]+"_"+namecut[j], "N_{btag}^{b}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
+      h2DSFbtag_btag_c[j][i]    = new TH2D("hSFbtag_btag_c_"+namech[i]+"_"+namecut[j], "N_{btag}^{c}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
+      h2DSFbtag_btag_l[j][i]    = new TH2D("hSFbtag_btag_l_"+namech[i]+"_"+namecut[j], "N_{btag}^{l}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
       
       for(int ij=0; ij<NhJets; ij++){
 	TString jetn;
@@ -289,12 +290,12 @@ int main(int argc, const char* argv[]){
 	jni << ij;
 	jetn = "Jet-" + jni.str();	
 	
-	hCSV[ij][j][i]   = new TH1F("hCSV_"   + jetn + "_" + namech[i] + "_" + namecut[j],"CSV " + jetn + " " + titlenamech[i] + ";CSVv2",10,0,1);
-	hCvsL[ij][j][i]  = new TH1F("hCvsL_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsL " + jetn + " " + titlenamech[i] + ";CvsL",20,-1,1);
-	hCvsB[ij][j][i]  = new TH1F("hCvsB_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsB " + jetn + " " + titlenamech[i] + ";CvsB",20,-1,1);
-	hJetPt[ij][j][i] = new TH1F("hJetPt_" + jetn + "_" + namech[i] + "_" + namecut[j],"p_{T}^{Jet} " + jetn + " " + titlenamech[i] + ";p_{T}[GeV]",10,0,200);
+	hCSV[ij][j][i]   = new TH1D("hCSV_"   + jetn + "_" + namech[i] + "_" + namecut[j],"CSV " + jetn + " " + titlenamech[i] + ";CSVv2",30,0,1);
+	hCvsL[ij][j][i]  = new TH1D("hCvsL_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsL " + jetn + " " + titlenamech[i] + ";CvsL",20,-1,1);
+	hCvsB[ij][j][i]  = new TH1D("hCvsB_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsB " + jetn + " " + titlenamech[i] + ";CvsB",20,-1,1);
+	hJetPt[ij][j][i] = new TH1D("hJetPt_" + jetn + "_" + namech[i] + "_" + namecut[j],"p_{T}^{Jet} " + jetn + " " + titlenamech[i] + ";p_{T}[GeV]",10,0,200);
 
-	hJetpTUncVar[ij][j][i] = new TH1F("hJetpTUncVar_" + jetn + "_" + namech[i] + "_" + namecut[j], "#Delta pT^{Jet} " + jetn + " " + titlenamech[i], 20.0, 0.0, 2.0);
+	hJetpTUncVar[ij][j][i] = new TH1D("hJetpTUncVar_" + jetn + "_" + namech[i] + "_" + namecut[j], "#Delta pT^{Jet} " + jetn + " " + titlenamech[i], 20.0, 0.0, 2.0);
 	
 	for(int jj=ij+1; jj<NhJets; jj++){
 	  TString jetMassn;
@@ -303,40 +304,43 @@ int main(int argc, const char* argv[]){
 	  jnj << jj;
 	  jetMassn = "Jet" + jni.str() + jnj.str();
 	  
-	  hMassJet[ij][jj][j][i] = new TH1F("hMassJet_" + jetMassn + "_" + namech[i] + "_" + namecut[j],"Mass of Dijets "+ jetMassn + " " + titlenamech[i] + "; M_{jj}[GeV]",150,0,300);
-	  hDRJet[ij][jj][j][i]   = new TH1F("hDRJet_"   + jetMassn + "_" + namech[i] + "_" + namecut[j],"#Delta R of Dijets "+ jetMassn + " " + titlenamech[i] + "; #Delta R_{jj}",25,0,5);
-	  h2DCSV[ij][jj][j][i]   = new TH2F("h2DCSV_"   + jetMassn + "_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 3rd and 4th Jets " + titlenamech[i], 20,0,1,20,0,1);
+	  hMassJet[ij][jj][j][i] = new TH1D("hMassJet_" + jetMassn + "_" + namech[i] + "_" + namecut[j],"Mass of Dijets "+ jetMassn + " " + titlenamech[i] + "; M_{jj}[GeV]",150,0,300);
+	  hDRJet[ij][jj][j][i]   = new TH1D("hDRJet_"   + jetMassn + "_" + namech[i] + "_" + namecut[j],"#Delta R of Dijets "+ jetMassn + " " + titlenamech[i] + "; #Delta R_{jj}",25,0,5);
+	  h2DCSV[ij][jj][j][i]   = new TH2D("h2DCSV_"   + jetMassn + "_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 3rd and 4th Jets " + titlenamech[i], 20,0,1,20,0,1);
 	}
 	
       }
       
-      hInvMassjj[j][i]  = new TH1F("hInvMassjj_" + namech[i] + "_"+namecut[j], "Compatible Inv. Mass " + titlenamech[i],80,40,120);
+      hInvMassjj[j][i]  = new TH1D("hInvMassjj_" + namech[i] + "_"+namecut[j], "Compatible Inv. Mass " + titlenamech[i],80,40,120);
 
       // Kinematic Reconstruction
-      hKinChi2 [j][i] = new TH1F("hKinChi2_" + namech[i] + "_" + namecut[j], "#chi^{2} for Kin. RECO " + titlenamech[i] + ";#chi^{2}", 100,0,20);
-      h2DKinChi2_JetMatch[j][i] = new TH2F("hKinChi2_JetMatch_" + namech[i] + "_" + namecut[j], "#chi^{2} Vs # of Jet Matches for Kin. RECO " + titlenamech[i], 100,0,20,5,0,5);
+      hKinChi2 [j][i] = new TH1D("hKinChi2_" + namech[i] + "_" + namecut[j], "#chi^{2} for Kin. RECO " + titlenamech[i] + ";#chi^{2}", 100,0,20);
+      h2DKinChi2_JetMatch[j][i] = new TH2D("hKinChi2_JetMatch_" + namech[i] + "_" + namecut[j], "#chi^{2} Vs # of Jet Matches for Kin. RECO " + titlenamech[i], 100,0,20,5,0,5);
       effKinGenIndex [j][i] = new TEfficiency("effKinGenIndex_" + namech[i] + "_" + namecut[j], "Kin. RECO vs GEN " + titlenamech[i] + "; [0]->All 4 jets, [1]->Top, [2]->W, [3]->Add; Match Eff.", 4,0,4);
       purKinGenIndex [j][i] = new TEfficiency("purKinGenIndex_" + namech[i] + "_" + namecut[j], "Kin. RECO vs GEN Purity " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add; Purity", 3,0,3);
 
-      hKinWlTransMass[j][i] = new TH1F("hKinWlTransMass_" + namech[i] + "_" + namecut[j], "Inv. Trans. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{T}^{W#to l#nu} [GeV]", 50,0,150);
-      hKinWlMass[j][i]      = new TH1F("hKinWlMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{W#to l#nu} [GeV]", 80,40,120);
-      hKinWlpT[j][i]        = new TH1F("hKinWlpT_"   + namech[i] + "_" + namecut[j], "p_{T} of W(lep) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
+      hKinWlTransMass[j][i] = new TH1D("hKinWlTransMass_" + namech[i] + "_" + namecut[j], "Inv. Trans. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{T}^{W#to l#nu} [GeV]", 50,0,150);
+      hKinWlMass[j][i]      = new TH1D("hKinWlMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{W#to l#nu} [GeV]", 80,40,120);
+      hKinWlpT[j][i]        = new TH1D("hKinWlpT_"   + namech[i] + "_" + namecut[j], "p_{T} of W(lep) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
 
-      hKinWhMass[j][i] = new TH1F("hKinWhMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W(had) from Kin Reco " + titlenamech[i] + "; M_{W#to jj} [GeV]", 80, 40, 120);
-      hKinWhpT[j][i]   = new TH1F("hKinWhpT_"   + namech[i] + "_" + namecut[j], "p_{T} of W(had) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
+      hKinWhMass[j][i] = new TH1D("hKinWhMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W(had) from Kin Reco " + titlenamech[i] + "; M_{W#to jj} [GeV]", 80, 40, 120);
+      hKinWhpT[j][i]   = new TH1D("hKinWhpT_"   + namech[i] + "_" + namecut[j], "p_{T} of W(had) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
 
-      hKinWMass[j][i] = new TH1F("hKinWMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W from Kin Reco " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
-      hKinWpT[j][i]   = new TH1F("hKinWpT_"   + namech[i] + "_" + namecut[j], "p_{T} of W from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
+      hKinWMass[j][i] = new TH1D("hKinWMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W from Kin Reco " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
+      hKinWpT[j][i]   = new TH1D("hKinWpT_"   + namech[i] + "_" + namecut[j], "p_{T} of W from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
 
-      hKinTagWMass [j][i]  = new TH1F("hKinTagWMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W_{jj} boson " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
-      hKinTagAddMass[j][i] = new TH1F("hKinTagAddMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Additional Jets " + titlenamech[i] + "; M [GeV]", 150, 0, 300);
-      hKinTagAddDR  [j][i] = new TH1F("hKinTagAddDR_" + namech[i] + "_" + namecut[j], "#Delta R of Additional Jets " + titlenamech[i] + "; #Delta R", 25, 0, 5);
+      hKinTagWMass [j][i]  = new TH1D("hKinTagWMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W_{jj} boson " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
+      hKinTagAddMass[j][i] = new TH1D("hKinTagAddMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Additional Jets " + titlenamech[i] + "; M [GeV]", 150, 0, 300);
+      hKinTagAddDR  [j][i] = new TH1D("hKinTagAddDR_" + namech[i] + "_" + namecut[j], "#Delta R of Additional Jets " + titlenamech[i] + "; #Delta R", 25, 0, 5);
 
-      hKintlMass[j][i] = new TH1F("hKintlMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Top(lep) from Kin Reco " + titlenamech[i] + "; M_{t_{l}} [GeV]", 100, 100, 300);
-      hKintlpT[j][i]   = new TH1F("hKintlpT_"   + namech[i] + "_" + namecut[j], "p_{T} of Top(lep) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
+      hKintlMass[j][i] = new TH1D("hKintlMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Top(lep) from Kin Reco " + titlenamech[i] + "; M_{t_{l}} [GeV]", 100, 100, 300);
+      hKintlpT[j][i]   = new TH1D("hKintlpT_"   + namech[i] + "_" + namecut[j], "p_{T} of Top(lep) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
 
-      hKinthMass[j][i] = new TH1F("hKinthMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Top(had) from Kin Reco " + titlenamech[i] + "; M_{t_{h}} [GeV]", 100, 100, 300);
-      hKinthpT[j][i]   = new TH1F("hKinthpT_"   + namech[i] + "_" + namecut[j], "p_{T} of Top(had) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
+      hKinthMass[j][i] = new TH1D("hKinthMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Top(had) from Kin Reco " + titlenamech[i] + "; M_{t_{h}} [GeV]", 100, 100, 300);
+      hKinthpT[j][i]   = new TH1D("hKinthpT_"   + namech[i] + "_" + namecut[j], "p_{T} of Top(had) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
+
+      hKinAdd1CSV[j][i]   = new TH1D("hKinAdd1CSV_" + namech[i] + "_" + namecut[j],"CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",30,0,1);
+      hKinAdd2CSV[j][i]   = new TH1D("hKinAdd2CSV_" + namech[i] + "_" + namecut[j],"CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",30,0,1);
 
       TString kinJetname[4];
       kinJetname[0] = "bFromH";
@@ -344,27 +348,27 @@ int main(int argc, const char* argv[]){
       kinJetname[2] = "W2";
       kinJetname[3] = "bFromL";
       for(unsigned int ikj=0; ikj<4; ikj++){
-	hKinJetPt[ikj][j][i] = new TH1F ("hKinJetPt_" + kinJetname[ikj] + "_"  + namech[i] + "_" + namecut[j], "pT KIN Assignment " + titlenamech[i] + "; p_{T}^{j}[GeV]", 50,0,150);
-	hGENJetPt[ikj][j][i] = new TH1F ("hGENJetPt_" + kinJetname[ikj] + "_"  + namech[i] + "_" + namecut[j], "pT GEN Assignment " + titlenamech[i] + "; p_{T}^{j}[GeV]", 50,0,150);
+	hKinJetPt[ikj][j][i] = new TH1D ("hKinJetPt_" + kinJetname[ikj] + "_"  + namech[i] + "_" + namecut[j], "pT KIN Assignment " + titlenamech[i] + "; p_{T}^{j}[GeV]", 50,0,150);
+	hGENJetPt[ikj][j][i] = new TH1D ("hGENJetPt_" + kinJetname[ikj] + "_"  + namech[i] + "_" + namecut[j], "pT GEN Assignment " + titlenamech[i] + "; p_{T}^{j}[GeV]", 50,0,150);
       }
       
-      hTJetPosition[j][i] = new TH1F ("hTJetPosition_" + namech[i] + "_" + namecut[j], "CSV Position for jets from Top "   + titlenamech[i] + "; CSV Jet Index", 7,0,7);
-      hWJetPosition[j][i] = new TH1F ("hWJetPosition_" + namech[i] + "_" + namecut[j], "CSV Position for jets from W "     + titlenamech[i] + "; CSV Jet Index", 7,0,7);
-      hOJetPosition[j][i] = new TH1F ("hOJetPosition_" + namech[i] + "_" + namecut[j], "CSV Position for additional jets " + titlenamech[i] + "; CSV Jet Index", 7,0,7);
+      hTJetPosition[j][i] = new TH1D ("hTJetPosition_" + namech[i] + "_" + namecut[j], "CSV Position for jets from Top "   + titlenamech[i] + "; CSV Jet Index", 7,0,7);
+      hWJetPosition[j][i] = new TH1D ("hWJetPosition_" + namech[i] + "_" + namecut[j], "CSV Position for jets from W "     + titlenamech[i] + "; CSV Jet Index", 7,0,7);
+      hOJetPosition[j][i] = new TH1D ("hOJetPosition_" + namech[i] + "_" + namecut[j], "CSV Position for additional jets " + titlenamech[i] + "; CSV Jet Index", 7,0,7);
       effTagCSV    [j][i] = new TEfficiency ("effTagCSV_" + namech[i] + "_" + namecut[j], "CSV Tag Eff. " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add; Match Eff.", 3,0,3);
       purTagCSV    [j][i] = new TEfficiency ("purTagCSV_" + namech[i] + "_" + namecut[j], "CSV Purity " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add; Purity", 3,0,3);
-      hGenTagWMass  [j][i] = new TH1F("hGenTagWMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W boson " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
-      hGenTagAddMass[j][i] = new TH1F("hGenTagAddMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Add Jets " + titlenamech[i] + "; M [GeV]", 150, 0, 300);
-      hGenTagAddDR  [j][i] = new TH1F("hGenTagAddDR_" + namech[i] + "_" + namecut[j], "#Delta R of Add Jets " + titlenamech[i] + "; #Delta R", 25, 0, 5);
+      hGenTagWMass  [j][i] = new TH1D("hGenTagWMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W boson " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
+      hGenTagAddMass[j][i] = new TH1D("hGenTagAddMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Add Jets " + titlenamech[i] + "; M [GeV]", 150, 0, 300);
+      hGenTagAddDR  [j][i] = new TH1D("hGenTagAddDR_" + namech[i] + "_" + namecut[j], "#Delta R of Add Jets " + titlenamech[i] + "; #Delta R", 25, 0, 5);
 
     }//for(i->channel)
   }//for(j->cut)
   
   // BEST escenario plots  
-  h2DTJetPosition    = new TH2F("h2DTJetPosition","CSV Position for jets from Top Vs Dijet Rank",  7,0,7,7,0,7);
-  h2DWJetPosition    = new TH2F("h2DWJetPosition","CSV Position for jets from W Vs Dijet Rank",    7,0,7,7,0,7);
+  h2DTJetPosition    = new TH2D("h2DTJetPosition","CSV Position for jets from Top Vs Dijet Rank",  7,0,7,7,0,7);
+  h2DWJetPosition    = new TH2D("h2DWJetPosition","CSV Position for jets from W Vs Dijet Rank",    7,0,7,7,0,7);
   
-  h2DttbarNGenJets   = new TH2F("h2DttbarNGenJets","Number of b and W jets per event",    3,0,3,4,0,4);
+  h2DttbarNGenJets   = new TH2D("h2DttbarNGenJets","Number of b and W jets per event",    3,0,3,4,0,4);
   h2DttbarNGenJets->GetXaxis()->SetBinLabel(1,"b-jets from top");
   h2DttbarNGenJets->GetXaxis()->SetBinLabel(2,"jets from W");
   h2DttbarNGenJets->GetXaxis()->SetBinLabel(3,"Nj(Kin/Gen) matched");
@@ -522,7 +526,7 @@ int main(int argc, const char* argv[]){
 	btagUnc_val = 1.0 * (*Jet_SF_CSV)[btagSysPar];
       else if(_syst && syst_varname.Contains("btag_Down")) 
 	btagUnc_val = -1.0 * (*Jet_SF_CSV)[btagSysPar];      
-      // SF estimated for jets with pT > 25GeV
+      // SF estimated for jets with pT = 25, 30, 35 and 40 GeV
       PUWeight = PUWeight * ((*Jet_SF_CSV)[btagUnc::CENTRAL] + btagUnc_val);
     }// if(!data)
     
@@ -590,7 +594,7 @@ int main(int argc, const char* argv[]){
 	if (ijet == KinJetIndex[1] || ijet == KinJetIndex[2] ) jet.KinMom = 24;
       }
 
-      if(jet.Pt() > 25){ // Jet pT Cut
+      if(jet.Pt() > 30){ // Jet pT Cut
 
 	Jets.push_back(jet);
 	
@@ -667,7 +671,6 @@ int main(int argc, const char* argv[]){
      
     }// else(Contain("Data"))
     
-
     /***************************
             Selection
     ***************************/
@@ -800,6 +803,8 @@ int main(int argc, const char* argv[]){
 	     fKinAddjj){
 	    hKinTagAddMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
 	    hKinTagAddDR  [icut][Channel]->Fill(DijetDR,      PUWeight);
+	    hKinAdd1CSV   [icut][Channel]->Fill(jet.CSV,      PUWeight);
+	    hKinAdd2CSV   [icut][Channel]->Fill(jet_.CSV,     PUWeight);
 	    fKinAddjj = false;
 	  }
 	}// for(jjet)
@@ -888,6 +893,7 @@ int main(int argc, const char* argv[]){
 	hKinthMass[icut][Channel]->Fill(Kinth.M());
 	hKinthpT  [icut][Channel]->Fill(Kinth.Pt());
 	
+
 	bool IsKinGenMatch = false;
 	if ( kinGenConeMatch == (TopkinGenConeMatch + WkinGenConeMatch) ) IsKinGenMatch = true;
 	effKinGenIndex[icut][Channel]->Fill(IsKinGenMatch, 0.5, PUWeight);
@@ -909,8 +915,8 @@ int main(int argc, const char* argv[]){
   std::cout << std::endl;
 
   //Acceptance-Efficiency
-  TH1F *Yields;
-  Yields = new TH1F("Yields", "Yields",(Nhcuts)*(Nhch+1),0,(Nhcuts)*(Nhch+1));
+  TH1D *Yields;
+  Yields = new TH1D("Yields", "Yields",(Nhcuts)*(Nhch+1),0,(Nhcuts)*(Nhch+1));
   int nbin = 1;
   
   for(int nc = 0; nc < Nhcuts; nc++){
@@ -1022,6 +1028,9 @@ int main(int argc, const char* argv[]){
 
       hKinthMass     [j][i]->Write();
       hKinthpT       [j][i]->Write();
+
+      hKinAdd1CSV    [j][i]->Write();
+      hKinAdd2CSV    [j][i]->Write();
 
       for(int ikj=0; ikj<4;ikj++) hKinJetPt[ikj][j][i]->Write();
 

@@ -59,20 +59,21 @@ void Plots(TString plots="2btag", bool LogScale=false) {
   ****************/ 
   // ttbar categorization 
   std::vector<histos> ttbar_0_ttbb;
-  ttbar_0_ttbb = loadhistograms(plots, files + "_ttbar_PowhegPythiattbb");
+  ttbar_0_ttbb = loadhistograms(plots, files + "_ttbar_PowhegPythiattbbAlphaS");
+  //ttbar_0_ttbb = loadhistograms(plots, files + "_ttbb_aMCatNLOPythia");
   setuphistograms(ttbar_0_ttbb, col_ttbb);
   std::vector<histos> ttbar_0_ttbj;
-  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_PowhegPythiattbj");
+  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_PowhegPythiattbjAlphaS");
   setuphistograms(ttbar_0_ttb, col_ttb);
   std::vector<histos> ttbar_0_ttcc;
-  ttbar_0_ttcc = loadhistograms(plots, files + "_ttbar_PowhegPythiattcc");
+  ttbar_0_ttcc = loadhistograms(plots, files + "_ttbar_PowhegPythiattccAlphaS");
   setuphistograms(ttbar_0_ttcc, col_ttcc);
   std::vector<histos> ttbar_0_ttLF;
-  ttbar_0_ttLF = loadhistograms(plots, files + "_ttbar_PowhegPythiattLF");
+  ttbar_0_ttLF = loadhistograms(plots, files + "_ttbar_PowhegPythiattLFAlphaS");
   setuphistograms(ttbar_0_ttLF, col_ttLF);
   // ttbar Bkg/Others
   std::vector<histos> ttbar_0;
-  ttbar_0 = loadhistograms(plots, files + "_ttbar_PowhegPythiatt");
+  ttbar_0 = loadhistograms(plots, files + "_ttbar_PowhegPythiattAlphaS");
   setuphistograms(ttbar_0, col_tt);
   std::vector<histos> ttbar_bkg;
   ttbar_bkg = loadhistograms(plots, files + "_ttbar_PowhegPythiaBkg");
@@ -133,8 +134,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
        W+Jets
   ****************/ 
   std::vector<histos> WJets;
-  // WJets = loadhistograms(plots, files + "_WJets_aMCatNLO");
-  WJets = loadhistograms(plots, files + "_WJets_Madgraph");
+  WJets = loadhistograms(plots, files + "_WJets_aMCatNLO");
+  //WJets = loadhistograms(plots, files + "_WJets_Madgraph");
   setuphistograms(WJets, col_WJets);
 
   /****************
@@ -152,9 +153,9 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       ttbar+V
   ****************/ 
   std::vector<histos> ttbarW;
-  ttbarW = loadhistograms(plots, files + "_ttbarW_Madgraph");
+  ttbarW = loadhistograms(plots, files + "_ttW_Madgraph");
   std::vector<histos> ttbarZ;
-  ttbarZ = loadhistograms(plots, files + "_ttbarZ_Madgraph");
+  ttbarZ = loadhistograms(plots, files + "_ttZ_Madgraph");
   std::vector<histos> ttbarV;  
   ttbarV = addhistograms(ttbarW, ttbarZ);
   setuphistograms(ttbarV, col_ttbarV);
@@ -163,7 +164,7 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       ttbar+H
   ****************/ 
   std::vector<histos> ttbarH;
-  ttbarH = loadhistograms(plots, files + "_ttbarHbb_Powheg");
+  ttbarH = loadhistograms(plots, files + "_ttHbb_PowhegPythia");
   setuphistograms(ttbarH, col_ttbarH);
 
   /****************
@@ -282,8 +283,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       
       //-------------------------------------------------------
       // Band error
-      TGraphErrors *thegraph = new TGraphErrors(MC_syst[h].hist[ch]);  // Full set of Syst. Unc.
-      // TGraphErrors *thegraph = new TGraphErrors(Stack[h].hist[ch]); // Just Statistical Unc. 
+      // TGraphErrors *thegraph = new TGraphErrors(MC_syst[h].hist[ch]);  // Full set of Syst. Unc.
+      TGraphErrors *thegraph = new TGraphErrors(Stack[h].hist[ch]); // Just Statistical Unc. 
       thegraph->SetName("thegraph");
       thegraph->SetFillStyle(1001);
       thegraph->SetFillColor(chatch);
@@ -363,7 +364,7 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       titlePr->Draw("SAME");
       
       TLatex *title;
-      title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 5.91 fb^{-1}");
+      title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 15.92 fb^{-1}");
       title->SetNDC();
       title->SetTextAlign(12);
       title->SetX(0.20);
@@ -396,8 +397,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
 
       TH1F *RatioSyst;
       RatioSyst = (TH1F*)Data[h].hist[ch]->Clone();
-      RatioSyst->Divide(MC_syst[h].hist[ch]);  // Should be the histogram with the Total Syst. Unc.
-      // RatioSyst->Divide(Stack[h].hist[ch]); // Histogram with the total uncertainty from the STACK
+      // RatioSyst->Divide(MC_syst[h].hist[ch]);  // Should be the histogram with the Total Syst. Unc.
+      RatioSyst->Divide(Stack[h].hist[ch]); // Histogram with the total uncertainty from the STACK
       std::vector<double> ratioContent;
       for(unsigned int b_r = 1; b_r <= RatioSyst->GetNbinsX(); b_r++) RatioSyst->SetBinContent(b_r,1.0);
 
@@ -462,8 +463,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       else dirfigname_log = "";
       TString dirfigname_pdf;
       TString dirfigname_png;
-      dirfigname_pdf = dirnameIn + "figures_" + fl + "/ttbb/pdf" + dirfigname_log + "/";
-      dirfigname_png = dirnameIn + "figures_" + fl + "/ttbb/png" + dirfigname_log + "/";
+      dirfigname_pdf = dirnameIn + "figures_" + fl + "AlphaS/ttbb/pdf" + dirfigname_log + "/";
+      dirfigname_png = dirnameIn + "figures_" + fl + "AlphaS/ttbb/png" + dirfigname_log + "/";
       // make a dir if it does not exist!!
       gSystem->mkdir(dirfigname_pdf,       kTRUE);
       histocanvas->SaveAs(dirfigname_pdf + WJets[h].hist[ch]->GetName() + ".pdf");
@@ -571,11 +572,13 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
   histoname.push_back("hCSV_Jet-3");
   histoname.push_back("hCSV_Jet-4");
   histoname.push_back("hCSV_Jet-5");
+  histoname.push_back("hKinAdd1CSV");
+  histoname.push_back("hKinAdd2CSV");
   histoname.push_back("hInvMassjj");
   histoname.push_back("hmT");
 
   for(unsigned int h=0; h<histoname.size(); h++){
-    for(unsigned int ch=0; ch<2; ch++) histofile.hist[ch] = (TH1F*)file->Get(histoname[h] + "_" + channel[ch] + "_" + plots);
+    for(unsigned int ch=0; ch<2; ch++) histofile.hist[ch] = (TH1F*)file->Get(plots + "/" + channel[ch] + "/" +  histoname[h] + "_" + channel[ch] + "_" + plots);
     // lep + jets
     histofile.hist[2] = (TH1F*)histofile.hist[0]->Clone();
     histofile.hist[2]->Add(histofile.hist[0], histofile.hist[1]);

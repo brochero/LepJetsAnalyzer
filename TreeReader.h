@@ -120,6 +120,7 @@ Histos    hKinWMass, hKinWpT, hKinTagWMass, hKinTagAddMass, hKinTagAddDR;
 Eff       effKinGenIndex, purKinGenIndex;
 HistosJet hKinJetPt, hGENJetPt;
 Histos    hKinAdd1CSV, hKinAdd2CSV;
+Histos2D  h2DKinAddCSV;
 // GenCone
 Histos hTJetPosition, hWJetPosition, hOJetPosition;
 Histos hGenTagWMass, hGenTagAddMass, hGenTagAddDR;

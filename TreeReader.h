@@ -89,6 +89,7 @@ typedef TH2D *HistosDiJet2D[NhJets][NhJets-1][Nhcuts][Nhch];
 typedef TH1D *Histos       [Nhcuts][Nhch];
 typedef TH2D *Histos2D     [Nhcuts][Nhch];
 typedef TEfficiency *Eff   [Nhcuts][Nhch];
+typedef TProfile    *Prof  [Nhcuts][Nhch];
 
 //----------------------------------------
 //            Histograms
@@ -107,10 +108,11 @@ HistosDiJet2D h2DCSV;
 HistosDiJet hMassJet, hDRJet;
 Histos hInvMassjj;
 // Lepton, trigger SF and b-tag eff.
-Histos hSFIDISOTr, hSFIDISOTrError, hSFIDISO, hSFIDISOError, hSFTrigger, hSFTriggerError;
+Histos   hSFIDISOTr, hSFIDISOTrError, hSFIDISO, hSFIDISOError, hSFTrigger, hSFTriggerError;
 Histos2D h2DSFbtag_Global;
-Histos hSFbtag_Global, hSFbtag_Global_var;
+Histos   hSFbtag_Global, hSFbtag_Global_var;
 Histos2D h2DSFbtag_b, h2DSFbtag_c, h2DSFbtag_l, h2DSFbtag_btag_b, h2DSFbtag_btag_c, h2DSFbtag_btag_l;
+Prof     pSFCSVVsCSV, pSFCSVErrorVsCSV;
 // Kinematic Fitter
 Histos    hKinChi2;
 Histos2D  h2DKinChi2_JetMatch;
@@ -126,7 +128,6 @@ Histos hTJetPosition, hWJetPosition, hOJetPosition;
 Histos hGenTagWMass, hGenTagAddMass, hGenTagAddDR;
 Eff    effTagCSV, purTagCSV;
 TH2D *h2DTJetPosition, *h2DWJetPosition, *h2DttbarNGenJets;
-
 //----------------------------------------
 //           Tree branches
 //----------------------------------------

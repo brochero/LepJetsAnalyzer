@@ -271,9 +271,11 @@ int main(int argc, const char* argv[]){
       /***************************
               SF(b-tag)
       ***************************/
-      h2DSFbtag_Global[j][i]   = new TH2D("h2DSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} Vs  #Delta SF_{b-tag} " + titlenamech[i], 40, 0.0, 4.0, 50, 0.0, 0.5);
-      hSFbtag_Global[j][i]     = new TH1D("hSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} " + titlenamech[i],40, 0.0, 4.0);
-      hSFbtag_Global_var[j][i] = new TH1D("hSFbtag_Global_var_"+namech[i]+"_"+namecut[j], "Global #Delta SF_{b-tag} " + titlenamech[i], 20, 0.0, 0.10);
+      h2DSFbtag_Global[j][i]   = new TH2D("h2DSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} Vs  #Delta SF_{b-tag} " + titlenamech[i] + ";SF_{b-tag};#Delta SF_{b-tag}", 40, 0.0, 4.0, 50, 0.0, 0.5);
+      hSFbtag_Global[j][i]     = new TH1D("hSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} " + titlenamech[i] + ";SF_{b-tag}",40, 0.0, 4.0);
+      hSFbtag_Global_var[j][i] = new TH1D("hSFbtag_Global_var_"+namech[i]+"_"+namecut[j], "Global #Delta SF_{b-tag} " + titlenamech[i] + ";#Delta SF_{b-tag}", 20, 0.0, 0.10);
+      pSFCSVVsCSV[j][i]        = new TProfile("pSFCSVVsCSV_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag}" + titlenamech[i] + ";CSV;SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
+      pSFCSVErrorVsCSV[j][i]   = new TProfile("pSFCSVErrorVsCSV_"+namech[i]+"_"+namecut[j], "#Delta SF_{b-tag}" + titlenamech[i] + ";CSV;#Delta SF_{b-tag}", 20, 0.0, 1.0, -1.0, 1.0);
 
       // B-tag efficiency histograms
       h2DSFbtag_b[j][i]    = new TH2D("hSFbtag_b_"+namech[i]+"_"+namecut[j], "N^{b}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
@@ -284,6 +286,9 @@ int main(int argc, const char* argv[]){
       h2DSFbtag_btag_c[j][i]    = new TH2D("hSFbtag_btag_c_"+namech[i]+"_"+namecut[j], "N_{btag}^{c}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
       h2DSFbtag_btag_l[j][i]    = new TH2D("hSFbtag_btag_l_"+namech[i]+"_"+namecut[j], "N_{btag}^{l}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
       
+      /***************************
+                 Jets 
+      ***************************/
       for(int ij=0; ij<NhJets; ij++){
 	TString jetn;
 	std::ostringstream jni;
@@ -313,7 +318,9 @@ int main(int argc, const char* argv[]){
       
       hInvMassjj[j][i]  = new TH1D("hInvMassjj_" + namech[i] + "_"+namecut[j], "Compatible Inv. Mass " + titlenamech[i],80,40,120);
 
-      // Kinematic Reconstruction
+      /***************************
+        Kinematic Reconstruction
+      ***************************/
       hKinChi2 [j][i] = new TH1D("hKinChi2_" + namech[i] + "_" + namecut[j], "#chi^{2} for Kin. RECO " + titlenamech[i] + ";#chi^{2}", 100,0,20);
       h2DKinChi2_JetMatch[j][i] = new TH2D("hKinChi2_JetMatch_" + namech[i] + "_" + namecut[j], "#chi^{2} Vs # of Jet Matches for Kin. RECO " + titlenamech[i], 100,0,20,5,0,5);
       effKinGenIndex [j][i] = new TEfficiency("effKinGenIndex_" + namech[i] + "_" + namecut[j], "Kin. RECO vs GEN " + titlenamech[i] + "; [0]->All 4 jets, [1]->Top, [2]->W, [3]->Add; Match Eff.", 4,0,4);
@@ -365,7 +372,9 @@ int main(int argc, const char* argv[]){
     }//for(i->channel)
   }//for(j->cut)
   
-  // BEST escenario plots  
+  /***************************
+      BEST escenario plots  
+  ***************************/
   h2DTJetPosition    = new TH2D("h2DTJetPosition","CSV Position for jets from Top Vs Dijet Rank",  7,0,7,7,0,7);
   h2DWJetPosition    = new TH2D("h2DWJetPosition","CSV Position for jets from W Vs Dijet Rank",    7,0,7,7,0,7);
   
@@ -750,7 +759,7 @@ int main(int argc, const char* argv[]){
       hSFbtag_Global    [icut][Channel]->Fill((*Jet_SF_CSV)[btagUnc::CENTRAL], PUWeight);
       hSFbtag_Global_var[icut][Channel]->Fill(btagUnc_val,                     PUWeight);
       h2DSFbtag_Global  [icut][Channel]->Fill((*Jet_SF_CSV)[btagUnc::CENTRAL], btagUnc_val, PUWeight);
-      
+
       // Jet Variables
       int kinGenConeMatch = 0, TopkinGenConeMatch = 0, WkinGenConeMatch = 0, OkinGenConeMatch = 0;
       bool fKinAddjj = true;
@@ -770,7 +779,11 @@ int main(int argc, const char* argv[]){
 	  h2DSFbtag_l[icut][Channel]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight); // l-Flavour
 	  if(jet.CSV > CSV_WP) h2DSFbtag_btag_l[icut][Channel]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight);  
 	}
+	// SF_btag Profile
+	pSFCSVVsCSV[icut][Channel]->Fill(jet.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL], PUWeight);
+	pSFCSVErrorVsCSV[icut][Channel]->Fill(jet.CSV, btagUnc_val, PUWeight);
 	
+	// Jet variables
 	if (ijet < NhJets){
 	  hJetPt[ijet][icut][Channel]->Fill(jet.Pt(), PUWeight);
 	  hCSV  [ijet][icut][Channel]->Fill(jet.CSV,  PUWeight);
@@ -973,9 +986,11 @@ int main(int argc, const char* argv[]){
       hNJets[j][i]->Write();
       hNBtagJets[j][i]->Write();            
 
-      h2DSFbtag_Global[j][i]->Write();
-      hSFbtag_Global[j][i]->Write();
+      h2DSFbtag_Global[j][i]  ->Write();
+      hSFbtag_Global[j][i]    ->Write();
       hSFbtag_Global_var[j][i]->Write();
+      pSFCSVVsCSV[j][i]       ->Write();
+      pSFCSVErrorVsCSV[j][i]  ->Write();
 
       for(int ij=0; ij<NhJets; ij++){
   	hJetPt[ij][j][i]->Write();

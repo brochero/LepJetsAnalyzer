@@ -59,21 +59,21 @@ void Plots(TString plots="2btag", bool LogScale=false) {
   ****************/ 
   // ttbar categorization 
   std::vector<histos> ttbar_0_ttbb;
-  ttbar_0_ttbb = loadhistograms(plots, files + "_ttbar_PowhegPythiattbbAlphaS");
+  ttbar_0_ttbb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbb");
   //ttbar_0_ttbb = loadhistograms(plots, files + "_ttbb_aMCatNLOPythia");
   setuphistograms(ttbar_0_ttbb, col_ttbb);
   std::vector<histos> ttbar_0_ttbj;
-  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_PowhegPythiattbjAlphaS");
+  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbj");
   setuphistograms(ttbar_0_ttb, col_ttb);
   std::vector<histos> ttbar_0_ttcc;
-  ttbar_0_ttcc = loadhistograms(plots, files + "_ttbar_PowhegPythiattccAlphaS");
+  ttbar_0_ttcc = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttcc");
   setuphistograms(ttbar_0_ttcc, col_ttcc);
   std::vector<histos> ttbar_0_ttLF;
-  ttbar_0_ttLF = loadhistograms(plots, files + "_ttbar_PowhegPythiattLFAlphaS");
+  ttbar_0_ttLF = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttLF");
   setuphistograms(ttbar_0_ttLF, col_ttLF);
   // ttbar Bkg/Others
   std::vector<histos> ttbar_0;
-  ttbar_0 = loadhistograms(plots, files + "_ttbar_PowhegPythiattAlphaS");
+  ttbar_0 = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3tt");
   setuphistograms(ttbar_0, col_tt);
   std::vector<histos> ttbar_bkg;
   ttbar_bkg = loadhistograms(plots, files + "_ttbar_PowhegPythiaBkg");
@@ -463,8 +463,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       else dirfigname_log = "";
       TString dirfigname_pdf;
       TString dirfigname_png;
-      dirfigname_pdf = dirnameIn + "figures_" + fl + "AlphaS/ttbb/pdf" + dirfigname_log + "/";
-      dirfigname_png = dirnameIn + "figures_" + fl + "AlphaS/ttbb/png" + dirfigname_log + "/";
+      dirfigname_pdf = dirnameIn + "figures_" + fl + "Tranche3/ttbb/pdf" + dirfigname_log + "/";
+      dirfigname_png = dirnameIn + "figures_" + fl + "Tranche3/ttbb/png" + dirfigname_log + "/";
       // make a dir if it does not exist!!
       gSystem->mkdir(dirfigname_pdf,       kTRUE);
       histocanvas->SaveAs(dirfigname_pdf + WJets[h].hist[ch]->GetName() + ".pdf");
@@ -555,6 +555,7 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
   // Histograms
   histoname.push_back("hPV");
   histoname.push_back("hMET");
+  histoname.push_back("hMET_Phi");
   histoname.push_back("hLepPt");
   histoname.push_back("hLepEta");
   histoname.push_back("hLepPhi");

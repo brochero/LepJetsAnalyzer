@@ -295,7 +295,7 @@ int main(int argc, const char* argv[]){
 	jni << ij;
 	jetn = "Jet-" + jni.str();	
 	
-	hCSV[ij][j][i]   = new TH1D("hCSV_"   + jetn + "_" + namech[i] + "_" + namecut[j],"CSV " + jetn + " " + titlenamech[i] + ";CSVv2",30,0,1);
+	hCSV[ij][j][i]   = new TH1D("hCSV_"   + jetn + "_" + namech[i] + "_" + namecut[j],"CSV " + jetn + " " + titlenamech[i] + ";CSVv2",20,0,1);
 	hCvsL[ij][j][i]  = new TH1D("hCvsL_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsL " + jetn + " " + titlenamech[i] + ";CvsL",20,-1,1);
 	hCvsB[ij][j][i]  = new TH1D("hCvsB_"  + jetn + "_" + namech[i] + "_" + namecut[j],"CvsB " + jetn + " " + titlenamech[i] + ";CvsB",20,-1,1);
 	hJetPt[ij][j][i] = new TH1D("hJetPt_" + jetn + "_" + namech[i] + "_" + namecut[j],"p_{T}^{Jet} " + jetn + " " + titlenamech[i] + ";p_{T}[GeV]",40,0,200);
@@ -311,7 +311,7 @@ int main(int argc, const char* argv[]){
 	  
 	  hMassJet[ij][jj][j][i] = new TH1D("hMassJet_" + jetMassn + "_" + namech[i] + "_" + namecut[j],"Mass of Dijets "+ jetMassn + " " + titlenamech[i] + "; M_{jj}[GeV]",150,0,300);
 	  hDRJet[ij][jj][j][i]   = new TH1D("hDRJet_"   + jetMassn + "_" + namech[i] + "_" + namecut[j],"#Delta R of Dijets "+ jetMassn + " " + titlenamech[i] + "; #Delta R_{jj}",25,0,5);
-	  h2DCSV[ij][jj][j][i]   = new TH2D("h2DCSV_"   + jetMassn + "_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 3rd and 4th Jets " + titlenamech[i], 30,0,1,30,0,1);
+	  h2DCSV[ij][jj][j][i]   = new TH2D("h2DCSV_"   + jetMassn + "_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for 3rd and 4th Jets " + titlenamech[i], 20,0,1,20,0,1);
 	}
 	
       }
@@ -346,9 +346,9 @@ int main(int argc, const char* argv[]){
       hKinthMass[j][i] = new TH1D("hKinthMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Top(had) from Kin Reco " + titlenamech[i] + "; M_{t_{h}} [GeV]", 100, 100, 300);
       hKinthpT[j][i]   = new TH1D("hKinthpT_"   + namech[i] + "_" + namecut[j], "p_{T} of Top(had) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
 
-      hKinAdd1CSV[j][i]   = new TH1D("hKinAdd1CSV_"  + namech[i] + "_" + namecut[j], "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",30,0,1);
-      hKinAdd2CSV[j][i]   = new TH1D("hKinAdd2CSV_"  + namech[i] + "_" + namecut[j], "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",30,0,1);
-      h2DKinAddCSV[j][i]  = new TH2D("h2DKinAddCSV_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for the Add (kin) Jets " + titlenamech[i], 30,0,1,30,0,1);
+      hKinAdd1CSV[j][i]   = new TH1D("hKinAdd1CSV_"  + namech[i] + "_" + namecut[j], "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",20,0,1);
+      hKinAdd2CSV[j][i]   = new TH1D("hKinAdd2CSV_"  + namech[i] + "_" + namecut[j], "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",20,0,1);
+      h2DKinAddCSV[j][i]  = new TH2D("h2DKinAddCSV_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for the Add (kin) Jets " + titlenamech[i], 20,0,1,30,0,1);
 
       TString kinJetname[4];
       kinJetname[0] = "bFromH";
@@ -368,6 +368,11 @@ int main(int argc, const char* argv[]){
       hGenTagWMass  [j][i] = new TH1D("hGenTagWMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W boson " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
       hGenTagAddMass[j][i] = new TH1D("hGenTagAddMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of Add Jets " + titlenamech[i] + "; M [GeV]", 150, 0, 300);
       hGenTagAddDR  [j][i] = new TH1D("hGenTagAddDR_" + namech[i] + "_" + namecut[j], "#Delta R of Add Jets " + titlenamech[i] + "; #Delta R", 25, 0, 5);
+      hGenTagAdd1CSV[j][i]   = new TH1D("hGenTagAdd1CSV_"  + namech[i] + "_" + namecut[j], "CSV For add Jet-1 from GenTag " + titlenamech[i] + ";CSVv2",20,0,1);
+      hGenTagAdd2CSV[j][i]   = new TH1D("hGenTagAdd2CSV_"  + namech[i] + "_" + namecut[j], "CSV For add Jet-2 from GenTag " + titlenamech[i] + ";CSVv2",20,0,1);
+      h2DGenTagAddCSV[j][i]  = new TH2D("h2DGenTagAddCSV_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for the Add (GenTag) Jets " + titlenamech[i], 20,0,1,30,0,1);
+
+
 
     }//for(i->channel)
   }//for(j->cut)
@@ -808,6 +813,10 @@ int main(int argc, const char* argv[]){
 	     fGenAddjj){
 	    hGenTagAddMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
 	    hGenTagAddDR  [icut][Channel]->Fill(DijetDR,      PUWeight);
+
+	    hGenTagAdd1CSV [icut][Channel]->Fill(jet.CSV, PUWeight);
+	    hGenTagAdd2CSV [icut][Channel]->Fill(jet_.CSV, PUWeight);
+	    h2DGenTagAddCSV[icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
 	    fGenAddjj = false;
 	  }
 	  // Kin Mass
@@ -1056,10 +1065,12 @@ int main(int argc, const char* argv[]){
       hWJetPosition [j][i]->Write();
       hOJetPosition [j][i]->Write();
 
-      hGenTagWMass  [j][i]->Write();
-      hGenTagAddMass[j][i]->Write();
-      hGenTagAddDR  [j][i]->Write();
-
+      hGenTagWMass    [j][i]->Write();
+      hGenTagAddMass  [j][i]->Write();
+      hGenTagAddDR    [j][i]->Write();
+      hGenTagAdd1CSV  [j][i]->Write();
+      hGenTagAdd2CSV  [j][i]->Write();
+      h2DGenTagAddCSV [j][i]->Write();
       // Purities and Efficiencies
       effKinGenIndex [j][i]->Write();
       purKinGenIndex [j][i]->Write();

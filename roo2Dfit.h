@@ -35,7 +35,7 @@ typedef struct HistoFit{
 
 
 TString dirnameIn= "TopResults/";
-TString fl  = "hSF-pTj30_FitBin20-v1_Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1";  
+TString fl  = "hSF-pTj30_FitBin20-v3_Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1";  
 
 enum FileSample{data, 
 		ttbb, ttb, ttcc, ttLF, ttccLF, Bkgtt, ttjj, 

@@ -187,8 +187,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
     for(int ch=0; ch<3; ch++){
       st.mc[ch]     = new THStack(variable, "");
       st_bkg.mc[ch] = new THStack(variable, "");
-      st.mc[ch]     -> SetHistogram( (TH1F*)WJets[h].hist[ch]->Clone());
-      st_bkg.mc[ch] -> SetHistogram( (TH1F*)WJets[h].hist[ch]->Clone());      
+      st.mc[ch]     -> SetHistogram( (TH1D*)WJets[h].hist[ch]->Clone());
+      st_bkg.mc[ch] -> SetHistogram( (TH1D*)WJets[h].hist[ch]->Clone());      
     }
     Stack.push_back(st);
     Stack_bkg.push_back(st_bkg);
@@ -296,12 +296,12 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       ttbar_1[h].hist[ch]->SetLineColor(6);
       ttbar_1[h].hist[ch]->SetLineStyle(2);
       ttbar_1[h].hist[ch]->SetFillColor(0);
-      ttbar_1[h].hist[ch]->Draw("histoSAME");
+      ttbar_1[h].hist[ch]->Draw("histSAME");
 
       ttbar_2[h].hist[ch]->SetLineColor(8);
       ttbar_2[h].hist[ch]->SetLineStyle(4);
       ttbar_2[h].hist[ch]->SetFillColor(0);
-      ttbar_2[h].hist[ch]->Draw("histoSAME");
+      ttbar_2[h].hist[ch]->Draw("histSAME");
       //-------------------------------------------------------
       // Data Histogram
       Data[h].hist[ch]->SetMarkerStyle(20);
@@ -391,12 +391,12 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       pad[1]->cd();
       //-------------------------------------------------------
       //Graph Ratio Clone
-      TH1F *Ratio;
-      Ratio = (TH1F*)Data[h].hist[ch]->Clone();
+      TH1D *Ratio;
+      Ratio = (TH1D*)Data[h].hist[ch]->Clone();
       Ratio->Divide(Stack[h].hist[ch]);
 
-      TH1F *RatioSyst;
-      RatioSyst = (TH1F*)Data[h].hist[ch]->Clone();
+      TH1D *RatioSyst;
+      RatioSyst = (TH1D*)Data[h].hist[ch]->Clone();
       // RatioSyst->Divide(MC_syst[h].hist[ch]);  // Should be the histogram with the Total Syst. Unc.
       RatioSyst->Divide(Stack[h].hist[ch]); // Histogram with the total uncertainty from the STACK
       std::vector<double> ratioContent;
@@ -432,24 +432,26 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       
       //-------------------------------------------------------
       //Graph Ratio other ttbar generators
-      TH1F *Ratio_1;
-      Ratio_1 = (TH1F*)Data[h].hist[ch]->Clone();
+      TH1D *Ratio_1;
+      Ratio_1 = (TH1D*)Data[h].hist[ch]->Clone();
       Ratio_1->Divide(ttbar_1[h].hist[ch]);
       Ratio_1->SetLineColor(6);
       Ratio_1->SetLineStyle(2);
       Ratio_1->SetLineWidth(2);
       Ratio_1->SetFillColor(0);
 
-      TH1F *Ratio_2;
-      Ratio_2 = (TH1F*)Data[h].hist[ch]->Clone();
+      TH1D *Ratio_2;
+      Ratio_2 = (TH1D*)Data[h].hist[ch]->Clone();
       Ratio_2->Divide(ttbar_2[h].hist[ch]);
       Ratio_2->SetLineColor(8);
       Ratio_2->SetLineStyle(4);
       Ratio_2->SetLineWidth(2);
       Ratio_2->SetFillColor(0);
+
       //-------------------------------------------------------
       // Draw Ratios
       Ratio->Draw();
+
       thegraphRatioSyst->Draw("e2");
       Ratio->Draw("histpSAME");
       Ratio_1->Draw("histSAME");
@@ -463,8 +465,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       else dirfigname_log = "";
       TString dirfigname_pdf;
       TString dirfigname_png;
-      dirfigname_pdf = dirnameIn + "figures_" + fl + "Tranche3/ttbb/pdf" + dirfigname_log + "/";
-      dirfigname_png = dirnameIn + "figures_" + fl + "Tranche3/ttbb/png" + dirfigname_log + "/";
+      dirfigname_pdf = dirnameIn + "figures_" + fl + "/ttbb/pdf" + dirfigname_log + "/";
+      dirfigname_png = dirnameIn + "figures_" + fl + "/ttbb/png" + dirfigname_log + "/";
       // make a dir if it does not exist!!
       gSystem->mkdir(dirfigname_pdf,       kTRUE);
       histocanvas->SaveAs(dirfigname_pdf + WJets[h].hist[ch]->GetName() + ".pdf");
@@ -511,7 +513,7 @@ std::vector<histos> addhistograms(std::vector<histos> histos_0, std::vector<hist
 
   for(unsigned int h = 0; h < histos_0.size(); h++){
     for(unsigned int ch=0; ch<3; ch++){  
-      histos.hist[ch] = (TH1F*)histos_0[h].hist[ch]->Clone();
+      histos.hist[ch] = (TH1D*)histos_0[h].hist[ch]->Clone();
       histos.hist[ch]->Add(histos_0[h].hist[ch], histos_1[h].hist[ch]);
     }
     sum.push_back(histos);
@@ -525,7 +527,7 @@ std::vector<histos> addstack(std::vector<histos> stack_0, std::vector<histos> hi
   for(unsigned int h = 0; h < histos_0.size(); h++){
     for(unsigned int ch=0; ch<3; ch++){
       stack_0[h].mc[ch]->Add(histos_0[h].hist[ch]); // add histo to stack
-      stack_0[h].hist[ch] = (TH1F*) stack_0[h].mc[ch]->GetStack()->Last()->Clone(); // create histo with the final stack
+      stack_0[h].hist[ch] = (TH1D*) stack_0[h].mc[ch]->GetStack()->Last()->Clone(); // create histo with the final stack
     }
   }
   
@@ -579,9 +581,9 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
   histoname.push_back("hmT");
 
   for(unsigned int h=0; h<histoname.size(); h++){
-    for(unsigned int ch=0; ch<2; ch++) histofile.hist[ch] = (TH1F*)file->Get(plots + "/" + channel[ch] + "/" +  histoname[h] + "_" + channel[ch] + "_" + plots);
+    for(unsigned int ch=0; ch<2; ch++) histofile.hist[ch] = (TH1D*)file->Get(plots + "/" + channel[ch] + "/" +  histoname[h] + "_" + channel[ch] + "_" + plots);
     // lep + jets
-    histofile.hist[2] = (TH1F*)histofile.hist[0]->Clone();
+    histofile.hist[2] = (TH1D*)histofile.hist[0]->Clone();
     histofile.hist[2]->Add(histofile.hist[0], histofile.hist[1]);
     histofile.hist[2]->SetName(histoname[h] + "_" + channel[2] + "_" + plots);
 

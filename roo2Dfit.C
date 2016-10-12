@@ -11,7 +11,7 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
   eff_Ratiobbjj[1] = 0.1583/0.3710;
   eff_Ratiobbjj[2] = 0.1734/0.4034;
   // Acceptance Ratios
-  float acc_Ratiobbjj[3]; // Acc_ttjj/Eff_ttbb    
+  float acc_Ratiobbjj[3]; // Acc_ttjj/Acc_ttbb    
   acc_Ratiobbjj[0] = 0.276/0.322; 
   acc_Ratiobbjj[1] = 0.275/0.320; 
   //acc_Ratiobbjj[2] = 0.275/0.320; 
@@ -23,8 +23,9 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
 
   InFile[data] = LoadSample("_DataSingleLep.root");
 
-  InFile[ttbb]   = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttbb"   + SystVar + ".root");
-  InFile[ttb]    = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttbj"    + SystVar + ".root");
+  //InFile[ttbb]   = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttbb"   + SystVar + ".root");
+  InFile[ttbb]   = LoadSample("_ttbb_aMCatNLOPythia.root");
+  InFile[ttb]    = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttbj"   + SystVar + ".root");
   InFile[ttcc]   = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttcc"   + SystVar + ".root");
   InFile[ttLF]   = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttLF"   + SystVar + ".root"); // Includes ttc
   InFile[ttccLF] = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttccLF" + SystVar + ".root");
@@ -35,19 +36,16 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
   // InFile[ttLF]   = LoadSample("_ttbar_PowhegPythiattLF" + SystVar + ".root"); // Includes ttc
   // InFile[ttccLF] = LoadSample("_ttbar_PowhegPythiattccLF" + SystVar + ".root");
 
-  InFile[WJets]     = LoadSample("_WJets_aMCatNLO.root");
-  InFile[ZJets]     = LoadSample("_ZJets_aMCatNLO.root");
-  InFile[SingleTop] = LoadSample("_SingleTop.root");
-  //InFile[SingleTop] = LoadSample("_SingleTop" + SystVar + ".root");
-  InFile[VV]        = LoadSample("_VV.root");
+  InFile[WJets]     = LoadSample("_WJets_aMCatNLO" + SystVar + ".root");
+  InFile[ZJets]     = LoadSample("_ZJets_aMCatNLO" + SystVar + ".root");
+  InFile[SingleTop] = LoadSample("_SingleTop" + SystVar + ".root");
+  InFile[VV]        = LoadSample("_VV" + SystVar + ".root");
   InFile[QCD]       = LoadSample("_QCD.root");
 
   // Add Backgrounds
   InFile[Bkgtt]    = LoadSample("_ttbar_PowhegPythiaBkgtt" + SystVar + ".root"); // ttbarBkg + tt
-  // InFile[BkgOther] = LoadSample("_BkgOther" + SystVar + ".root"); 
-  // InFile[BkgFull]  = LoadSample("_BkgFull" + SystVar + ".root"); // BkgOther + Bkgtt
-  InFile[BkgOther] = LoadSample("_BkgOther.root"); 
-  InFile[BkgFull]  = LoadSample("_BkgFull.root"); // BkgOther + Bkgtt
+  InFile[BkgOther] = LoadSample("_BkgOther" + SystVar + ".root"); 
+  InFile[BkgFull]  = LoadSample("_BkgFull" + SystVar + ".root"); // BkgOther + Bkgtt
 
 
   TString name_ch[3];
@@ -76,10 +74,10 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
   
   
   TString dirfigname_pdf;
-  dirfigname_pdf = dirnameIn + "FIT-" + nModel + "_figures_" + fl + SystVar + "/Kinpdf/";
+  dirfigname_pdf = dirnameIn + "figures_" + fl + "/ttbbFITttbbaMCatNLO" + nModel + SystVar + "/pdf/";
   // make a dir if it does not exist!!
   gSystem->mkdir(dirfigname_pdf,       kTRUE);
-  TString Rfile = dirnameIn + "FIT-" + nModel + "_figures_" + fl + SystVar + "/KinFitResult.log";
+  TString Rfile =  dirnameIn + "figures_" + fl + "/ttbbFITttbbaMCatNLO" + nModel + SystVar + "/FitResult.log";
   FILE* fResult = fopen(Rfile, "w");
 
   for (unsigned int ch=0; ch<3; ch++){

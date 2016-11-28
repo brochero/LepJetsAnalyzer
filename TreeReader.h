@@ -19,6 +19,8 @@
 #include "TStopwatch.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TH1D.h"
+#include "TH2D.h"
 #include "TProfile.h"
 #include "TEfficiency.h"
 #include "TFile.h"
@@ -65,7 +67,7 @@ float DiJetMassCorrection(std::vector<ComJet> &Jets, bool ReArrange);
 bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id);
 
 // Luminosity
-float LuminNorm = 15920; //[pb-1]
+float LuminNorm = 15941.38; //[pb-1]
 // Output Dir
 TString dirname="TopResults";
 // Number of Histograms
@@ -77,16 +79,17 @@ TString namech     [Nhch + 1] = {"mujets","ejets","lepjets"};
 TString titlenamech[Nhch]     = {"#mu+Jets","e+Jets"};
 TString namecut    [Nhcuts]   = {"lepton","6Jets","2btag","3btag","4Jets","4Jets2btag","Only2btag"};
 // Acceptancies and Efficiencies
-int   AccEvent[Nhcuts][Nhch+1];
-float EffEvent[Nhcuts][Nhch+1];
+int    AccEvent[Nhcuts][Nhch+1];
+double EffEvent[Nhcuts][Nhch+1];
 // Histograms definitions
-typedef TH1F *HistosJet    [NhJets][Nhcuts][Nhch];
-typedef TH2F *HistosJet2D  [NhJets][Nhcuts][Nhch];
-typedef TH1F *HistosDiJet  [NhJets][NhJets-1][Nhcuts][Nhch];
-typedef TH2F *HistosDiJet2D[NhJets][NhJets-1][Nhcuts][Nhch];
-typedef TH1F *Histos       [Nhcuts][Nhch];
-typedef TH2F *Histos2D     [Nhcuts][Nhch];
+typedef TH1D *HistosJet    [NhJets][Nhcuts][Nhch];
+typedef TH2D *HistosJet2D  [NhJets][Nhcuts][Nhch];
+typedef TH1D *HistosDiJet  [NhJets][NhJets-1][Nhcuts][Nhch];
+typedef TH2D *HistosDiJet2D[NhJets][NhJets-1][Nhcuts][Nhch];
+typedef TH1D *Histos       [Nhcuts][Nhch];
+typedef TH2D *Histos2D     [Nhcuts][Nhch];
 typedef TEfficiency *Eff   [Nhcuts][Nhch];
+typedef TProfile    *Prof  [Nhcuts][Nhch];
 
 //----------------------------------------
 //            Histograms
@@ -105,24 +108,27 @@ HistosDiJet2D h2DCSV;
 HistosDiJet hMassJet, hDRJet;
 Histos hInvMassjj;
 // Lepton, trigger SF and b-tag eff.
-Histos hSFIDISOTr, hSFIDISOTrError, hSFIDISO, hSFIDISOError, hSFTrigger, hSFTriggerError;
+Histos   hSFIDISOTr, hSFIDISOTrError, hSFIDISO, hSFIDISOError, hSFTrigger, hSFTriggerError;
 Histos2D h2DSFbtag_Global;
-Histos hSFbtag_Global, hSFbtag_Global_var;
+Histos   hSFbtag_Global, hSFbtag_Global_var;
 Histos2D h2DSFbtag_b, h2DSFbtag_c, h2DSFbtag_l, h2DSFbtag_btag_b, h2DSFbtag_btag_c, h2DSFbtag_btag_l;
+Prof     pSFCSVVsCSV, pSFCSVErrorVsCSV;
 // Kinematic Fitter
 Histos    hKinChi2;
 Histos2D  h2DKinChi2_JetMatch;
 Histos    hKinWlTransMass, hKinWlMass, hKinWlpT, hKintlMass, hKintlpT;
 Histos    hKinWhMass, hKinWhpT, hKinthMass, hKinthpT;
 Histos    hKinWMass, hKinWpT, hKinTagWMass, hKinTagAddMass, hKinTagAddDR;
-Eff       effKinGenIndex, purKinGenIndex;
+Eff       effKinGenIndex, purKinGenIndex, effKinGenIndexVsChi2;
 HistosJet hKinJetPt, hGENJetPt;
+Histos    hKinAdd1CSV, hKinAdd2CSV;
+Histos2D  h2DKinAddCSV;
 // GenCone
-Histos hTJetPosition, hWJetPosition, hOJetPosition;
-Histos hGenTagWMass, hGenTagAddMass, hGenTagAddDR;
+Histos   hTJetPosition, hWJetPosition, hOJetPosition;
+Histos   hGenTagWMass, hGenTagAddMass, hGenTagAddDR, hGenTagAdd1CSV, hGenTagAdd2CSV;
+Histos2D h2DGenTagAddCSV;
 Eff    effTagCSV, purTagCSV;
-TH2F *h2DTJetPosition, *h2DWJetPosition, *h2DttbarNGenJets;
-
+TH2D *h2DTJetPosition, *h2DWJetPosition, *h2DttbarNGenJets;
 //----------------------------------------
 //           Tree branches
 //----------------------------------------

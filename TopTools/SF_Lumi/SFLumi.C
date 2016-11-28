@@ -56,7 +56,7 @@ float SFLumi(TString filename,
   if(filename.Contains("ttZ"))             NormWeight = Lumi * (1.0/NGenEvents) * (0.78);    // [pb]
   
   if(filename.Contains("ttbar_LepJetsPowhegPythia"))  NormWeight = Lumi * (1.0/NGenEvents) * (356.4); // [pb] Xsec*Br(lep+Jets) = (831.76) * 2[(0.1086*3) * (0.67)] = 363.12 (356.4)
-  if(filename.Contains("ttbb_aMCatNLOMadspinPythia")) NormWeight = Lumi * (1.0/NGenEvents) * (13.93); // [pb] Xsec*Br(tt+bb)
+  if(filename.Contains("ttbb_aMCatNLOPythia"))        NormWeight = Lumi * (1.0/NGenEvents) * (13.93); // [pb] Xsec*Br(tt+bb)
   if(filename.Contains("ttbar_PowhegPythia"))         NormWeight = Lumi * (1.0/NGenEvents) * (831.76); // [pb] Br = (leptonic) * Hadronic = (0.1086*3) * (0.67)
   if(filename.Contains("ttbar_aMCatNLO"))             NormWeight = Lumi * (1.0/NGenEvents) * (831.76); // * (0.1086*3.0*3.0); // Br correction
   if(filename.Contains("ttbar_Madgraph"))             NormWeight = Lumi * (1.0/NGenEvents) * (831.76);  

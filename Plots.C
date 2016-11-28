@@ -59,20 +59,21 @@ void Plots(TString plots="2btag", bool LogScale=false) {
   ****************/ 
   // ttbar categorization 
   std::vector<histos> ttbar_0_ttbb;
-  ttbar_0_ttbb = loadhistograms(plots, files + "_ttbar_PowhegPythiattbb");
+  ttbar_0_ttbb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbb");
+  //ttbar_0_ttbb = loadhistograms(plots, files + "_ttbb_aMCatNLOPythia");
   setuphistograms(ttbar_0_ttbb, col_ttbb);
   std::vector<histos> ttbar_0_ttbj;
-  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_PowhegPythiattbj");
+  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbj");
   setuphistograms(ttbar_0_ttb, col_ttb);
   std::vector<histos> ttbar_0_ttcc;
-  ttbar_0_ttcc = loadhistograms(plots, files + "_ttbar_PowhegPythiattcc");
+  ttbar_0_ttcc = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttcc");
   setuphistograms(ttbar_0_ttcc, col_ttcc);
   std::vector<histos> ttbar_0_ttLF;
-  ttbar_0_ttLF = loadhistograms(plots, files + "_ttbar_PowhegPythiattLF");
+  ttbar_0_ttLF = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttLF");
   setuphistograms(ttbar_0_ttLF, col_ttLF);
   // ttbar Bkg/Others
   std::vector<histos> ttbar_0;
-  ttbar_0 = loadhistograms(plots, files + "_ttbar_PowhegPythiatt");
+  ttbar_0 = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3tt");
   setuphistograms(ttbar_0, col_tt);
   std::vector<histos> ttbar_bkg;
   ttbar_bkg = loadhistograms(plots, files + "_ttbar_PowhegPythiaBkg");
@@ -133,8 +134,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
        W+Jets
   ****************/ 
   std::vector<histos> WJets;
-  // WJets = loadhistograms(plots, files + "_WJets_aMCatNLO");
-  WJets = loadhistograms(plots, files + "_WJets_Madgraph");
+  WJets = loadhistograms(plots, files + "_WJets_aMCatNLO");
+  //WJets = loadhistograms(plots, files + "_WJets_Madgraph");
   setuphistograms(WJets, col_WJets);
 
   /****************
@@ -152,9 +153,9 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       ttbar+V
   ****************/ 
   std::vector<histos> ttbarW;
-  ttbarW = loadhistograms(plots, files + "_ttbarW_Madgraph");
+  ttbarW = loadhistograms(plots, files + "_ttW_Madgraph");
   std::vector<histos> ttbarZ;
-  ttbarZ = loadhistograms(plots, files + "_ttbarZ_Madgraph");
+  ttbarZ = loadhistograms(plots, files + "_ttZ_Madgraph");
   std::vector<histos> ttbarV;  
   ttbarV = addhistograms(ttbarW, ttbarZ);
   setuphistograms(ttbarV, col_ttbarV);
@@ -163,7 +164,7 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       ttbar+H
   ****************/ 
   std::vector<histos> ttbarH;
-  ttbarH = loadhistograms(plots, files + "_ttbarHbb_Powheg");
+  ttbarH = loadhistograms(plots, files + "_ttHbb_PowhegPythia");
   setuphistograms(ttbarH, col_ttbarH);
 
   /****************
@@ -186,8 +187,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
     for(int ch=0; ch<3; ch++){
       st.mc[ch]     = new THStack(variable, "");
       st_bkg.mc[ch] = new THStack(variable, "");
-      st.mc[ch]     -> SetHistogram( (TH1F*)WJets[h].hist[ch]->Clone());
-      st_bkg.mc[ch] -> SetHistogram( (TH1F*)WJets[h].hist[ch]->Clone());      
+      st.mc[ch]     -> SetHistogram( (TH1D*)WJets[h].hist[ch]->Clone());
+      st_bkg.mc[ch] -> SetHistogram( (TH1D*)WJets[h].hist[ch]->Clone());      
     }
     Stack.push_back(st);
     Stack_bkg.push_back(st_bkg);
@@ -282,8 +283,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       
       //-------------------------------------------------------
       // Band error
-      TGraphErrors *thegraph = new TGraphErrors(MC_syst[h].hist[ch]);  // Full set of Syst. Unc.
-      // TGraphErrors *thegraph = new TGraphErrors(Stack[h].hist[ch]); // Just Statistical Unc. 
+      // TGraphErrors *thegraph = new TGraphErrors(MC_syst[h].hist[ch]);  // Full set of Syst. Unc.
+      TGraphErrors *thegraph = new TGraphErrors(Stack[h].hist[ch]); // Just Statistical Unc. 
       thegraph->SetName("thegraph");
       thegraph->SetFillStyle(1001);
       thegraph->SetFillColor(chatch);
@@ -295,12 +296,12 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       ttbar_1[h].hist[ch]->SetLineColor(6);
       ttbar_1[h].hist[ch]->SetLineStyle(2);
       ttbar_1[h].hist[ch]->SetFillColor(0);
-      ttbar_1[h].hist[ch]->Draw("histoSAME");
+      ttbar_1[h].hist[ch]->Draw("histSAME");
 
       ttbar_2[h].hist[ch]->SetLineColor(8);
       ttbar_2[h].hist[ch]->SetLineStyle(4);
       ttbar_2[h].hist[ch]->SetFillColor(0);
-      ttbar_2[h].hist[ch]->Draw("histoSAME");
+      ttbar_2[h].hist[ch]->Draw("histSAME");
       //-------------------------------------------------------
       // Data Histogram
       Data[h].hist[ch]->SetMarkerStyle(20);
@@ -363,7 +364,7 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       titlePr->Draw("SAME");
       
       TLatex *title;
-      title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 5.91 fb^{-1}");
+      title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 15.92 fb^{-1}");
       title->SetNDC();
       title->SetTextAlign(12);
       title->SetX(0.20);
@@ -390,14 +391,14 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       pad[1]->cd();
       //-------------------------------------------------------
       //Graph Ratio Clone
-      TH1F *Ratio;
-      Ratio = (TH1F*)Data[h].hist[ch]->Clone();
+      TH1D *Ratio;
+      Ratio = (TH1D*)Data[h].hist[ch]->Clone();
       Ratio->Divide(Stack[h].hist[ch]);
 
-      TH1F *RatioSyst;
-      RatioSyst = (TH1F*)Data[h].hist[ch]->Clone();
-      RatioSyst->Divide(MC_syst[h].hist[ch]);  // Should be the histogram with the Total Syst. Unc.
-      // RatioSyst->Divide(Stack[h].hist[ch]); // Histogram with the total uncertainty from the STACK
+      TH1D *RatioSyst;
+      RatioSyst = (TH1D*)Data[h].hist[ch]->Clone();
+      // RatioSyst->Divide(MC_syst[h].hist[ch]);  // Should be the histogram with the Total Syst. Unc.
+      RatioSyst->Divide(Stack[h].hist[ch]); // Histogram with the total uncertainty from the STACK
       std::vector<double> ratioContent;
       for(unsigned int b_r = 1; b_r <= RatioSyst->GetNbinsX(); b_r++) RatioSyst->SetBinContent(b_r,1.0);
 
@@ -431,24 +432,26 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       
       //-------------------------------------------------------
       //Graph Ratio other ttbar generators
-      TH1F *Ratio_1;
-      Ratio_1 = (TH1F*)Data[h].hist[ch]->Clone();
+      TH1D *Ratio_1;
+      Ratio_1 = (TH1D*)Data[h].hist[ch]->Clone();
       Ratio_1->Divide(ttbar_1[h].hist[ch]);
       Ratio_1->SetLineColor(6);
       Ratio_1->SetLineStyle(2);
       Ratio_1->SetLineWidth(2);
       Ratio_1->SetFillColor(0);
 
-      TH1F *Ratio_2;
-      Ratio_2 = (TH1F*)Data[h].hist[ch]->Clone();
+      TH1D *Ratio_2;
+      Ratio_2 = (TH1D*)Data[h].hist[ch]->Clone();
       Ratio_2->Divide(ttbar_2[h].hist[ch]);
       Ratio_2->SetLineColor(8);
       Ratio_2->SetLineStyle(4);
       Ratio_2->SetLineWidth(2);
       Ratio_2->SetFillColor(0);
+
       //-------------------------------------------------------
       // Draw Ratios
       Ratio->Draw();
+
       thegraphRatioSyst->Draw("e2");
       Ratio->Draw("histpSAME");
       Ratio_1->Draw("histSAME");
@@ -510,7 +513,7 @@ std::vector<histos> addhistograms(std::vector<histos> histos_0, std::vector<hist
 
   for(unsigned int h = 0; h < histos_0.size(); h++){
     for(unsigned int ch=0; ch<3; ch++){  
-      histos.hist[ch] = (TH1F*)histos_0[h].hist[ch]->Clone();
+      histos.hist[ch] = (TH1D*)histos_0[h].hist[ch]->Clone();
       histos.hist[ch]->Add(histos_0[h].hist[ch], histos_1[h].hist[ch]);
     }
     sum.push_back(histos);
@@ -524,7 +527,7 @@ std::vector<histos> addstack(std::vector<histos> stack_0, std::vector<histos> hi
   for(unsigned int h = 0; h < histos_0.size(); h++){
     for(unsigned int ch=0; ch<3; ch++){
       stack_0[h].mc[ch]->Add(histos_0[h].hist[ch]); // add histo to stack
-      stack_0[h].hist[ch] = (TH1F*) stack_0[h].mc[ch]->GetStack()->Last()->Clone(); // create histo with the final stack
+      stack_0[h].hist[ch] = (TH1D*) stack_0[h].mc[ch]->GetStack()->Last()->Clone(); // create histo with the final stack
     }
   }
   
@@ -554,6 +557,7 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
   // Histograms
   histoname.push_back("hPV");
   histoname.push_back("hMET");
+  histoname.push_back("hMET_Phi");
   histoname.push_back("hLepPt");
   histoname.push_back("hLepEta");
   histoname.push_back("hLepPhi");
@@ -571,13 +575,15 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
   histoname.push_back("hCSV_Jet-3");
   histoname.push_back("hCSV_Jet-4");
   histoname.push_back("hCSV_Jet-5");
+  histoname.push_back("hKinAdd1CSV");
+  histoname.push_back("hKinAdd2CSV");
   histoname.push_back("hInvMassjj");
   histoname.push_back("hmT");
 
   for(unsigned int h=0; h<histoname.size(); h++){
-    for(unsigned int ch=0; ch<2; ch++) histofile.hist[ch] = (TH1F*)file->Get(plots + "/" + channel[ch] + "/" +  histoname[h] + "_" + channel[ch] + "_" + plots);
+    for(unsigned int ch=0; ch<2; ch++) histofile.hist[ch] = (TH1D*)file->Get(plots + "/" + channel[ch] + "/" +  histoname[h] + "_" + channel[ch] + "_" + plots);
     // lep + jets
-    histofile.hist[2] = (TH1F*)histofile.hist[0]->Clone();
+    histofile.hist[2] = (TH1D*)histofile.hist[0]->Clone();
     histofile.hist[2]->Add(histofile.hist[0], histofile.hist[1]);
     histofile.hist[2]->SetName(histoname[h] + "_" + channel[2] + "_" + plots);
 

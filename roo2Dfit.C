@@ -2,10 +2,20 @@
 
 void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
 
-  setTDRStyle();
-
   gSystem->Load("libRooFit") ;
   using namespace RooFit;
+
+  // Efficiency Ratios
+  float eff_Ratiobbjj[3]; // Eff_ttjj/Eff_ttbb    
+  eff_Ratiobbjj[0] = 0.1885/0.4359; 
+  eff_Ratiobbjj[1] = 0.1583/0.3710;
+  eff_Ratiobbjj[2] = 0.1734/0.4034;
+  // Acceptance Ratios
+  float acc_Ratiobbjj[3]; // Acc_ttjj/Acc_ttbb    
+  acc_Ratiobbjj[0] = 0.276/0.322; 
+  acc_Ratiobbjj[1] = 0.275/0.320; 
+  //acc_Ratiobbjj[2] = 0.275/0.320; 
+  acc_Ratiobbjj[2] = 0.094428/0.109935; // Includes ttjj events in all channels
 
   HistoFit InFile[15];
   float ratio[15];
@@ -13,27 +23,27 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
 
   InFile[data] = LoadSample("_DataSingleLep.root");
 
-  // InFile[ttbb]   = LoadSample("_ttbar_PowhegPythiattbb"   + SystVar + ".root");
-  // InFile[ttb]    = LoadSample("_ttbar_PowhegPythiattb"    + SystVar + ".root");
-  // InFile[ttcc]   = LoadSample("_ttbar_PowhegPythiattcc"   + SystVar + ".root");
-  // InFile[ttLF]   = LoadSample("_ttbar_PowhegPythiattLF"   + SystVar + ".root"); // Includes ttc
+  //InFile[ttbb]   = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttbb"   + SystVar + ".root");
+  InFile[ttbb]   = LoadSample("_ttbb_aMCatNLOPythia.root");
+  InFile[ttb]    = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttbj"   + SystVar + ".root");
+  InFile[ttcc]   = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttcc"   + SystVar + ".root");
+  InFile[ttLF]   = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttLF"   + SystVar + ".root"); // Includes ttc
+  InFile[ttccLF] = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttccLF" + SystVar + ".root");
+
+  // infile[ttbb]   = LoadSample("_ttbar_PowhegPythiattbb" + SystVar + ".root");
+  // InFile[ttb]    = LoadSample("_ttbar_PowhegPythiattb"  + SystVar + ".root");
+  // InFile[ttcc]   = LoadSample("_ttbar_PowhegPythiattcc" + SystVar + ".root");
+  // InFile[ttLF]   = LoadSample("_ttbar_PowhegPythiattLF" + SystVar + ".root"); // Includes ttc
   // InFile[ttccLF] = LoadSample("_ttbar_PowhegPythiattccLF" + SystVar + ".root");
 
-  InFile[ttbb]   = LoadSample("_ttbar_PowhegPythiattbb" + SystVar + ".root");
-  InFile[ttb]    = LoadSample("_ttbar_PowhegPythiattb"  + SystVar + ".root");
-  InFile[ttcc]   = LoadSample("_ttbar_PowhegPythiattcc" + SystVar + ".root");
-  InFile[ttLF]   = LoadSample("_ttbar_PowhegPythiattLF" + SystVar + ".root"); // Includes ttc
-  InFile[ttccLF] = LoadSample("_ttbar_PowhegPythiattccLF" + SystVar + ".root");
-
-  InFile[WJets]     = LoadSample("_WJets_MCatNLO.root");
-  InFile[ZJets]     = LoadSample("_ZJets_MCatNLO.root");
-  //InFile[SingleTop] = LoadSample("_SingleTop" + SystVar + ".root");
+  InFile[WJets]     = LoadSample("_WJets_aMCatNLO" + SystVar + ".root");
+  InFile[ZJets]     = LoadSample("_ZJets_aMCatNLO" + SystVar + ".root");
   InFile[SingleTop] = LoadSample("_SingleTop" + SystVar + ".root");
-  InFile[VV]        = LoadSample("_VV.root");
+  InFile[VV]        = LoadSample("_VV" + SystVar + ".root");
   InFile[QCD]       = LoadSample("_QCD.root");
 
   // Add Backgrounds
-  InFile[Bkgtt]    = LoadSample("_ttbar_PowhegPythia" + SystVar + "Bkgtt.root"); // ttbarBkg + tt
+  InFile[Bkgtt]    = LoadSample("_ttbar_PowhegPythiaBkgtt" + SystVar + ".root"); // ttbarBkg + tt
   InFile[BkgOther] = LoadSample("_BkgOther" + SystVar + ".root"); 
   InFile[BkgFull]  = LoadSample("_BkgFull" + SystVar + ".root"); // BkgOther + Bkgtt
 
@@ -64,13 +74,12 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
   
   
   TString dirfigname_pdf;
-  dirfigname_pdf = dirnameIn + "FIT-" + nModel + "_figures_" + fl + SystVar + "/pdf/";
+  dirfigname_pdf = dirnameIn + "figures_" + fl + "/ttbbFITttbbaMCatNLO" + nModel + SystVar + "/pdf/";
   // make a dir if it does not exist!!
   gSystem->mkdir(dirfigname_pdf,       kTRUE);
-  TString Rfile = dirnameIn + "FIT-" + nModel + "_figures_" + fl + SystVar + "/FitResult.log";
+  TString Rfile =  dirnameIn + "figures_" + fl + "/ttbbFITttbbaMCatNLO" + nModel + SystVar + "/FitResult.log";
   FILE* fResult = fopen(Rfile, "w");
-  
-  
+
   for (unsigned int ch=0; ch<3; ch++){
     
     float n_ttjj = InFile[ttbb].events[ch] + 
@@ -84,9 +93,10 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
     ratio[ttccLF]  = InFile[ttccLF].events[ch]/n_ttjj; 
     
     // Variables
-    RooRealVar *CSV2 = new RooRealVar("CSV2", "CSV for Jet 3", InFile[ttbb].hist1D[0][0]->GetXaxis()->GetXmin(), InFile[ttbb].hist1D[0][0]->GetXaxis()->GetXmax()); 
-    RooRealVar *CSV3 = new RooRealVar("CSV3", "CSV for Jet 4", InFile[ttbb].hist1D[0][0]->GetXaxis()->GetXmin(), InFile[ttbb].hist1D[0][0]->GetXaxis()->GetXmax());  
-    
+    // + 0.1 to avoid empty bins
+    RooRealVar *CSV2 = new RooRealVar("CSV2", "CSV for Jet 3", InFile[ttbb].hist1D[0][0]->GetXaxis()->GetXmin()+0.1, InFile[ttbb].hist1D[0][0]->GetXaxis()->GetXmax()); 
+    RooRealVar *CSV3 = new RooRealVar("CSV3", "CSV for Jet 4", InFile[ttbb].hist1D[0][0]->GetXaxis()->GetXmin()+0.1, InFile[ttbb].hist1D[0][0]->GetXaxis()->GetXmax());  
+   
     // Ratio at RECO level
     RooRealVar *RECO_ratio_ttbb   = new RooRealVar("RECO_ratio_ttbb",   "RECO ratio ttbb/ttjj",   ratio[ttbb],   ratio[ttbb],    ratio[ttbb]);
     RooRealVar *RECO_ratio_ttb    = new RooRealVar("RECO_ratio_ttb",    "RECO ratio ttb/ttjj",    ratio[ttb],    ratio[ttb],     ratio[ttb]);
@@ -94,7 +104,7 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
     RooRealVar *RECO_ratio_ttccLF = new RooRealVar("RECO_ratio_ttccLF", "RECO ratio ttccLF/ttjj", ratio[ttccLF], ratio[ttccLF] , ratio[ttccLF]);
 
     // Signal: Fitted ratios
-    RooRealVar  *fit_ratio_ttbb   = new RooRealVar("fit_ratio_ttbb",   "FITTED ratio ttbb/ttjj",   ratio[ttbb],   0.0, 0.1); 
+    RooRealVar  *fit_ratio_ttbb   = new RooRealVar("fit_ratio_ttbb",   "FITTED ratio ttbb/ttjj",   ratio[ttbb],   0.0, 0.5); 
     RooRealVar  *fit_ratio_ttb    = new RooRealVar("fit_ratio_ttb",    "FITTED ratio ttb/ttjj",    ratio[ttb],    0.0, 1.0); 
     RooRealVar  *fit_ratio_ttcc   = new RooRealVar("fit_ratio_ttcc",   "FITTED ratio ttcc/ttjj",   ratio[ttcc],   0.0, 1.0); 
     RooRealVar  *fit_ratio_ttccLF = new RooRealVar("fit_ratio_ttccLF", "FITTED ratio ttccLF/ttjj", ratio[ttccLF], 0.0, 1.0); 
@@ -104,7 +114,7 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
     RooFormulaVar *fit_ratio_ttbb_con = new RooFormulaVar("fit_ratio_ttbb_con", "FITTED ratio ttbb/ttjj contrained", "fit_ratio_ttbb*(RECO_ratio_ttb/RECO_ratio_ttbb)", RooArgList(*fit_ratio_ttbb, *RECO_ratio_ttbb, *RECO_ratio_ttb));
 
     // Normalization Constant
-    RooRealVar *k = new RooRealVar("k", "Normalization factor", 1.0, 0.50, 3.50);
+    RooRealVar *k = new RooRealVar("k", "Normalization factor", 1.0, 0.5, 1.50);
 
     // Background
     RooRealVar  *fit_ratio_Bkgtt    = new RooRealVar("fit_ratio_Bkgtt",    "FITTED ratio bkgtt/FullBkg",    0.4, 0.0, 1.0); 
@@ -292,18 +302,6 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
     RooPlot *k_f = k->frame();
     nll_ratio->plotOn(k_f, ShiftToZero());
 
-    // Efficiency Ratios
-    float eff_Ratiobbjj[3]; // Eff_ttjj/Eff_ttbb    
-    eff_Ratiobbjj[0] = 0.1885/0.4359; 
-    eff_Ratiobbjj[1] = 0.1583/0.3710;
-    eff_Ratiobbjj[2] = 0.1734/0.4034;
-    // Acceptance Ratios
-    float acc_Ratiobbjj[3]; // Acc_ttjj/Eff_ttbb    
-    acc_Ratiobbjj[0] = 0.276/0.322; 
-    acc_Ratiobbjj[1] = 0.275/0.320; 
-    //acc_Ratiobbjj[2] = 0.275/0.320; 
-    acc_Ratiobbjj[2] = 0.094428/0.109935; // Includes ttjj events in all channels
-
     float ratio_ttbb_Vis        = ratio_ttbb_pf  * eff_Ratiobbjj[ch];
     float ratio_ttbb_Vis_error  = ratio_ttbb_pf  * eff_Ratiobbjj[ch] * (ratio_ttbb_pf_error/ratio_ttbb_pf);
     float ratio_ttbb_Full       = ratio_ttbb_Vis * acc_Ratiobbjj[ch];
@@ -395,22 +393,24 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
     canvas_ratio_k->cd(1);
     ratio_ttbb_f->SetMaximum(0.6);
     ratio_ttbb_f->SetMinimum(0.0); 
+    ratio_ttbb_f->GetXaxis()->SetRangeUser(ratio_ttbb_pf -5*ratio_ttbb_pf_error, ratio_ttbb_pf+5*ratio_ttbb_pf_error);
     ratio_ttbb_f->GetYaxis()->SetNdivisions(607);
     ratio_ttbb_f->GetXaxis()->SetNdivisions(509); //(402)
     ratio_ttbb_f->Draw();
 
-    TLine *line_ratio = new TLine(ratio_ttbb_f->GetXaxis()->GetXmin(), DeltaSigma, ratio_ttbb_f->GetXaxis()->GetXmax(), DeltaSigma);
+    TLine *line_ratio = new TLine(ratio_ttbb_pf -5*ratio_ttbb_pf_error, DeltaSigma, ratio_ttbb_pf+5*ratio_ttbb_pf_error, DeltaSigma);
     line_ratio->SetLineColor(kRed);
     line_ratio->Draw("SAME");
       
     canvas_ratio_k->cd(2);
     k_f->SetMaximum(0.6);
     k_f->SetMinimum(0.0);
+    k_f->GetXaxis()->SetRangeUser(k_pf - 5*k_pf_error, k_pf + 5*k_pf_error);
     k_f->GetYaxis()->SetNdivisions(607);
     k_f->GetXaxis()->SetNdivisions(509); //(402)
     k_f->Draw();
 
-    TLine *line_k = new TLine(k_f->GetXaxis()->GetXmin(), DeltaSigma, k_f->GetXaxis()->GetXmax(), DeltaSigma);
+    TLine *line_k = new TLine(k_pf - 5*k_pf_error, DeltaSigma, k_pf + 5*k_pf_error, DeltaSigma);
     line_k->SetLineColor(kRed);
     line_k->Draw("SAME");
 
@@ -443,30 +443,44 @@ HistoFit LoadSample(TString FileName){
 
   
   TFile* fInput  = new TFile(dirnameIn + fl +  FileName);
-  
+  if(!fInput->GetFile()){
+    std::cerr << dirnameIn + fl +  FileName << " not Found!!!" << std::endl;
+    std::exit(0);
+  }  
+
   TString Cut = "2btag";   
   
   HistoFit Output;
   
   // 3rd Jet
-  Output.hist1D[0][0] = (TH1F*)fInput->Get("hCSV_Jet-2_mujets_" + Cut);
-  Output.hist1D[0][1] = (TH1F*)fInput->Get("hCSV_Jet-2_ejets_"  + Cut);
-  Output.hist1D[0][2] = (TH1F*)Output.hist1D[0][0]->Clone();
+  // Output.hist1D[0][0] = (TH1D*)fInput->Get(Cut + "/mujets/" + "hKinAdd1CSV_mujets_" + Cut);
+  // Output.hist1D[0][1] = (TH1D*)fInput->Get(Cut + "/ejets/"  + "hKinAdd1CSV_ejets_"  + Cut);
+  Output.hist1D[0][0] = (TH1D*)fInput->Get(Cut + "/mujets/" + "hCSV_Jet-2_mujets_" + Cut);
+  Output.hist1D[0][1] = (TH1D*)fInput->Get(Cut + "/ejets/"  + "hCSV_Jet-2_ejets_"  + Cut);
+  Output.hist1D[0][2] = (TH1D*)Output.hist1D[0][0]->Clone();
   Output.hist1D[0][2]->Add(Output.hist1D[0][0], Output.hist1D[0][1]);
   // 4th Jet
-  Output.hist1D[1][0] = (TH1F*)fInput->Get("hCSV_Jet-3_mujets_" + Cut);
-  Output.hist1D[1][1] = (TH1F*)fInput->Get("hCSV_Jet-3_ejets_"  + Cut);
-  Output.hist1D[1][2] = (TH1F*)Output.hist1D[1][0]->Clone();
+  // Output.hist1D[1][0] = (TH1D*)fInput->Get(Cut + "/mujets/" + "hKinAdd2CSV_mujets_" + Cut);
+  // Output.hist1D[1][1] = (TH1D*)fInput->Get(Cut + "/ejets/"  + "hKinAdd2CSV_ejets_"  + Cut);
+  Output.hist1D[1][0] = (TH1D*)fInput->Get(Cut + "/mujets/" + "hCSV_Jet-3_mujets_" + Cut);
+  Output.hist1D[1][1] = (TH1D*)fInput->Get(Cut + "/ejets/"  + "hCSV_Jet-3_ejets_"  + Cut);
+  Output.hist1D[1][2] = (TH1D*)Output.hist1D[1][0]->Clone();
   Output.hist1D[1][2]->Add(Output.hist1D[1][0], Output.hist1D[1][1]);
-  // 3rd and 4th Jet
-  Output.hist2D[0] = (TH2F*)fInput->Get("h2DCSV_23Jet_mujets_" + Cut);
-  Output.hist2D[1] = (TH2F*)fInput->Get("h2DCSV_23Jet_ejets_"  + Cut);
-  Output.hist2D[2] = (TH2F*)Output.hist2D[0]->Clone();
+
+  // 3rd and 4th Jet                                       
+  // Output.hist2D[0] = (TH2D*)fInput->Get(Cut + "/mujets/" + "h2DKinAddCSV_mujets_" + Cut);
+  // Output.hist2D[1] = (TH2D*)fInput->Get(Cut + "/ejets/"  + "h2DKinAddCSV_ejets_"  + Cut);
+  Output.hist2D[0] = (TH2D*)fInput->Get(Cut + "/mujets/" + "h2DCSV_Jet23_mujets_" + Cut);
+  Output.hist2D[1] = (TH2D*)fInput->Get(Cut + "/ejets/"  + "h2DCSV_Jet23_ejets_"  + Cut);
+  Output.hist2D[2] = (TH2D*)Output.hist2D[0]->Clone();
   Output.hist2D[2]->Add(Output.hist2D[0], Output.hist2D[1]);
-  // Numbewr of Events
+
+  // Number of Events
   for(unsigned int i=0; i<3; i++) Output.events[i] = Output.hist1D[0][i]->Integral(0,1000);
   
   cout << "All the histograms from " << dirnameIn + fl +  FileName << " have been loaded successfully!!!" << endl;
+
+  //fInput->Close();
 
   return Output;
 }

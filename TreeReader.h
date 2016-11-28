@@ -119,7 +119,7 @@ Histos2D  h2DKinChi2_JetMatch;
 Histos    hKinWlTransMass, hKinWlMass, hKinWlpT, hKintlMass, hKintlpT;
 Histos    hKinWhMass, hKinWhpT, hKinthMass, hKinthpT;
 Histos    hKinWMass, hKinWpT, hKinTagWMass, hKinTagAddMass, hKinTagAddDR;
-Eff       effKinGenIndex, purKinGenIndex;
+Eff       effKinGenIndex, purKinGenIndex, effKinGenIndexVsChi2;
 HistosJet hKinJetPt, hGENJetPt;
 Histos    hKinAdd1CSV, hKinAdd2CSV;
 Histos2D  h2DKinAddCSV;

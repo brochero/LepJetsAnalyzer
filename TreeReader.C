@@ -326,6 +326,8 @@ int main(int argc, const char* argv[]){
       effKinGenIndex [j][i] = new TEfficiency("effKinGenIndex_" + namech[i] + "_" + namecut[j], "Kin. RECO vs GEN " + titlenamech[i] + "; [0]->All 4 jets, [1]->Top, [2]->W, [3]->Add; Match Eff.", 4,0,4);
       purKinGenIndex [j][i] = new TEfficiency("purKinGenIndex_" + namech[i] + "_" + namecut[j], "Kin. RECO vs GEN Purity " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add; Purity", 3,0,3);
 
+      effKinGenIndexVsChi2 [j][i] = new TEfficiency("effKinGenIndexVsChi2_" + namech[i] + "_" + namecut[j], "Kin. RECO Vs Chi2 Efficiency " + titlenamech[i] + "; #chi^{2}; W Efficiency", 40,0,20);
+
       hKinWlTransMass[j][i] = new TH1D("hKinWlTransMass_" + namech[i] + "_" + namecut[j], "Inv. Trans. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{T}^{W#to l#nu} [GeV]", 50,0,150);
       hKinWlMass[j][i]      = new TH1D("hKinWlMass_" + namech[i] + "_" + namecut[j], "Inv. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{W#to l#nu} [GeV]", 80,40,120);
       hKinWlpT[j][i]        = new TH1D("hKinWlpT_"   + namech[i] + "_" + namecut[j], "p_{T} of W(lep) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
@@ -423,8 +425,8 @@ int main(int argc, const char* argv[]){
   if(_ttbar_cat) fname += ttbar_id; // add in the sample name the ttbar category
 
   // New WP for 76X: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation76X
-  float CSV_WP = 0.800; // Medium
-  //float CSV_WP = 0.935; // Tight
+  //float CSV_WP = 0.800; // Medium
+  float CSV_WP = 0.935; // Tight
   int btagSysPar = 0;
 
   // Global SF uncertainty: 18 Components
@@ -857,7 +859,12 @@ int main(int argc, const char* argv[]){
 	    if(jet.Mom == jet.KinMom) kinGenConeMatch++; 
 	    
 	    if(jet.Mom == 6) { effKinGenIndex[icut][Channel]->Fill(jet.KinMom == 6,  1.5); TopkinGenConeMatch++;}
-	    if(jet.Mom == 24){ effKinGenIndex[icut][Channel]->Fill(jet.KinMom == 24, 2.5); WkinGenConeMatch++;}
+	    if(jet.Mom == 24){ 
+	      effKinGenIndex[icut][Channel]->Fill(jet.KinMom == 24, 2.5); WkinGenConeMatch++;
+	      // Eff. Vs Xi2
+	      effKinGenIndexVsChi2[icut][Channel]->Fill(jet.KinMom == 24, Kin_Chi2);
+	    }
+
 	  } // if ((jet.Mom)
 	  else if(jet.Mom != 6 && jet.Mom != 24){ effKinGenIndex[icut][Channel]->Fill((jet.KinMom != 24 && jet.KinMom != 6), 3.5); OkinGenConeMatch++;}
 
@@ -1073,6 +1080,7 @@ int main(int argc, const char* argv[]){
       h2DGenTagAddCSV [j][i]->Write();
       // Purities and Efficiencies
       effKinGenIndex [j][i]->Write();
+      effKinGenIndexVsChi2 [j][i]->Write();
       purKinGenIndex [j][i]->Write();
       
       effTagCSV     [j][i]->Write();

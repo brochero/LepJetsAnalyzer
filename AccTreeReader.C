@@ -96,7 +96,7 @@ int main(int argc, const char* argv[]){
   const char * _output   = 0;
   const char * _input    = 0;
   // TopTrees directory
-  const char * _dir      = "../Files_v7-6-3/";
+  const char * _dir      = "/xrootd/store/user/brochero/v8-0-1/";
   const char * _syst_var = 0;
   const char * _ttbar_id = "";
 
@@ -165,7 +165,7 @@ int main(int argc, const char* argv[]){
   float GENWeight; 
   std::vector<float> *ScaleWeight=0;
   float Lep_pT, Lep_eta;
-  std::vector<float> *Jet_px=0, *Jet_py=0, *Jet_pz=0, *Jet_pT=0, *Jet_E=0;
+  std::vector<float> *Jet_pT=0, *Jet_eta=0, *Jet_phi=0, *Jet_E=0;
   std::vector<int> *Jet_Mom=0;
 
   std::vector<int>   *Jet_partonFlavour=0;
@@ -186,9 +186,9 @@ int main(int argc, const char* argv[]){
 
   theTree.SetBranchAddress( "genlepton_pT",  &Lep_pT );
   theTree.SetBranchAddress( "genlepton_eta", &Lep_eta);
-  theTree.SetBranchAddress( "genjet_px",     &Jet_px );
-  theTree.SetBranchAddress( "genjet_py",     &Jet_py );
-  theTree.SetBranchAddress( "genjet_pz",     &Jet_pz );
+  theTree.SetBranchAddress( "genjet_pT",     &Jet_pT );
+  theTree.SetBranchAddress( "genjet_eta",    &Jet_eta );
+  theTree.SetBranchAddress( "genjet_phi",    &Jet_phi );
   theTree.SetBranchAddress( "genjet_E",      &Jet_E  );
 
   theTree.SetBranchAddress( "genjet_mom",     &Jet_Mom);
@@ -413,12 +413,12 @@ int main(int argc, const char* argv[]){
     std::vector<TLorentzVector> vjets, vOjets, vWjets, vTjets;
     std::vector<int> vIndex, vWIndex, vOIndex, vTIndex;
 
-    for(int ijet=0; ijet < Jet_px->size(); ijet++){
+    for(int ijet=0; ijet < Jet_pT->size(); ijet++){
       
       TLorentzVector gjet;
-      gjet.SetPxPyPzE((*Jet_px)[ijet], (*Jet_py)[ijet], (*Jet_pz)[ijet], (*Jet_E)[ijet]);
+      gjet.SetPtEtaPhiE((*Jet_pT)[ijet], (*Jet_eta)[ijet], (*Jet_phi)[ijet], (*Jet_E)[ijet]);
 
-      if(gjet.Pt()>25 && std::abs(gjet.Eta())<2.5){
+      if(gjet.Pt()>30 && std::abs(gjet.Eta())<2.5){
 
 	vjets.push_back(gjet); // All Jets
 	vIndex.push_back(ijet);
@@ -475,171 +475,171 @@ int main(int argc, const char* argv[]){
              Dijet Invariant Mass 
   *******************************************/
     
-  if (vWjets.size() == 2 && 
-      (CatEvt == "bbWjj" || CatEvt == "bWjj" || CatEvt == "Wjj")){
-  // if (vWjets.size() == 2 && vjets.size() == 6 && vTjets.size() == 2 && cone_NaddJets == 2){
+  // if (vWjets.size() == 2 && 
+  //     (CatEvt == "bbWjj" || CatEvt == "bWjj" || CatEvt == "Wjj")){
+  // // if (vWjets.size() == 2 && vjets.size() == 6 && vTjets.size() == 2 && cone_NaddJets == 2){
       
-      NJets = vjets.size();
+  //     NJets = vjets.size();
       
-      float pTWjj, MWjj, DRWjj, DPhiWjj;
+  //     float pTWjj, MWjj, DRWjj, DPhiWjj;
       
-      // Jets from W
-      if(vWjets.size() == 2){
-	TLorentzVector jet_WI  = vWjets[0];
-	TLorentzVector jet_WII = vWjets[1];
-	hWJetPt[0][Channel]->Fill(jet_WI.Pt());
-	hWJetPt[1][Channel]->Fill(jet_WII.Pt());
+  //     // Jets from W
+  //     if(vWjets.size() == 2){
+  // 	TLorentzVector jet_WI  = vWjets[0];
+  // 	TLorentzVector jet_WII = vWjets[1];
+  // 	hWJetPt[0][Channel]->Fill(jet_WI.Pt());
+  // 	hWJetPt[1][Channel]->Fill(jet_WII.Pt());
 	
-	pTWjj   = (vWjets.at(0) + vWjets.at(1)).Pt();
-	MWjj    = (vWjets.at(0) + vWjets.at(1)).M();
-	DRWjj   = vWjets.at(0).DeltaR(vWjets.at(1));
-	DPhiWjj = std::abs(vWjets.at(0).DeltaPhi(vWjets.at(1)));
+  // 	pTWjj   = (vWjets.at(0) + vWjets.at(1)).Pt();
+  // 	MWjj    = (vWjets.at(0) + vWjets.at(1)).M();
+  // 	DRWjj   = vWjets.at(0).DeltaR(vWjets.at(1));
+  // 	DPhiWjj = std::abs(vWjets.at(0).DeltaPhi(vWjets.at(1)));
 	
-	hpTWjj[Channel]     ->Fill(pTWjj); 
-	hInvMassWjj[Channel]->Fill(MWjj); 
-	hDRWjj[Channel]     ->Fill(DRWjj);   
-	hDPhiWjj[Channel]   ->Fill(DPhiWjj);   
+  // 	hpTWjj[Channel]     ->Fill(pTWjj); 
+  // 	hInvMassWjj[Channel]->Fill(MWjj); 
+  // 	hDRWjj[Channel]     ->Fill(DRWjj);   
+  // 	hDPhiWjj[Channel]   ->Fill(DPhiWjj);   
 
- 	// MVA Bkg TREE
-	b_pTjj   = pTWjj;
-	b_Mjj    = MWjj;
-	b_DRjj   = DRWjj;
-	b_DPhijj = DPhiWjj;
+  // 	// MVA Bkg TREE
+  // 	b_pTjj   = pTWjj;
+  // 	b_Mjj    = MWjj;
+  // 	b_DRjj   = DRWjj;
+  // 	b_DPhijj = DPhiWjj;
 	
-	MVASignaltree->Fill();	
+  // 	MVASignaltree->Fill();	
 
-      }
+  //     }
 
-    std::vector<TLorentzVector> seljets;
+  //   std::vector<TLorentzVector> seljets;
       
-      for(int coljet = 0; coljet < 2; coljet++){
+  //     for(int coljet = 0; coljet < 2; coljet++){
 	
-	if(coljet == 0) seljets = vjets; 
-	else seljets = vOjets; 
+  // 	if(coljet == 0) seljets = vjets; 
+  // 	else seljets = vOjets; 
 	
-	// Estimation of all the the paramenters of the dijet
-	int pTminIndex[2], pTmaxIndex[2], InvMassIndex[2], DRminIndex[2], DRmaxIndex[2], DPhiminIndex[2], DPhimaxIndex[2];
-	float minpTjj = 9999., maxpTjj = 0., Mjj = 0., minDeltaMjj = 9999.,  minDeltaRjj = 9999., maxDeltaRjj = 0., minDeltaPhijj = 9999., maxDeltaPhijj = 0.;
+  // 	// Estimation of all the the paramenters of the dijet
+  // 	int pTminIndex[2], pTmaxIndex[2], InvMassIndex[2], DRminIndex[2], DRmaxIndex[2], DPhiminIndex[2], DPhimaxIndex[2];
+  // 	float minpTjj = 9999., maxpTjj = 0., Mjj = 0., minDeltaMjj = 9999.,  minDeltaRjj = 9999., maxDeltaRjj = 0., minDeltaPhijj = 9999., maxDeltaPhijj = 0.;
 	
-	// Loop over the first Jet
-	for(int ijet=0; ijet < seljets.size(); ijet++){
+  // 	// Loop over the first Jet
+  // 	for(int ijet=0; ijet < seljets.size(); ijet++){
 	  
-	  TLorentzVector jet_i = seljets[ijet];
+  // 	  TLorentzVector jet_i = seljets[ijet];
 	  
-	  // Loop over the second Jet
-	  for(int jjet=ijet+1; jjet < seljets.size(); jjet++){
+  // 	  // Loop over the second Jet
+  // 	  for(int jjet=ijet+1; jjet < seljets.size(); jjet++){
 	    
-	    TLorentzVector jet_j = seljets[jjet];
+  // 	    TLorentzVector jet_j = seljets[jjet];
 	    
-	    float DijetpT = (jet_i+jet_j).Pt(); 
+  // 	    float DijetpT = (jet_i+jet_j).Pt(); 
 	    
-	    if(minpTjj > DijetpT){
-	      minpTjj = DijetpT;
-	      pTminIndex[0] = vIndex[ijet];
-	      pTminIndex[1] = vIndex[jjet];
-	    }
+  // 	    if(minpTjj > DijetpT){
+  // 	      minpTjj = DijetpT;
+  // 	      pTminIndex[0] = vIndex[ijet];
+  // 	      pTminIndex[1] = vIndex[jjet];
+  // 	    }
 	    
-	    if(maxpTjj < DijetpT){
-	      maxpTjj = DijetpT;
-	      pTmaxIndex[0] = vIndex[ijet]; pTmaxIndex[1] = vIndex[jjet];
-	    }
+  // 	    if(maxpTjj < DijetpT){
+  // 	      maxpTjj = DijetpT;
+  // 	      pTmaxIndex[0] = vIndex[ijet]; pTmaxIndex[1] = vIndex[jjet];
+  // 	    }
 	    
-	    float DijetInvMass = (jet_i+jet_j).M(); 
-	    float DeltaMjj = std::abs(DijetInvMass-80.3);
+  // 	    float DijetInvMass = (jet_i+jet_j).M(); 
+  // 	    float DeltaMjj = std::abs(DijetInvMass-80.3);
 	    
-	    if(minDeltaMjj > DeltaMjj){
-	      minDeltaMjj = DeltaMjj;
-	      Mjj = DijetInvMass;
-	      InvMassIndex[0] = vIndex[ijet]; InvMassIndex[1] = vIndex[jjet];
-	    }
+  // 	    if(minDeltaMjj > DeltaMjj){
+  // 	      minDeltaMjj = DeltaMjj;
+  // 	      Mjj = DijetInvMass;
+  // 	      InvMassIndex[0] = vIndex[ijet]; InvMassIndex[1] = vIndex[jjet];
+  // 	    }
 	    
-	    float DijetDeltaR  = jet_i.DeltaR(jet_j); 
+  // 	    float DijetDeltaR  = jet_i.DeltaR(jet_j); 
 	    
-	    if(minDeltaRjj > DijetDeltaR){
-	      minDeltaRjj = DijetDeltaR;
-	      DRminIndex[0] = ijet; DRminIndex[1] = jjet;
-	    }
+  // 	    if(minDeltaRjj > DijetDeltaR){
+  // 	      minDeltaRjj = DijetDeltaR;
+  // 	      DRminIndex[0] = ijet; DRminIndex[1] = jjet;
+  // 	    }
 	    
-	    if(maxDeltaRjj < DijetDeltaR){
-	      maxDeltaRjj = DijetDeltaR;
-	      DRmaxIndex[0] = vIndex[ijet]; DRmaxIndex[1] = vIndex[jjet];
-	    }
+  // 	    if(maxDeltaRjj < DijetDeltaR){
+  // 	      maxDeltaRjj = DijetDeltaR;
+  // 	      DRmaxIndex[0] = vIndex[ijet]; DRmaxIndex[1] = vIndex[jjet];
+  // 	    }
 	    
-	    float DijetDeltaPhi  = std::abs(jet_i.DeltaPhi(jet_j)); 
+  // 	    float DijetDeltaPhi  = std::abs(jet_i.DeltaPhi(jet_j)); 
 	    
-	    if(minDeltaPhijj > DijetDeltaPhi){
-	      minDeltaPhijj = DijetDeltaPhi;
-	      DPhiminIndex[0] = vIndex[ijet]; DPhiminIndex[1] = vIndex[jjet];
-	    }
+  // 	    if(minDeltaPhijj > DijetDeltaPhi){
+  // 	      minDeltaPhijj = DijetDeltaPhi;
+  // 	      DPhiminIndex[0] = vIndex[ijet]; DPhiminIndex[1] = vIndex[jjet];
+  // 	    }
 	    
-	    if(maxDeltaPhijj < DijetDeltaPhi){
-	      maxDeltaPhijj = DijetDeltaPhi;
-	      DPhimaxIndex[0] = vIndex[ijet]; DPhimaxIndex[1] = vIndex[jjet];
-	    }
+  // 	    if(maxDeltaPhijj < DijetDeltaPhi){
+  // 	      maxDeltaPhijj = DijetDeltaPhi;
+  // 	      DPhimaxIndex[0] = vIndex[ijet]; DPhimaxIndex[1] = vIndex[jjet];
+  // 	    }
 	    
-	    // Dijet Variables
-	    if(coljet == 0){
-	      hpTJet   [ijet][jjet][Channel]->Fill(DijetpT);
-	      hMassJet [ijet][jjet][Channel]->Fill(DijetInvMass);  
-	      hDRJet   [ijet][jjet][Channel]->Fill(DijetDeltaR);
-	      hDPhiJet [ijet][jjet][Channel]->Fill(DijetDeltaPhi);
+  // 	    // Dijet Variables
+  // 	    if(coljet == 0){
+  // 	      hpTJet   [ijet][jjet][Channel]->Fill(DijetpT);
+  // 	      hMassJet [ijet][jjet][Channel]->Fill(DijetInvMass);  
+  // 	      hDRJet   [ijet][jjet][Channel]->Fill(DijetDeltaR);
+  // 	      hDPhiJet [ijet][jjet][Channel]->Fill(DijetDeltaPhi);
 
-	      // MVA TREE
-	      b_pTjj   = DijetpT;
-	      b_Mjj    = DijetInvMass;
-	      b_DRjj   = DijetDeltaR;
-	      b_DPhijj = DijetDeltaPhi;
+  // 	      // MVA TREE
+  // 	      b_pTjj   = DijetpT;
+  // 	      b_Mjj    = DijetInvMass;
+  // 	      b_DRjj   = DijetDeltaR;
+  // 	      b_DPhijj = DijetDeltaPhi;
 
-	      MVAtree->Fill();
-	    }
-	    else{
-	      hOpTJet   [ijet][jjet][Channel]->Fill(DijetpT);
-	      hOMassJet [ijet][jjet][Channel]->Fill(DijetInvMass);  
-	      hODRJet   [ijet][jjet][Channel]->Fill(DijetDeltaR);
-	      hODPhiJet [ijet][jjet][Channel]->Fill(DijetDeltaPhi);	  
+  // 	      MVAtree->Fill();
+  // 	    }
+  // 	    else{
+  // 	      hOpTJet   [ijet][jjet][Channel]->Fill(DijetpT);
+  // 	      hOMassJet [ijet][jjet][Channel]->Fill(DijetInvMass);  
+  // 	      hODRJet   [ijet][jjet][Channel]->Fill(DijetDeltaR);
+  // 	      hODPhiJet [ijet][jjet][Channel]->Fill(DijetDeltaPhi);	  
 
 
-	      hpTOjj[Channel]     ->Fill(DijetpT); 
-	      hInvMassOjj[Channel]->Fill(DijetInvMass); 
-	      hDROjj[Channel]     ->Fill(DijetDeltaR);   
-	      hDPhiOjj[Channel]   ->Fill(DijetDeltaPhi);   
+  // 	      hpTOjj[Channel]     ->Fill(DijetpT); 
+  // 	      hInvMassOjj[Channel]->Fill(DijetInvMass); 
+  // 	      hDROjj[Channel]     ->Fill(DijetDeltaR);   
+  // 	      hDPhiOjj[Channel]   ->Fill(DijetDeltaPhi);   
 
-	      // MVA Bkg TREE
-	      b_pTjj   = DijetpT;
-	      b_Mjj    = DijetInvMass;
-	      b_DRjj   = DijetDeltaR;
-	      b_DPhijj = DijetDeltaPhi;
+  // 	      // MVA Bkg TREE
+  // 	      b_pTjj   = DijetpT;
+  // 	      b_Mjj    = DijetInvMass;
+  // 	      b_DRjj   = DijetDeltaR;
+  // 	      b_DPhijj = DijetDeltaPhi;
 
-	      MVABkgtree->Fill();
-	    }
-	  }// for(jjets)
+  // 	      MVABkgtree->Fill();
+  // 	    }
+  // 	  }// for(jjets)
 
-	  if(coljet == 0) hJetPt[ijet][Channel]->Fill(jet_i.Pt());
-	  else hOJetPt[ijet][Channel]->Fill(jet_i.Pt());
-	}// for(ijet)
+  // 	  if(coljet == 0) hJetPt[ijet][Channel]->Fill(jet_i.Pt());
+  // 	  else hOJetPt[ijet][Channel]->Fill(jet_i.Pt());
+  // 	}// for(ijet)
 	
 	
-	if(coljet == 0){
-	  hpTminjj[Channel]  ->Fill(minpTjj);   
-	  hpTmaxjj[Channel]  ->Fill(maxpTjj);   
-	  hInvMassjj[Channel]->Fill(Mjj); 
-	  hDRminjj[Channel]  ->Fill(minDeltaRjj);   
-	  hDRmaxjj[Channel]  ->Fill(maxDeltaRjj);   
-	  hDPhiminjj[Channel]->Fill(minDeltaPhijj);   
-	  hDPhimaxjj[Channel]->Fill(maxDeltaPhijj);   
-	}
-	else{
-	  hOpTminjj[Channel]  ->Fill(minpTjj);   
-	  hOpTmaxjj[Channel]  ->Fill(maxpTjj);   
-	  hOInvMassjj[Channel]->Fill(Mjj); 
-	  hODRminjj[Channel]  ->Fill(minDeltaRjj);   
-	  hODRmaxjj[Channel]  ->Fill(maxDeltaRjj);   
-	  hODPhiminjj[Channel]->Fill(minDeltaPhijj);   
-	  hODPhimaxjj[Channel]->Fill(maxDeltaPhijj);   
-	}
-      }// for(coljet)
-      hNJets[Channel]->Fill(NJets); 
-    }// if(vWjets.size() == 0)
+  // 	if(coljet == 0){
+  // 	  hpTminjj[Channel]  ->Fill(minpTjj);   
+  // 	  hpTmaxjj[Channel]  ->Fill(maxpTjj);   
+  // 	  hInvMassjj[Channel]->Fill(Mjj); 
+  // 	  hDRminjj[Channel]  ->Fill(minDeltaRjj);   
+  // 	  hDRmaxjj[Channel]  ->Fill(maxDeltaRjj);   
+  // 	  hDPhiminjj[Channel]->Fill(minDeltaPhijj);   
+  // 	  hDPhimaxjj[Channel]->Fill(maxDeltaPhijj);   
+  // 	}
+  // 	else{
+  // 	  hOpTminjj[Channel]  ->Fill(minpTjj);   
+  // 	  hOpTmaxjj[Channel]  ->Fill(maxpTjj);   
+  // 	  hOInvMassjj[Channel]->Fill(Mjj); 
+  // 	  hODRminjj[Channel]  ->Fill(minDeltaRjj);   
+  // 	  hODRmaxjj[Channel]  ->Fill(maxDeltaRjj);   
+  // 	  hODPhiminjj[Channel]->Fill(minDeltaPhijj);   
+  // 	  hODPhimaxjj[Channel]->Fill(maxDeltaPhijj);   
+  // 	}
+  //     }// for(coljet)
+  //     hNJets[Channel]->Fill(NJets); 
+  //   }// if(vWjets.size() == 0)
     
     //------------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------

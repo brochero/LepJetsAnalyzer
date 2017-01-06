@@ -46,19 +46,19 @@ void PlotsTTbarCategories(TString plots="2btag", bool LogScale=true, TString nSy
   ****************/ 
   // ttbar categorization 
   std::vector<histos> ttbar_0;
-  ttbar_0 = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3tt" + nSyst);
+  ttbar_0 = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttFullPhSp" + nSyst);
   setuphistograms(ttbar_0, col_tt);
   std::vector<histos> ttbar_0_ttbb;
-  ttbar_0_ttbb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbb" + nSyst);
+  ttbar_0_ttbb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbbFullPhSp" + nSyst);
   setuphistograms(ttbar_0_ttbb, col_ttbb);
   std::vector<histos> ttbar_0_ttb;
-  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbj" + nSyst);
+  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbjFullPhSp" + nSyst);
   setuphistograms(ttbar_0_ttb, col_ttb);
   std::vector<histos> ttbar_0_ttcc;
-  ttbar_0_ttcc = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttcc" + nSyst);
+  ttbar_0_ttcc = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttccFullPhSp" + nSyst);
   setuphistograms(ttbar_0_ttcc, col_ttcc);
   std::vector<histos> ttbar_0_ttLF;
-  ttbar_0_ttLF = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttLF" + nSyst);
+  ttbar_0_ttLF = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttLFFullPhSp" + nSyst);
   setuphistograms(ttbar_0_ttLF, col_ttLF);
 
   /****************

@@ -59,21 +59,21 @@ void Plots(TString plots="2btag", bool LogScale=false) {
   ****************/ 
   // ttbar categorization 
   std::vector<histos> ttbar_0_ttbb;
-  ttbar_0_ttbb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbb");
+  ttbar_0_ttbb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbbFullPhSp");
   //ttbar_0_ttbb = loadhistograms(plots, files + "_ttbb_aMCatNLOPythia");
   setuphistograms(ttbar_0_ttbb, col_ttbb);
   std::vector<histos> ttbar_0_ttbj;
-  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbj");
+  ttbar_0_ttb = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttbjFullPhSp");
   setuphistograms(ttbar_0_ttb, col_ttb);
   std::vector<histos> ttbar_0_ttcc;
-  ttbar_0_ttcc = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttcc");
+  ttbar_0_ttcc = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttccFullPhSp");
   setuphistograms(ttbar_0_ttcc, col_ttcc);
   std::vector<histos> ttbar_0_ttLF;
-  ttbar_0_ttLF = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttLF");
+  ttbar_0_ttLF = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttLFFullPhSp");
   setuphistograms(ttbar_0_ttLF, col_ttLF);
   // ttbar Bkg/Others
   std::vector<histos> ttbar_0;
-  ttbar_0 = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3tt");
+  ttbar_0 = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiaTranche3ttFullPhSp");
   setuphistograms(ttbar_0, col_tt);
   std::vector<histos> ttbar_bkg;
   ttbar_bkg = loadhistograms(plots, files + "_ttbar_PowhegPythiaBkg");
@@ -283,8 +283,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       
       //-------------------------------------------------------
       // Band error
-      // TGraphErrors *thegraph = new TGraphErrors(MC_syst[h].hist[ch]);  // Full set of Syst. Unc.
-      TGraphErrors *thegraph = new TGraphErrors(Stack[h].hist[ch]); // Just Statistical Unc. 
+      TGraphErrors *thegraph = new TGraphErrors(MC_syst[h].hist[ch]);  // Full set of Syst. Unc.
+      //TGraphErrors *thegraph = new TGraphErrors(Stack[h].hist[ch]); // Just Statistical Unc. 
       thegraph->SetName("thegraph");
       thegraph->SetFillStyle(1001);
       thegraph->SetFillColor(chatch);
@@ -296,12 +296,12 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       ttbar_1[h].hist[ch]->SetLineColor(6);
       ttbar_1[h].hist[ch]->SetLineStyle(2);
       ttbar_1[h].hist[ch]->SetFillColor(0);
-      ttbar_1[h].hist[ch]->Draw("histSAME");
+      //ttbar_1[h].hist[ch]->Draw("histSAME");
 
       ttbar_2[h].hist[ch]->SetLineColor(8);
       ttbar_2[h].hist[ch]->SetLineStyle(4);
       ttbar_2[h].hist[ch]->SetFillColor(0);
-      ttbar_2[h].hist[ch]->Draw("histSAME");
+      //ttbar_2[h].hist[ch]->Draw("histSAME");
       //-------------------------------------------------------
       // Data Histogram
       Data[h].hist[ch]->SetMarkerStyle(20);
@@ -339,10 +339,10 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       leg->AddEntry(ttbar_0_ttb[h].hist[ch], "t#bar{t}+b","F");
       leg->AddEntry(ttbar_0_ttbb[h].hist[ch],"t#bar{t}+bb","F");
       leg->AddEntry("thegraph",              "Total Unc.","F");
-      leg->AddEntry((TObject*)0,"","");
-      leg->AddEntry(ttbar_1[h].hist[ch],     "aMC@NLO","L");
-      leg->AddEntry((TObject*)0,"","");
-      leg->AddEntry(ttbar_2[h].hist[ch],     "Madgraph","L");
+      // leg->AddEntry((TObject*)0,"","");
+      // leg->AddEntry(ttbar_1[h].hist[ch],     "aMC@NLO","L");
+      // leg->AddEntry((TObject*)0,"","");
+      // leg->AddEntry(ttbar_2[h].hist[ch],     "Madgraph","L");
       leg->Draw("SAME");
       //-------------------------------------------------------
       // CMS Legends
@@ -397,8 +397,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
 
       TH1D *RatioSyst;
       RatioSyst = (TH1D*)Data[h].hist[ch]->Clone();
-      // RatioSyst->Divide(MC_syst[h].hist[ch]);  // Should be the histogram with the Total Syst. Unc.
-      RatioSyst->Divide(Stack[h].hist[ch]); // Histogram with the total uncertainty from the STACK
+      RatioSyst->Divide(MC_syst[h].hist[ch]);  // Should be the histogram with the Total Syst. Unc.
+      //RatioSyst->Divide(Stack[h].hist[ch]); // Histogram with the total uncertainty from the STACK
       std::vector<double> ratioContent;
       for(unsigned int b_r = 1; b_r <= RatioSyst->GetNbinsX(); b_r++) RatioSyst->SetBinContent(b_r,1.0);
 
@@ -422,8 +422,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       Ratio->GetXaxis()->SetLabelSize(0.20);
       Ratio->GetXaxis()->SetTitleSize(0.16);
       
-      Ratio->SetMinimum(0.6);
-      Ratio->SetMaximum(1.4);
+      Ratio->SetMinimum(0.4);
+      Ratio->SetMaximum(1.6);
       
       TGraphErrors *thegraphRatioSyst = new TGraphErrors(RatioSyst);
       thegraphRatioSyst->SetFillStyle(1001);
@@ -454,8 +454,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
 
       thegraphRatioSyst->Draw("e2");
       Ratio->Draw("histpSAME");
-      Ratio_1->Draw("histSAME");
-      Ratio_2->Draw("histSAME");
+      // Ratio_1->Draw("histSAME");
+      // Ratio_2->Draw("histSAME");
             
       /***********************
             Save Histos

@@ -125,7 +125,7 @@ int main (int argc, char *argv[]){
   Samples.push_back(Data);
 
   Yields ttbar;
-  ttbar = loadhistoYields(cut, "\\ttbar", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3");
+  ttbar = loadhistoYields(cut, "\\ttbar", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3FullPhSp");
   Samples.push_back(ttbar);
   Yields ttbar_aMCatNLO;
   ttbar_aMCatNLO = loadhistoYields(cut, "ttbar aMCatNLO", fdir + fname + "_ttbar_aMCatNLOPythia");
@@ -135,19 +135,19 @@ int main (int argc, char *argv[]){
   Samples.push_back(ttbar_Madgraph);
     
   Yields ttbb;
-  ttbb = loadhistoYields(cut, "\\ttbar\\bbbar", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttbb");
+  ttbb = loadhistoYields(cut, "\\ttbar\\bbbar", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttbbFullPhSp");
   Samples.push_back(ttbb);
   Yields ttb;
-  ttb = loadhistoYields(cut, "\\ttbar\\qb", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttbj");
+  ttb = loadhistoYields(cut, "\\ttbar\\qb", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttbjFullPhSp");
   Samples.push_back(ttb);
   Yields ttcc;
-  ttcc = loadhistoYields(cut, "\\ttbar\\ccbar", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttcc");
+  ttcc = loadhistoYields(cut, "\\ttbar\\ccbar", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttccFullPhSp");
   Samples.push_back(ttcc);
   Yields ttLF;
-  ttLF = loadhistoYields(cut, "\\ttbar LF", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttLF");
+  ttLF = loadhistoYields(cut, "\\ttbar LF", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttLFFullPhSp");
   Samples.push_back(ttLF);
   Yields ttjj;
-  ttjj = loadhistoYields(cut, "\\ttbar\\jj", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttjj");
+  ttjj = loadhistoYields(cut, "\\ttbar\\jj", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttjjFullPhSp");
   Samples.push_back(ttjj);
 
   Yields ttOther;

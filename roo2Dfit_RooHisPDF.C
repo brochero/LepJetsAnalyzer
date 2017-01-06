@@ -1,10 +1,15 @@
 #include "roo2Dfit_RooHisPDF.h"
+#include "RooStats/ProfileLikelihoodCalculator.h"
+
+#include "RooStats/LikelihoodInterval.h"
+
 
 void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
 
   //setTDRStyle();
   gSystem->Load("libRooFit") ;
   using namespace RooFit;
+  using namespace RooStats;
 
   HistoFit InFile[18];
   float ratio[15];
@@ -13,11 +18,11 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
   InFile[data] = LoadSample("DataSingleLep");
 
   // MC: Signal
-  InFile[ttbb]   = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttbb");
-  InFile[ttb]    = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttbj");
-  InFile[ttcc]   = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttcc");
-  InFile[ttLF]   = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttLF"); // Includes ttc
-  InFile[ttccLF] = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttccLF");
+  InFile[ttbb]   = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttbbFullPhSp");
+  InFile[ttb]    = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttbjFullPhSp");
+  InFile[ttcc]   = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttccFullPhSp");
+  InFile[ttLF]   = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttLFFullPhSp"); // Includes ttc
+  InFile[ttccLF] = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttccLFFullPhSp");
 
   // MC: Backgrounds
   InFile[Bkgtt]    = LoadSample("ttbar_PowhegPythiaBkgtt"); // ttbarBkg + tt
@@ -35,40 +40,43 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
   // Initial Parameters
   // ----------------------------------------------------------------------------------
   // Cross Sections from MC 
-  RooRealVar *Vis_Xsecttjj   = new RooRealVar("Vis_Xsecttjj",  "ttjj cross section Vis Ph-Sp",    5.10, 1.0, 10.0);
-  RooRealVar *Vis_Xsecttbb   = new RooRealVar("Vis_Xsecttbb",  "ttbb cross section Vis Ph-Sp",    0.07, 0.001, 0.5);
-  RooRealVar *Full_Xsecttjj  = new RooRealVar("Full_Xsecttjj", "ttjj cross section Full Ph-Sp", 257.0,  150.0, 350.0);
-  RooRealVar *Full_Xsecttbb  = new RooRealVar("Full_Xsecttbb", "ttbb cross section Full Ph-Sp",   3.2,  2.0, 5.0);
+  RooRealVar *Vis_Xsecttjj   = new RooRealVar("Vis_Xsecttjj",  "ttjj cross section Vis Ph-Sp",   26.40,  10.0,   50.0);// mu
+  RooRealVar *Vis_Xsecttbb   = new RooRealVar("Vis_Xsecttbb",  "ttbb cross section Vis Ph-Sp",    0.375,  0.001,  1.5);// mu
+  RooRealVar *Full_Xsecttjj  = new RooRealVar("Full_Xsecttjj", "ttjj cross section Full Ph-Sp", 290.2,  150.0,  350.0);
+  RooRealVar *Full_Xsecttbb  = new RooRealVar("Full_Xsecttbb", "ttbb cross section Full Ph-Sp",   3.9,    2.0,    5.0);
   // Ratios Xsecttbb/Xsecttjj    
   RooFormulaVar *Vis_Xsecttbb_Xsecttjj  = new RooFormulaVar("Vis_Xsecttbb_Xsecttjj",  "Xsecttbb/Xsecttjj Vis-PhSp",  
 							    "Vis_Xsecttbb/Vis_Xsecttjj",   RooArgList(*Vis_Xsecttbb,*Vis_Xsecttjj));
   RooFormulaVar *Full_Xsecttbb_Xsecttjj = new RooFormulaVar("Full_Xsecttbb_Xsecttjj", "Xsecttbb/Xsecttjj Full-PhSp", 
 							    "Full_Xsecttbb/Full_Xsecttjj", RooArgList(*Full_Xsecttbb,*Full_Xsecttjj));
+  RooRealVar *Vis_C_Xsecttbb_Xsecttjj   = new RooRealVar("Vis_C_Xsecttbb_Xsecttjj",  "Xsecttbb/Xsecttjj Vis-PhSp",  0.375/26.40,  0.001,  0.5); // 0.0142
+  RooRealVar *Full_C_Xsecttbb_Xsecttjj  = new RooRealVar("Full_C_Xsecttbb_Xsecttjj", "Xsecttbb/Xsecttjj Full-PhSp", 3.900/290.2,  0.001,  0.5); // 0.0134
+
 
   // Efficiencies ttjj
   RooRealVar *Effttjj_nom[3];
-  Effttjj_nom[0] = new RooRealVar("Effttjj_nom_" + name_ch[0],  "Nom. ttjj Efficiency for "  + name_ch[0],  0.4359);
-  Effttjj_nom[1] = new RooRealVar("Effttjj_nom_" + name_ch[2],  "Nom. ttjj Efficiency for "  + name_ch[1],  0.3710);
-  Effttjj_nom[2] = new RooRealVar("Effttjj_nom_" + name_ch[3],  "Nom. ttjj Efficiency for "  + name_ch[2],  0.4034);
+  Effttjj_nom[0] = new RooRealVar("Effttjj_nom_" + name_ch[0],  "Nom. ttjj Efficiency for "  + name_ch[0],  0.0213);
+  Effttjj_nom[1] = new RooRealVar("Effttjj_nom_" + name_ch[2],  "Nom. ttjj Efficiency for "  + name_ch[1],  0.1);
+  Effttjj_nom[2] = new RooRealVar("Effttjj_nom_" + name_ch[3],  "Nom. ttjj Efficiency for "  + name_ch[2],  0.1);
   // Efficiencies ttbb
   RooRealVar *Effttbb_nom[3];
-  Effttbb_nom[0] = new RooRealVar("Effttbb_nom_" + name_ch[0],  "Nom. ttbb Efficiency for "  + name_ch[0],  0.1885);
-  Effttbb_nom[1] = new RooRealVar("Effttbb_nom_" + name_ch[2],  "Nom. ttbb Efficiency for "  + name_ch[1],  0.1583);
-  Effttbb_nom[2] = new RooRealVar("Effttbb_nom_" + name_ch[3],  "Nom. ttbb Efficiency for "  + name_ch[2],  0.1734);
+  Effttbb_nom[0] = new RooRealVar("Effttbb_nom_" + name_ch[0],  "Nom. ttbb Efficiency for "  + name_ch[0],  0.1084);
+  Effttbb_nom[1] = new RooRealVar("Effttbb_nom_" + name_ch[2],  "Nom. ttbb Efficiency for "  + name_ch[1],  0.1);
+  Effttbb_nom[2] = new RooRealVar("Effttbb_nom_" + name_ch[3],  "Nom. ttbb Efficiency for "  + name_ch[2],  0.1);
 
   // Aceptancies ttjj
   RooRealVar *Accttjj_nom[3];
-  Accttjj_nom[0] = new RooRealVar("Accttjj_nom_" + name_ch[0],  "Nom. ttjj Acceptancy for "  + name_ch[0],  0.322);
-  Accttjj_nom[1] = new RooRealVar("Accttjj_nom_" + name_ch[2],  "Nom. ttjj Acceptancy for "  + name_ch[1],  0.320);
-  Accttjj_nom[2] = new RooRealVar("Accttjj_nom_" + name_ch[3],  "Nom. ttjj Acceptancy for "  + name_ch[2],  0.320);
+  Accttjj_nom[0] = new RooRealVar("Accttjj_nom_" + name_ch[0],  "Nom. ttjj Acceptancy for "  + name_ch[0],  0.0910);
+  Accttjj_nom[1] = new RooRealVar("Accttjj_nom_" + name_ch[2],  "Nom. ttjj Acceptancy for "  + name_ch[1],  0.3);
+  Accttjj_nom[2] = new RooRealVar("Accttjj_nom_" + name_ch[3],  "Nom. ttjj Acceptancy for "  + name_ch[2],  0.3);
   // Aceptancies ttbb
   RooRealVar *Accttbb_nom[3];
-  Accttbb_nom[0] = new RooRealVar("Accttbb_nom_" + name_ch[0],  "Nom. ttbb Acceptancy for "  + name_ch[0],  0.276);
-  Accttbb_nom[1] = new RooRealVar("Accttbb_nom_" + name_ch[2],  "Nom. ttbb Acceptancy for "  + name_ch[1],  0.275);
-  Accttbb_nom[2] = new RooRealVar("Accttbb_nom_" + name_ch[3],  "Nom. ttbb Acceptancy for "  + name_ch[2],  0.275);
+  Accttbb_nom[0] = new RooRealVar("Accttbb_nom_" + name_ch[0],  "Nom. ttbb Acceptancy for "  + name_ch[0],  0.0961);
+  Accttbb_nom[1] = new RooRealVar("Accttbb_nom_" + name_ch[2],  "Nom. ttbb Acceptancy for "  + name_ch[1],  0.2);
+  Accttbb_nom[2] = new RooRealVar("Accttbb_nom_" + name_ch[3],  "Nom. ttbb Acceptancy for "  + name_ch[2],  0.2);
 
   // Luminosity
-  RooRealVar *Lumi_nom  = new RooRealVar("Lumi_nom",  "Luminosity",  15000);
+  RooRealVar *Lumi_nom  = new RooRealVar("Lumi_nom",  "Luminosity",  15941.38);
 
 
   for (unsigned int ch=0; ch<1; ch++){
@@ -266,6 +274,47 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     WS_StMo->factory("SUM::ttjj_hispdf23(FRatio_ttbbttjj*ttbb_hispdf23,prod(FRatio_ttbbttjj,CRatio_ttbjttbb)*ttb_hispdf23, ttccLF_hispdf23)");
     WS_StMo->factory("SUM::TotModel23(kn_ttjj_var*ttjj_hispdf23, n_Bkgtt_var*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
 
+
+    // Visible and Full Ph-Sp
+    WS_StMo->import(*Lumi_nom);
+    WS_StMo->import(*Accttjj_nom[ch]);
+    WS_StMo->import(*Accttbb_nom[ch]);
+    WS_StMo->import(*Effttjj_nom[ch]);
+    WS_StMo->import(*Effttbb_nom[ch]);
+    WS_StMo->import(*Vis_Xsecttbb_Xsecttjj);
+    WS_StMo->import(*Full_Xsecttbb_Xsecttjj);
+    WS_StMo->import(*Vis_C_Xsecttbb_Xsecttjj);
+    WS_StMo->import(*Full_C_Xsecttbb_Xsecttjj);
+
+    WS_StMo->factory("expr::Effttbbttjj('Effttbb_nom_muJets/Effttjj_nom_muJets',Effttbb_nom_muJets,Effttjj_nom_muJets)");
+    WS_StMo->factory("expr::Accttbbttjj('Accttbb_nom_muJets/Accttjj_nom_muJets',Accttbb_nom_muJets,Accttjj_nom_muJets)");
+
+    // Visible Ph-Sp
+    WS_StMo->factory("prod::Vis_XsecRatiottbbttjj(Effttbbttjj,Vis_Xsecttbb_Xsecttjj)");
+    WS_StMo->factory("prod::Vis_C_XsecRatiottbbttjj(Effttbbttjj,Vis_C_Xsecttbb_Xsecttjj)");
+    WS_StMo->factory("expr::Vis_Nttjj('Vis_Xsecttjj*Lumi_nom', Vis_Xsecttjj,Lumi_nom)");
+    WS_StMo->factory("prod::Vis_k(Vis_Xsecttjj,0.03788)"); // 0.03788 from 1/26.40
+    // Model: Visible Ph-Sp -> Cross Sections
+    WS_StMo->factory("SUM::Vis_ttjj_hispdf23(Vis_XsecRatiottbbttjj*ttbb_hispdf23,prod(Vis_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_hispdf23, ttccLF_hispdf23)");
+    WS_StMo->factory("SUM::Vis_TotModel23(prod(Vis_Nttjj,Effttjj_nom_muJets)*Vis_ttjj_hispdf23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
+    // Model: Visible Ph-Sp -> Cross Section and Ratio
+    WS_StMo->factory("SUM::Vis_C_ttjj_hispdf23(Vis_C_XsecRatiottbbttjj*ttbb_hispdf23,prod(Vis_C_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_hispdf23, ttccLF_hispdf23)");
+    WS_StMo->factory("SUM::Vis_C_TotModel23(prod(Vis_Nttjj,Effttjj_nom_muJets)*Vis_C_ttjj_hispdf23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
+
+
+    // Full Ph-Sp
+    WS_StMo->factory("prod::Full_XsecRatiottbbttjj(Effttbbttjj,Accttbbttjj,Full_Xsecttbb_Xsecttjj)");
+    WS_StMo->factory("prod::Full_C_XsecRatiottbbttjj(Effttbbttjj,Accttbbttjj,Full_C_Xsecttbb_Xsecttjj)");
+    WS_StMo->factory("expr::Full_Nttjj('Full_Xsecttjj*Lumi_nom', Full_Xsecttjj,Lumi_nom)");
+    WS_StMo->factory("prod::Full_k(Full_Xsecttjj,0.00345)"); // 0.00345 from 1/290.2
+    // Model: Visible Ph-Sp -> Cross Section
+    WS_StMo->factory("SUM::Full_ttjj_hispdf23(Full_XsecRatiottbbttjj*ttbb_hispdf23,prod(Full_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_hispdf23, ttccLF_hispdf23)");
+    WS_StMo->factory("SUM::Full_TotModel23(prod(Full_Nttjj,Effttjj_nom_muJets,Accttjj_nom_muJets)*Full_ttjj_hispdf23, prod(Full_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
+    // Model: Visible Ph-Sp -> Cross Section and Ratio
+    WS_StMo->factory("SUM::Full_C_ttjj_hispdf23(Full_C_XsecRatiottbbttjj*ttbb_hispdf23,prod(Full_C_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_hispdf23, ttccLF_hispdf23)");
+    WS_StMo->factory("SUM::Full_C_TotModel23(prod(Full_Nttjj,Effttjj_nom_muJets,Accttjj_nom_muJets)*Full_C_ttjj_hispdf23, prod(Full_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
+
+
     // ----------------------------------------------------------------------------------
     // ----------------------    Systematic Uncertainties   -----------------------------
     // ----------------------------------------------------------------------------------
@@ -293,11 +342,12 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
       AlphaSys[isys][1] = new RooRealVar("AlphaSys3"  + SystNam[isys], "Alpha Syst " + SystNam[isys], -5.0, 5.0);
       AlphaSys[isys][2] = new RooRealVar("AlphaSys23" + SystNam[isys], "Alpha Syst " + SystNam[isys], -5.0, 5.0);
 
-      if(isys == PileUp || isys == JES){
+      // if(isys == PileUp || isys == JES
+      // 	 || isys == LES || isys == LepSF || isys == JER){
 	arg_AlphaSys[0]->add(*AlphaSys[isys][0]);
 	arg_AlphaSys[1]->add(*AlphaSys[isys][1]);
 	arg_AlphaSys[2]->add(*AlphaSys[isys][2]);
-      }
+    //   }
     }
     
     for(int isam=ttbb; isam<=BkgOther; isam++){
@@ -333,11 +383,12 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
 	  // PDF
 	  HisPdfSys[isam][2][isys][ivar]  = new RooHistPdf(SamNam[isam] + "_hisPdf23" + SystNam[isys] + VarNam[ivar],   SamNam[isam] + " PDF",
 	  						   RooArgSet(*arg_CSV), *DataHisSys[isam][2][isys][ivar]);
-	  if(isys == PileUp || isys == JES){
+	  // if(isys == PileUp || isys == JES
+	  //    || isys == LES || isys == LepSF || isys == JER){
 	    arg_PdfVar[isam][0][ivar]->add(*HisPdfSys[isam][0][isys][ivar]);
 	    arg_PdfVar[isam][1][ivar]->add(*HisPdfSys[isam][1][isys][ivar]);
 	    arg_PdfVar[isam][2][ivar]->add(*HisPdfSys[isam][2][isys][ivar]);	    
-	  }
+	    //	  }
     	} // for(ivar)
       } // for(isys)
       
@@ -414,6 +465,47 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     WS_NuMo->factory("ASUM::ttjj_PInterSyst23(FRatio_ttbbttjj*ttbb_PInterSyst23,prod(FRatio_ttbbttjj,CRatio_ttbjttbb)*ttb_PInterSyst23,ttccLF_PInterSyst23)");
     WS_NuMo->factory("ASUM::TotModel23_sys(kn_ttjj_var*ttjj_PInterSyst23,n_Bkgtt_var*Bkgtt_PInterSyst23,n_BkgOther_var*BkgOther_PInterSyst23)");
 
+    // Visible and Full Ph-Sp
+    WS_NuMo->import(*Lumi_nom);
+    WS_NuMo->import(*Accttjj_nom[ch]);
+    WS_NuMo->import(*Accttbb_nom[ch]);
+    WS_NuMo->import(*Effttjj_nom[ch]);
+    WS_NuMo->import(*Effttbb_nom[ch]);
+    WS_NuMo->import(*Vis_Xsecttbb_Xsecttjj);
+    WS_NuMo->import(*Full_Xsecttbb_Xsecttjj);
+    WS_NuMo->import(*Vis_C_Xsecttbb_Xsecttjj);
+    WS_NuMo->import(*Full_C_Xsecttbb_Xsecttjj);
+
+    WS_NuMo->factory("expr::Effttbbttjj('Effttbb_nom_muJets/Effttjj_nom_muJets',Effttbb_nom_muJets,Effttjj_nom_muJets)");
+    WS_NuMo->factory("expr::Accttbbttjj('Accttbb_nom_muJets/Accttjj_nom_muJets',Accttbb_nom_muJets,Accttjj_nom_muJets)");
+
+    // Visible Ph-Sp
+    WS_NuMo->factory("prod::Vis_XsecRatiottbbttjj(Effttbbttjj,Vis_Xsecttbb_Xsecttjj)");
+    WS_NuMo->factory("prod::Vis_C_XsecRatiottbbttjj(Effttbbttjj,Vis_C_Xsecttbb_Xsecttjj)");
+    WS_NuMo->factory("expr::Vis_Nttjj('Vis_Xsecttjj*Lumi_nom', Vis_Xsecttjj,Lumi_nom)");
+    WS_NuMo->factory("prod::Vis_k(Vis_Xsecttjj,0.03788)"); // 0.03788 from 1/26.40
+    // Model: Visible Ph-Sp -> Cross Sections
+    WS_NuMo->factory("ASUM::Vis_ttjj_PInterSyst23(Vis_XsecRatiottbbttjj*ttbb_PInterSyst23,prod(Vis_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_PInterSyst23, ttccLF_PInterSyst23)");
+    WS_NuMo->factory("ASUM::Vis_TotModel23_sys(prod(Vis_Nttjj,Effttjj_nom_muJets)*Vis_ttjj_PInterSyst23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
+    // Model: Visible Ph-Sp -> Cross Section and Ratio
+    WS_NuMo->factory("ASUM::Vis_C_ttjj_PInterSyst23(Vis_C_XsecRatiottbbttjj*ttbb_PInterSyst23,prod(Vis_C_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_PInterSyst23, ttccLF_PInterSyst23)");
+    WS_NuMo->factory("ASUM::Vis_C_TotModel23_sys(prod(Vis_Nttjj,Effttjj_nom_muJets)*Vis_C_ttjj_PInterSyst23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
+
+
+    // Full Ph-Sp
+    WS_NuMo->factory("prod::Full_XsecRatiottbbttjj(Effttbbttjj,Accttbbttjj,Full_Xsecttbb_Xsecttjj)");
+    WS_NuMo->factory("prod::Full_C_XsecRatiottbbttjj(Effttbbttjj,Accttbbttjj,Full_C_Xsecttbb_Xsecttjj)");
+    WS_NuMo->factory("expr::Full_Nttjj('Full_Xsecttjj*Lumi_nom', Full_Xsecttjj,Lumi_nom)");
+    WS_NuMo->factory("prod::Full_k(Full_Xsecttjj,0.00345)"); // 0.00345 from 1/290.2
+    // Model: Full Ph-Sp -> Cross Section
+    WS_NuMo->factory("ASUM::Full_ttjj_PInterSyst23(Full_XsecRatiottbbttjj*ttbb_PInterSyst23,prod(Full_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_PInterSyst23, ttccLF_PInterSyst23)");
+    WS_NuMo->factory("ASUM::Full_TotModel23_sys(prod(Full_Nttjj,Effttjj_nom_muJets,Accttjj_nom_muJets)*Full_ttjj_PInterSyst23, prod(Full_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
+    // Model: Full Ph-Sp -> Cross Section and Ratio
+    WS_NuMo->factory("ASUM::Full_C_ttjj_PInterSyst23(Full_C_XsecRatiottbbttjj*ttbb_PInterSyst23,prod(Full_C_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_PInterSyst23, ttccLF_PInterSyst23)");
+    WS_NuMo->factory("ASUM::Full_C_TotModel23_sys(prod(Full_Nttjj,Effttjj_nom_muJets,Accttjj_nom_muJets)*Full_C_ttjj_PInterSyst23, prod(Full_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
+
+
+
     // Constrain the models
     TString ModelSysName[3] = {"TotModel2_SysCons",
 			       "TotModel3_SysCons",
@@ -421,14 +513,19 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
  
     TString sTotModel2_sys  = "PROD::" + ModelSysName[0] + "(TotModel2_sys"; 
     TString sTotModel3_sys  = "PROD::" + ModelSysName[1] + "(TotModel3_sys"; 
-    TString sTotModel23_sys = "PROD::" + ModelSysName[2] + "(TotModel23_sys"; 
+    // TString sTotModel23_sys = "PROD::" + ModelSysName[2] + "(TotModel23_sys"; 
+    // TString sTotModel23_sys = "PROD::" + ModelSysName[2] + "(Vis_TotModel23_sys"; 
+    // TString sTotModel23_sys = "PROD::" + ModelSysName[2] + "(Vis_C_TotModel23_sys"; 
+    // TString sTotModel23_sys = "PROD::" + ModelSysName[2] + "(Full_TotModel23_sys"; 
+    TString sTotModel23_sys = "PROD::" + ModelSysName[2] + "(Full_C_TotModel23_sys"; 
     
     for(int isys=0; isys<14; isys++){
-      if(isys == PileUp || isys == JES){
+      // if(isys == PileUp || isys == JES
+      // 	 || isys == LES || isys == LepSF || isys == JER){
 	sTotModel2_sys  += ",Gaussian(0.0,AlphaSys2"  + SystNam[isys] + ",1.0)"; 
 	sTotModel3_sys  += ",Gaussian(0.0,AlphaSys3"  + SystNam[isys] + ",1.0)"; 
 	sTotModel23_sys += ",Gaussian(0.0,AlphaSys23" + SystNam[isys] + ",1.0)"; 
-      }
+	// }
     }
     // To close the model definition
     sTotModel2_sys  += ")"; 
@@ -444,7 +541,7 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     WS_NuMo->factory(sTotModel23_sys);
 
 
-    WS_NuMo->Print();
+    // WS_NuMo->Print();
 
     // ----------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------
@@ -461,16 +558,98 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     // ----------------------------------------------------------------------------------
     // Fits (NLL Minimization)
     // ----------------------------------------------------------------------------------
-
-    RooAbsReal *nll_StMo = WS_StMo->pdf("TotModel23")->createNLL(*DataHis[data][2]);
+    RooAbsReal *nll_StMo = WS_StMo->pdf("Full_C_TotModel23")->createNLL(*DataHis[data][2]);
+    // Create MINUIT interface object
     RooMinimizer m_StMo(*nll_StMo);
+    // Call MIGRAD to minimize the likelihood
     m_StMo.migrad();
+    // Run HESSE to calculate errors from d2L/dp2
     m_StMo.hesse();
+    // Save the current fit result
+    RooFitResult* r_StMo = m_StMo.save() ;
 
     RooAbsReal *nll_NuMo = WS_NuMo->pdf("TotModel23_SysCons")->createNLL(*DataHis[data][2]);
+    // Create MINUIT interface object
     RooMinimizer m_NuMo(*nll_NuMo);
+    // Call MIGRAD to minimize the likelihood
+    m_NuMo.migrad();
+    // Run HESSE to calculate errors from d2L/dp2
+    m_NuMo.hesse();
+    // More precise estimation of the parameter uncertainties
+    // MINOS uses a likelihood scan
+    // m_NuMo.minos();
+
+    // Save the current fit result
+    RooFitResult* r_NuMo = m_NuMo.save() ;
+
+    // To fix parameter "par"
+    // par.setConstant(kTRUE) ;
+
+    // Save the current fit result
+    // RooFitResult* r = m.save() ;
+
+    // Make contour plot of mx vs sx at 1,2,3 sigma
+    // RooPlot* frame = m.contour(frac,sigma_g2,1,2,3) ;
+
+    // All the Nuisance values after fit
+    float val_AlphaSys[14];
+    RooFitResult *r_NuMo_sys[14];
+    RooFitResult *r_NuMo_zero, *r_NuMo_fixed;
+
+    cout << "Nuisance Parameters.........................." << endl; 
+    for(int isys=0; isys<14; isys++){
+      val_AlphaSys[isys] = WS_NuMo->var("AlphaSys23" + SystNam[isys])->getVal();
+      cout << "Parameter [" << SystNam[isys] << "] = " << val_AlphaSys[isys] << endl;
+    } 
+    
+    // Contribution of each source
+    for(int isys=0; isys<14; isys++){ 
+      
+      // cout << "\n" <<endl;
+      // cout << "Setting new values........................." << endl;
+      // cout << "\n" <<endl;
+      
+      for(int jsys=0; jsys<14; jsys++){
+	TString NuiParName = "AlphaSys23" + SystNam[jsys];
+	// WS_NuMo->var(NuiParName)->setVal(0.0);
+	WS_NuMo->var(NuiParName)->setVal(val_AlphaSys[jsys]);
+	WS_NuMo->var(NuiParName)->setConstant(kFALSE);    
+      }
+      TString NuiParName = "AlphaSys23" + SystNam[isys];
+      //WS_NuMo->var(NuiParName)->setVal();
+      WS_NuMo->var(NuiParName)->setConstant(kTRUE);    
+      
+      m_NuMo.migrad();
+      m_NuMo.hesse();
+      
+      r_NuMo_sys[isys] = m_NuMo.save() ;
+      
+    }
+
+    // Statistical Uncertainty (All parameters Fixed)
+    for(int isys=0; isys<14; isys++){
+      TString NuiParName = "AlphaSys23" + SystNam[isys];
+      WS_NuMo->var(NuiParName)->setVal(val_AlphaSys[isys]);
+      WS_NuMo->var(NuiParName)->setConstant(kTRUE);    
+    }
+
     m_NuMo.migrad();
     m_NuMo.hesse();
+    
+    r_NuMo_fixed = m_NuMo.save() ;
+
+    for(int isys=0; isys<14; isys++){
+      TString NuiParName = "AlphaSys23" + SystNam[isys];
+      WS_NuMo->var(NuiParName)->setVal(0.0);
+      WS_NuMo->var(NuiParName)->setConstant(kTRUE);          
+    }
+    
+    m_NuMo.migrad();
+    m_NuMo.hesse();
+
+    r_NuMo_zero = m_NuMo.save() ;
+
+
 
     // ----------------------------------------------------------------------------------
     // Plots
@@ -507,11 +686,11 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
 
     canvas_com_StMo->SaveAs("Canvas_com_StMo.pdf");
 
-    RooRealVar *k_StMo = WS_StMo->var("k");
+    RooRealVar *k_StMo = WS_StMo->var("Full_Xsecttjj");
     float vk_StMo =  k_StMo->getVal();
     float vk_error_StMo =  k_StMo->getError();
 
-    RooRealVar *FRatio_ttbbttjj_StMo = WS_StMo->var("FRatio_ttbbttjj");
+    RooRealVar *FRatio_ttbbttjj_StMo = WS_StMo->var("Full_Xsecttbb");
     float vFRatio_ttbbttjj_StMo =  FRatio_ttbbttjj_StMo->getVal();
     float vFRatio_ttbbttjj_error_StMo =  FRatio_ttbbttjj_StMo->getError();
 
@@ -529,24 +708,24 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     plot_NLL_FRatio_ttbbttjj_StMo->GetXaxis()->SetRangeUser(vFRatio_ttbbttjj_StMo - ErrorRange*vFRatio_ttbbttjj_error_StMo, 
 							    vFRatio_ttbbttjj_StMo + ErrorRange*vFRatio_ttbbttjj_error_StMo);
     plot_NLL_FRatio_ttbbttjj_StMo->SetMinimum(0.0);
-    plot_NLL_FRatio_ttbbttjj_StMo->SetMaximum(50.0);
+    plot_NLL_FRatio_ttbbttjj_StMo->SetMaximum(5.0);
     plot_NLL_FRatio_ttbbttjj_StMo->Draw();
 
     canvas_par_StMo->cd(2);
     plot_NLL_k_StMo->GetXaxis()->SetRangeUser(vk_StMo - ErrorRange*vk_error_StMo, 
 					      vk_StMo + ErrorRange*vk_error_StMo);
     plot_NLL_k_StMo->SetMinimum(0.0);
-    plot_NLL_k_StMo->SetMaximum(50.0);
+    plot_NLL_k_StMo->SetMaximum(5.0);
     plot_NLL_k_StMo->Draw();
 
     canvas_par_StMo->SaveAs("Canvas_par_StMo.pdf");
 
 
-    RooRealVar *k_NuMo  = WS_NuMo->var("k");
+    RooRealVar *k_NuMo  = WS_NuMo->var("Vis_Xsecttjj");
     float vk_NuMo       = k_NuMo->getVal();
     float vk_error_NuMo = k_NuMo->getError();
 
-    RooRealVar *FRatio_ttbbttjj_NuMo  = WS_NuMo->var("FRatio_ttbbttjj");
+    RooRealVar *FRatio_ttbbttjj_NuMo  = WS_NuMo->var("Vis_Xsecttbb");
     float vFRatio_ttbbttjj_NuMo       = FRatio_ttbbttjj_NuMo->getVal();
     float vFRatio_ttbbttjj_error_NuMo = FRatio_ttbbttjj_NuMo->getError();
 
@@ -561,8 +740,8 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     TLegend *CSV_leg_NuMo;
 
     CSV_leg_NuMo = new TLegend(legPos[0],legPos[1],legPos[2],legPos[3]);
-    RooPlot *plot_CSV2_NuMo = PlotPDF_NuMo(CSV2, (RooHistPdf*)WS_NuMo->function("TotModel23_SysCons"), DataHis[data][2], true, CSV_leg_NuMo, k_NuMo, FRatio_ttbbttjj_NuMo);
-    RooPlot *plot_CSV3_NuMo = PlotPDF_NuMo(CSV3, (RooHistPdf*)WS_NuMo->function("TotModel23_SysCons"), DataHis[data][2], true, CSV_leg_NuMo, k_NuMo, FRatio_ttbbttjj_NuMo);
+    RooPlot *plot_CSV2_NuMo = PlotPDF_NuMo(CSV2, WS_NuMo, DataHis[data][2], true, CSV_leg_NuMo);
+    RooPlot *plot_CSV3_NuMo = PlotPDF_NuMo(CSV3, WS_NuMo, DataHis[data][2], true, CSV_leg_NuMo);
       
     TH1 *hModel[3];
     hModel[0] = WS_NuMo->pdf(ModelSysName[0])->createHistogram("CSV2");
@@ -570,35 +749,49 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     hModel[2] = WS_NuMo->pdf(ModelSysName[2])->createHistogram("CSV2,CSV3");
        
     // TH1 *hModel2D_PileUp     = WS_NuMo->pdf("TotModel2_SysCons")->createHistogram("CSV2,AlphaSys2PileUp", 20, 100);
-    // TH1 *hModel_alpha_PileUp = WS_NuMo->pdf("TotModel2_SysCons")->createHistogram("AlphaSys2PileUp",100);
-    // TH1 *hInter_ttbb_PileUp  = WS_NuMo->function("ttbb_PInterSyst2")->createHistogram("CSV2,AlphaSys2PileUp");
+
+    TCanvas *canvas_sys_NuMo = new TCanvas("canvas_sys_NuMo",   "Model Plots");
+    canvas_sys_NuMo->Divide(2,2);
+    TH1 *hModel2D_sys  = WS_NuMo->function("ttccLF_PInterSyst2")->createHistogram("CSV2,AlphaSys2btagcfI", 20, 50);
+    TH1 *hModel_sys_Nom = WS_NuMo->pdf("ttccLF_hisPdf2PileUpNom")->createHistogram("CSV2");
+    TH1 *hModel_sys_Up  = WS_NuMo->pdf("ttccLF_hisPdf2btagcfIUp")->createHistogram("CSV2");
+    TH1 *hModel_sys_Down = WS_NuMo->pdf("ttccLF_hisPdf2btagcfIDown")->createHistogram("CSV2");
+    canvas_sys_NuMo->cd(1);
+    //canvas_sys_NuMo->cd(1)->SetTheta(120);
+    canvas_sys_NuMo->cd(1)->SetPhi(-60);
+    hModel2D_sys->Draw("LEGO2");
+    canvas_sys_NuMo->cd(2);
+    hModel_sys_Nom->SetTitle("Nominal");
+    hModel_sys_Nom->SetLineColor(1);
+    hModel_sys_Nom->Draw();
+    canvas_sys_NuMo->cd(3);
+    hModel_sys_Up->SetTitle("Up Variation");
+    hModel_sys_Up->SetLineColor(2);
+    hModel_sys_Up->Draw();
+    canvas_sys_NuMo->cd(4);
+    hModel_sys_Down->SetTitle("Down Variation");
+    hModel_sys_Down->SetLineColor(4);
+    hModel_sys_Down->Draw();
+
+    canvas_sys_NuMo->SaveAs("Canvas_sys_NuMo.pdf");
+
 
     TCanvas *canvas_com_NuMo = new TCanvas("canvas_com_NuMo",   "Model Plots");
-    canvas_com_NuMo->Divide(2,3);
+    canvas_com_NuMo->Divide(2,2);
     
     canvas_com_NuMo->cd(1);
-    canvas_com_NuMo->cd(1)->SetTheta(50);
-    canvas_com_NuMo->cd(1)->SetPhi(45);
-    hModel[2]->Draw("LEGO");
-
-    canvas_com_NuMo->cd(2);
-    canvas_com_NuMo->cd(2)->SetTheta(50);
-    canvas_com_NuMo->cd(2)->SetPhi(-75);
-    hModel[2]->Draw("LEGO");
-
-    canvas_com_NuMo->cd(3);
     plot_CSV2_NuMo->Draw();
 
-    canvas_com_NuMo->cd(4);
+    canvas_com_NuMo->cd(2);
     plot_CSV3_NuMo->Draw();
     CSV_leg_NuMo->Draw("SAME");
 
-    canvas_com_NuMo->cd(5);
-    canvas_com_NuMo->cd(5)->SetLogy();
+    canvas_com_NuMo->cd(3);
+    canvas_com_NuMo->cd(3)->SetLogy();
     plot_CSV2_NuMo->Draw();
 
-    canvas_com_NuMo->cd(6);
-    canvas_com_NuMo->cd(6)->SetLogy();
+    canvas_com_NuMo->cd(4);
+    canvas_com_NuMo->cd(4)->SetLogy();
     plot_CSV3_NuMo->Draw();
     CSV_leg_NuMo->Draw("SAME");
 
@@ -610,6 +803,7 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
 
     RooPlot *plot_NLL_FRatio_ttbbttjj_NuMo = FRatio_ttbbttjj_NuMo->frame();
     nll_NuMo->plotOn(plot_NLL_FRatio_ttbbttjj_NuMo, ShiftToZero());
+
     RooPlot *plot_NLL_k_NuMo = k_NuMo->frame();
     nll_NuMo->plotOn(plot_NLL_k_NuMo, ShiftToZero());
     RooPlot *plot_NLL_AlphaSys23PileUp_NuMo = AlphaSys23PileUp_NuMo->frame();
@@ -617,19 +811,28 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     RooPlot *plot_NLL_AlphaSys23JES_NuMo = AlphaSys23JES_NuMo->frame();
     nll_NuMo->plotOn(plot_NLL_AlphaSys23JES_NuMo, ShiftToZero());
 
+    double DeltaSigma = 0.5; //one sigma variation. for two sigma, it should be 2.0
+
     canvas_par_NuMo->cd(1);
     plot_NLL_k_NuMo->GetXaxis()->SetRangeUser(vk_NuMo - ErrorRange*vk_error_NuMo, 
-					      vk_NuMo + ErrorRange*vk_error_NuMo);
+    					      vk_NuMo + ErrorRange*vk_error_NuMo);
     plot_NLL_k_NuMo->SetMinimum(0.0);
-    plot_NLL_k_NuMo->SetMaximum(5.0);
+    plot_NLL_k_NuMo->SetMaximum(2);
     plot_NLL_k_NuMo->Draw();
+    TLine *line_1 = new TLine(vk_NuMo - ErrorRange*vk_error_NuMo, DeltaSigma, vk_NuMo + ErrorRange*vk_error_NuMo, DeltaSigma);
+    line_1->SetLineColor(kRed);
+    line_1->Draw("SAME");
+
 
     canvas_par_NuMo->cd(2);
     plot_NLL_FRatio_ttbbttjj_NuMo->GetXaxis()->SetRangeUser(vFRatio_ttbbttjj_NuMo - ErrorRange*vFRatio_ttbbttjj_error_NuMo, 
 							    vFRatio_ttbbttjj_NuMo + ErrorRange*vFRatio_ttbbttjj_error_NuMo);
     plot_NLL_FRatio_ttbbttjj_NuMo->SetMinimum(0.0);
-    plot_NLL_FRatio_ttbbttjj_NuMo->SetMaximum(5.0);
+    plot_NLL_FRatio_ttbbttjj_NuMo->SetMaximum(2.0);
     plot_NLL_FRatio_ttbbttjj_NuMo->Draw();
+    TLine *line_2 = new TLine(vFRatio_ttbbttjj_NuMo - ErrorRange*vFRatio_ttbbttjj_error_NuMo, DeltaSigma, vFRatio_ttbbttjj_NuMo + ErrorRange*vFRatio_ttbbttjj_error_NuMo, DeltaSigma);
+    line_2->SetLineColor(kRed);
+    line_2->Draw("SAME");
 
     canvas_par_NuMo->cd(3);
     plot_NLL_AlphaSys23PileUp_NuMo->GetXaxis()->SetRangeUser(vAlphaSys23PileUp_NuMo - ErrorRange*vAlphaSys23PileUp_error_NuMo, 
@@ -647,6 +850,185 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
 
     canvas_par_NuMo->SaveAs("Canvas_par_NuMo.pdf");
 
+
+    //TEST
+    ProfileLikelihoodCalculator* PL = new ProfileLikelihoodCalculator(*DataHis[data][2],*WS_StMo->pdf("Full_C_TotModel23"), RooArgSet(*WS_StMo->var("Full_Xsecttjj")));
+    PL->SetConfidenceLevel(0.68);
+    LikelihoodInterval* interval = PL->GetInterval();
+    double intervalValue = WS_StMo->var("Full_Xsecttjj")->getVal();
+    double intervalError = WS_StMo->var("Full_Xsecttjj")->getError();
+    double intervalLow = interval->LowerLimit(*WS_StMo->var("Full_Xsecttjj"));
+    double intervalUp = interval->UpperLimit(*WS_StMo->var("Full_Xsecttjj"));
+
+    cout << intervalValue << " +/- " << intervalError << " --- Up = " << intervalUp  << " Down = " << intervalLow << endl;
+
+    // Save the current fit result
+    cout << "Standard Fit (No Nuisance Parameters)" << endl;
+    r_StMo->Print();
+
+    cout << "Fit including Nuisance Parameters" << endl;
+    r_NuMo->Print();
+    RooRealVar *Xsecttjj_fitresult_nom          = (RooRealVar*) r_NuMo->floatParsFinal().find("Full_Xsecttjj"); 
+    RooRealVar *XsecRatiottbbttjj_fitresult_nom = (RooRealVar*) r_NuMo->floatParsFinal().find("Full_C_Xsecttbb_Xsecttjj"); 
+    float r_Full_Xsecttjj_nom[3];
+    float r_Full_XsecRatiottbbttjj_nom[3];
+    r_Full_Xsecttjj_nom[0] = Xsecttjj_fitresult_nom->getVal();
+    r_Full_Xsecttjj_nom[1] = Xsecttjj_fitresult_nom->getAsymErrorHi();
+    r_Full_Xsecttjj_nom[2] = Xsecttjj_fitresult_nom->getAsymErrorHi();
+    
+    r_Full_XsecRatiottbbttjj_nom[0] = XsecRatiottbbttjj_fitresult_nom->getVal();
+    r_Full_XsecRatiottbbttjj_nom[1] = XsecRatiottbbttjj_fitresult_nom->getAsymErrorHi();
+    r_Full_XsecRatiottbbttjj_nom[2] = XsecRatiottbbttjj_fitresult_nom->getAsymErrorHi();
+
+    float per_Xsecttjj_nom[3];
+    per_Xsecttjj_nom[0] = 100.;
+    per_Xsecttjj_nom[1] = 100.*r_Full_Xsecttjj_nom[1]/r_Full_Xsecttjj_nom[0];
+    per_Xsecttjj_nom[2] = 100.*r_Full_Xsecttjj_nom[2]/r_Full_Xsecttjj_nom[0];
+    float per_XsecRatiottbbttjj_nom[3];
+    per_XsecRatiottbbttjj_nom[0] = 100.;
+    per_XsecRatiottbbttjj_nom[1] = 100.*r_Full_XsecRatiottbbttjj_nom[1]/r_Full_XsecRatiottbbttjj_nom[0];
+    per_XsecRatiottbbttjj_nom[2] = 100.*r_Full_XsecRatiottbbttjj_nom[2]/r_Full_XsecRatiottbbttjj_nom[0];
+    cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+    cout << " Central: " << endl;
+    cout << "Ratio-> " << r_Full_XsecRatiottbbttjj_nom[0] << " + " << r_Full_XsecRatiottbbttjj_nom[1] << " - " << r_Full_XsecRatiottbbttjj_nom[2] << endl;
+    cout << "Xsecttjj-> " << r_Full_Xsecttjj_nom[0] << " + " << r_Full_Xsecttjj_nom[1] << " - " << r_Full_Xsecttjj_nom[2] << endl;
+    
+
+    cout << "Nuisance Fit: Fixed values (after fit)" << endl;
+    r_NuMo_fixed->Print();
+    RooRealVar *Xsecttjj_fitresult_fixed          = (RooRealVar*) r_NuMo_fixed->floatParsFinal().find("Full_Xsecttjj"); 
+    RooRealVar *XsecRatiottbbttjj_fitresult_fixed = (RooRealVar*) r_NuMo_fixed->floatParsFinal().find("Full_C_Xsecttbb_Xsecttjj"); 
+    float r_Full_Xsecttjj_stat[3];
+    float r_Full_XsecRatiottbbttjj_stat[3];
+    r_Full_Xsecttjj_stat[0] = Xsecttjj_fitresult_fixed->getVal();
+    r_Full_Xsecttjj_stat[1] = Xsecttjj_fitresult_fixed->getAsymErrorHi();
+    r_Full_Xsecttjj_stat[2] = Xsecttjj_fitresult_fixed->getAsymErrorHi();
+    
+    r_Full_XsecRatiottbbttjj_stat[0] = XsecRatiottbbttjj_fitresult_fixed->getVal();
+    r_Full_XsecRatiottbbttjj_stat[1] = XsecRatiottbbttjj_fitresult_fixed->getAsymErrorHi();
+    r_Full_XsecRatiottbbttjj_stat[2] = XsecRatiottbbttjj_fitresult_fixed->getAsymErrorHi();
+    cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+    cout << " Stat: Fixed to Values after fit" << endl;
+    cout << "Ratio-> " << r_Full_XsecRatiottbbttjj_stat[0] << " + " << r_Full_XsecRatiottbbttjj_stat[1] << " - " << r_Full_XsecRatiottbbttjj_stat[2] << endl;
+    cout << "Xsecttjj-> " << r_Full_Xsecttjj_stat[0] << " + " << r_Full_Xsecttjj_stat[1] << " - " << r_Full_Xsecttjj_stat[2] << endl;
+
+    float per_Xsecttjj_stat[3];
+    per_Xsecttjj_stat[0] = 100.;
+    per_Xsecttjj_stat[1] = 100.*r_Full_Xsecttjj_stat[1]/r_Full_Xsecttjj_stat[0];
+    per_Xsecttjj_stat[2] = 100.*r_Full_Xsecttjj_stat[2]/r_Full_Xsecttjj_stat[0];
+    float per_XsecRatiottbbttjj_stat[3];
+    per_XsecRatiottbbttjj_stat[0] = 100.;
+    per_XsecRatiottbbttjj_stat[1] = 100.*r_Full_XsecRatiottbbttjj_stat[1]/r_Full_XsecRatiottbbttjj_stat[0];
+    per_XsecRatiottbbttjj_stat[2] = 100.*r_Full_XsecRatiottbbttjj_stat[2]/r_Full_XsecRatiottbbttjj_stat[0];
+    
+
+    cout << "Nuisance Fit: Fixed values (ZERO)" << endl;
+    r_NuMo_zero->Print();
+
+    float r_Full_Xsecttjj[14][3];
+    float r_Full_XsecRatiottbbttjj[14][3];
+    float per_Xsecttjj[14][3];
+    float per_XsecRatiottbbttjj[14][3];
+    float Nui_Sys_Xsecttjj[14][3];
+    float Nui_Sys_XsecRatiottbbttjj[14][3];
+    
+    FILE*   Yields_ttjj      = fopen("Table_ttjj.tex", "w");
+    FILE*   Yields_R         = fopen("Table_R.tex", "w");
+    FILE*   Yields_ttjj_Unc  = fopen("Table_ttjj_Unc.tex", "w");
+    FILE*   Yields_R_Unc     = fopen("Table_R_Unc.tex", "w");
+
+    fprintf(Yields_ttjj,"Nomimal  & %.2f & %.3f(%.1f\\\%) & %.3f(%.1f\\\%)  \\\\\\hline \n", 
+	    r_Full_Xsecttjj_nom[0],r_Full_Xsecttjj_nom[1],per_Xsecttjj_nom[1],r_Full_Xsecttjj_nom[2],per_Xsecttjj_nom[2]);
+    fprintf(Yields_ttjj,"For Stat & %.2f & %.3f(%.1f\\\%) & %.3f(%.1f\\\%)  \\\\\\hline \n", 
+	    r_Full_Xsecttjj_stat[0],r_Full_Xsecttjj_stat[1],per_Xsecttjj_stat[1],r_Full_Xsecttjj_stat[2],per_Xsecttjj_stat[2]);
+
+    fprintf(Yields_R,"Nomimal  & %.4f & %.5f(%.1f\\\%) & %.5f(%.1f\\\%)  \\\\\\hline \n", 
+	    r_Full_XsecRatiottbbttjj_nom[0],r_Full_XsecRatiottbbttjj_nom[1],per_XsecRatiottbbttjj_nom[1],r_Full_XsecRatiottbbttjj_nom[2],per_XsecRatiottbbttjj_nom[2]);
+    fprintf(Yields_R,"For Stat & %.4f & %.5f(%.1f\\\%) & %.5f(%.1f\\\%)  \\\\\\hline \n", 
+	    r_Full_XsecRatiottbbttjj_stat[0],r_Full_XsecRatiottbbttjj_stat[1],per_Xsecttjj_stat[1],r_Full_XsecRatiottbbttjj_stat[2],per_Xsecttjj_stat[2]);
+
+    float Tot_Sys_Xsecttjj[3], Tot_Sys_XsecRatiottbbttjj[3];
+    Tot_Sys_Xsecttjj[1] = sqrt(fabs( ((r_Full_Xsecttjj_nom[0]  - r_Full_Xsecttjj_nom[1] )*(r_Full_Xsecttjj_nom[0]  - r_Full_Xsecttjj_nom[1])) - 
+				     ((r_Full_Xsecttjj_stat[0] - r_Full_Xsecttjj_stat[1])*(r_Full_Xsecttjj_stat[0] - r_Full_Xsecttjj_stat[1]))
+				     )
+			       );
+    Tot_Sys_Xsecttjj[2] = sqrt(fabs( ((r_Full_Xsecttjj_nom[0]  - r_Full_Xsecttjj_nom[2] )*(r_Full_Xsecttjj_nom[0]  - r_Full_Xsecttjj_nom[2])) - 
+				     ((r_Full_Xsecttjj_stat[0] - r_Full_Xsecttjj_stat[2])*(r_Full_Xsecttjj_stat[0] - r_Full_Xsecttjj_stat[2]))
+				     )
+			       );
+    
+
+    Tot_Sys_XsecRatiottbbttjj[1] = sqrt(fabs( (r_Full_XsecRatiottbbttjj_nom[0]  - r_Full_XsecRatiottbbttjj_nom[1] )*(r_Full_XsecRatiottbbttjj_nom[0]  - r_Full_XsecRatiottbbttjj_nom[1]) - 
+					      (r_Full_XsecRatiottbbttjj_stat[0] - r_Full_XsecRatiottbbttjj_stat[1])*(r_Full_XsecRatiottbbttjj_stat[0] - r_Full_XsecRatiottbbttjj_stat[1])));
+    Tot_Sys_XsecRatiottbbttjj[2] = sqrt(fabs( (r_Full_XsecRatiottbbttjj_nom[0]  - r_Full_XsecRatiottbbttjj_nom[2] )*(r_Full_XsecRatiottbbttjj_nom[0]  - r_Full_XsecRatiottbbttjj_nom[2]) - 
+					      (r_Full_XsecRatiottbbttjj_stat[0] - r_Full_XsecRatiottbbttjj_stat[2])*(r_Full_XsecRatiottbbttjj_stat[0] - r_Full_XsecRatiottbbttjj_stat[2])));
+
+    fprintf(Yields_ttjj_Unc,"Total Syst. & %.2f & %.2f \\\\\\hline \n",
+	    Tot_Sys_Xsecttjj[1], Tot_Sys_Xsecttjj[2]);
+    fprintf(Yields_R_Unc,"Total Syst. & %.5f & %.5f \\\\\\hline \n",
+	    Tot_Sys_XsecRatiottbbttjj[1],Tot_Sys_XsecRatiottbbttjj[2]);
+
+    fprintf(Yields_ttjj_Unc,"Total Stat. & %.2f & %.2f \\\\\\hline \n",
+	    r_Full_Xsecttjj_stat[1], r_Full_Xsecttjj_stat[2]);
+    fprintf(Yields_R_Unc,"Total Stat. & %.5f & %.5f \\\\\\hline \n",
+	    r_Full_XsecRatiottbbttjj_stat[1],r_Full_XsecRatiottbbttjj_stat[2]);
+    
+    
+    for(int isys=0; isys<14; isys++){
+      cout << "Nuisance Fit: Contribution from " << SystNam[isys] << endl;
+      //r_NuMo_sys[isys]->Print() ;
+      
+      RooRealVar *Xsecttjj_fitresult = (RooRealVar*) r_NuMo_sys[isys]->floatParsFinal().find("Full_Xsecttjj"); 
+      RooRealVar *XsecRatiottbbttjj_fitresult = (RooRealVar*) r_NuMo_sys[isys]->floatParsFinal().find("Full_C_Xsecttbb_Xsecttjj"); 
+      
+      r_Full_Xsecttjj[isys][0] = Xsecttjj_fitresult->getVal();
+      r_Full_Xsecttjj[isys][1] = Xsecttjj_fitresult->getAsymErrorHi();
+      r_Full_Xsecttjj[isys][2] = Xsecttjj_fitresult->getAsymErrorHi();
+      
+      r_Full_XsecRatiottbbttjj[isys][0] = XsecRatiottbbttjj_fitresult->getVal();
+      r_Full_XsecRatiottbbttjj[isys][1] = XsecRatiottbbttjj_fitresult->getAsymErrorHi();
+      r_Full_XsecRatiottbbttjj[isys][2] = XsecRatiottbbttjj_fitresult->getAsymErrorHi();
+
+      per_Xsecttjj[isys][0] = 100.;
+      per_Xsecttjj[isys][1] = 100.*r_Full_Xsecttjj[isys][1]/r_Full_Xsecttjj[isys][0];
+      per_Xsecttjj[isys][2] = 100.*r_Full_Xsecttjj[isys][2]/r_Full_Xsecttjj[isys][0];
+      per_XsecRatiottbbttjj[isys][0] = 100.;
+      per_XsecRatiottbbttjj[isys][1] = 100.*r_Full_XsecRatiottbbttjj[isys][1]/r_Full_XsecRatiottbbttjj[isys][0];
+      per_XsecRatiottbbttjj[isys][2] = 100.*r_Full_XsecRatiottbbttjj[isys][2]/r_Full_XsecRatiottbbttjj[isys][0];
+      
+
+      fprintf(Yields_ttjj,"%s & %.2f & %.3f(%.1f\\\%) & %.3f (%.1f\\\%) \\\\ \n",
+	      SystNam[isys].Data(),r_Full_Xsecttjj[isys][0],r_Full_Xsecttjj[isys][1],per_Xsecttjj[isys][1] ,r_Full_Xsecttjj[isys][2],per_Xsecttjj[isys][2]);
+      fprintf(Yields_R,"%s & %.4f & %.5f(%.1f\\\%) & %.5f (%.1f\\\%) \\\\ \n",
+	      SystNam[isys].Data(),r_Full_XsecRatiottbbttjj[isys][0],r_Full_XsecRatiottbbttjj[isys][1],per_XsecRatiottbbttjj[isys][1] ,r_Full_XsecRatiottbbttjj[isys][2],per_XsecRatiottbbttjj[isys][2]);
+     
+
+      Nui_Sys_Xsecttjj[isys][1] = sqrt(fabs( (r_Full_Xsecttjj_nom[0]  - r_Full_Xsecttjj_nom[1] )*(r_Full_Xsecttjj_nom[0]  - r_Full_Xsecttjj_nom[1]) - 
+					     (r_Full_Xsecttjj[isys][0] - r_Full_Xsecttjj[isys][1])*(r_Full_Xsecttjj[isys][0] - r_Full_Xsecttjj[isys][1])));
+      Nui_Sys_Xsecttjj[isys][2] = sqrt(fabs( (r_Full_Xsecttjj_nom[0]  - r_Full_Xsecttjj_nom[2] )*(r_Full_Xsecttjj_nom[2]  - r_Full_Xsecttjj_nom[2]) - 
+					     (r_Full_Xsecttjj[isys][0] - r_Full_Xsecttjj[isys][2])*(r_Full_Xsecttjj[isys][2] - r_Full_Xsecttjj[isys][2])));
+      
+      Nui_Sys_XsecRatiottbbttjj[isys][1] = sqrt(fabs( (r_Full_XsecRatiottbbttjj_nom[0]  - r_Full_XsecRatiottbbttjj_nom[1] )*(r_Full_XsecRatiottbbttjj_nom[0]  - r_Full_XsecRatiottbbttjj_nom[1]) - 
+						      (r_Full_XsecRatiottbbttjj[isys][0] - r_Full_XsecRatiottbbttjj[isys][1])*(r_Full_XsecRatiottbbttjj[isys][0] - r_Full_XsecRatiottbbttjj[isys][1])));
+      Nui_Sys_XsecRatiottbbttjj[isys][2] = sqrt(fabs( (r_Full_XsecRatiottbbttjj_nom[0]  - r_Full_XsecRatiottbbttjj_nom[2] )*(r_Full_XsecRatiottbbttjj_nom[0]  - r_Full_XsecRatiottbbttjj_nom[2]) - 
+						      (r_Full_XsecRatiottbbttjj[isys][0] - r_Full_XsecRatiottbbttjj[isys][2])*(r_Full_XsecRatiottbbttjj[isys][0] - r_Full_XsecRatiottbbttjj[isys][2])));
+      
+      
+      fprintf(Yields_ttjj_Unc,"%s & %.2f & %.2f \\\\ \n",
+	      SystNam[isys].Data(),Nui_Sys_Xsecttjj[isys][1],Nui_Sys_Xsecttjj[isys][2]);
+
+      fprintf(Yields_R_Unc,"%s & %.5f & %.5f \\\\ \n",
+	      SystNam[isys].Data(),Nui_Sys_XsecRatiottbbttjj[isys][1],Nui_Sys_XsecRatiottbbttjj[isys][2]);
+      
+    }// for(isys)
+
+    fprintf(Yields_ttjj,"\\hline \n");
+    fprintf(Yields_R,"\\hline \n");
+
+    fclose(Yields_ttjj);
+    fclose(Yields_R);
+    fclose(Yields_R_Unc);
+    fclose(Yields_ttjj_Unc);
 
   } // for(ch)
   
@@ -666,14 +1048,15 @@ HistoFit LoadSample(TString FileName){
 
   TString Cut = "2btag";   
   TString nch[3] = {"mujets","ejets","ljets"};
-  TString nca[3] = {"Jet-2","Jet-3","Jet23"};
+  // TString nca[3] = {"hCSV_Jet-2","hCSV_Jet-3","h2DCSV_Jet23"};
+  TString nca[3] = {"hKinAdd1CSV","hKinAdd2CSV","h2DKinAddCSV"};
   
   HistoFit Output;
 
   for(int irca=0; irca<3;irca++){
     for(int irch=0; irch<2;irch++){
       if (irca<2){
-	Output.hist1D[irca][irch] = (TH1D*)fInput->Get(Cut + "/" + nch[irch] + "/" + "hCSV_" + nca[irca] + "_" + nch[irch] + "_" + Cut)->Clone();
+	Output.hist1D[irca][irch] = (TH1D*)fInput->Get(Cut + "/" + nch[irch] + "/" + nca[irca] + "_" + nch[irch] + "_" + Cut)->Clone();
 	// Avoid negative entries (from aMC@NLO MC)
 	for(int ibin = 1; ibin<= Output.hist1D[irca][irch]->GetNbinsX();ibin++){
 	  double binCont = Output.hist1D[irca][irch]->GetBinContent(ibin);
@@ -681,7 +1064,7 @@ HistoFit LoadSample(TString FileName){
 	}
       } // if(irca)
       else {
-	Output.hist2D[irch] = (TH2D*)fInput->Get(Cut + "/" + nch[irch] + "/" + "h2DCSV_" + nca[irca] + "_" + nch[irch] + "_" + Cut)->Clone();
+	Output.hist2D[irch] = (TH2D*)fInput->Get(Cut + "/" + nch[irch] + "/" + nca[irca] + "_" + nch[irch] + "_" + Cut)->Clone();
 	// Avoid negative entries (from aMC@NLO MC)
 	for(int ibinX = 1; ibinX<= Output.hist2D[irch]->GetNbinsX();ibinX++){
 	  for(int ibinY = 1; ibinY<= Output.hist2D[irch]->GetNbinsX();ibinY++){
@@ -717,14 +1100,14 @@ HistoFit LoadSample(TString FileName){
       TFile* fInputSys[3];
       fInputSys[Nom]  = new TFile(dirnameIn + fl + "_" + FileName + ".root");
       
-      if(isys == PileUp || isys == JES){
-	fInputSys[Up]    = new TFile(dirnameIn + fl + "_" + FileName + "_SYS_" + SystNam[isys] + "_Up.root");
-	fInputSys[Down]  = new TFile(dirnameIn + fl + "_" + FileName + "_SYS_" + SystNam[isys] + "_Down.root");
-      }
-      else{
-	fInputSys[Up]   = new TFile(dirnameIn + fl + "_" + FileName + ".root");
-	fInputSys[Down] = new TFile(dirnameIn + fl + "_" + FileName + ".root");
-      }
+      //if(isys == PileUp || isys == JES){
+      fInputSys[Up]    = new TFile(dirnameIn + fl + "_" + FileName + "_SYS_" + SystNam[isys] + "_Up.root");
+      fInputSys[Down]  = new TFile(dirnameIn + fl + "_" + FileName + "_SYS_" + SystNam[isys] + "_Down.root");
+      //}
+      //else{
+      //fInputSys[Up]   = new TFile(dirnameIn + fl + "_" + FileName + ".root");
+      //fInputSys[Down] = new TFile(dirnameIn + fl + "_" + FileName + ".root");
+      //}
       
       if(!fInputSys[Nom]->GetFile() || !fInputSys[Up]->GetFile() || !fInputSys[Down]->GetFile()){
 	std::cerr << SystNam[isys] << " systematic variation for " << dirnameIn + fl +  FileName << " not Found!!!" << std::endl;
@@ -735,7 +1118,7 @@ HistoFit LoadSample(TString FileName){
 	for(int irca=0; irca<3;irca++){
 	  for(int irch=0; irch<2;irch++){
 	    if (irca<2){
-	      Output.hsyst1D[isys][ivar][irca][irch] = (TH1D*)fInputSys[ivar]->Get(Cut + "/" + nch[irch] + "/" + "hCSV_" + nca[irca] + "_" + nch[irch] + "_" + Cut)->Clone();
+	      Output.hsyst1D[isys][ivar][irca][irch] = (TH1D*)fInputSys[ivar]->Get(Cut + "/" + nch[irch] + "/" +  nca[irca] + "_" + nch[irch] + "_" + Cut)->Clone();
 	      // Avoid negative entries (from aMC@NLO MC)
 	      for(int ibin = 1; ibin<= Output.hsyst1D[isys][ivar][irca][irch]->GetNbinsX();ibin++){
 		double binCont = Output.hsyst1D[isys][ivar][irca][irch]->GetBinContent(ibin);
@@ -745,7 +1128,7 @@ HistoFit LoadSample(TString FileName){
 	      Output.hsyst1D[isys][ivar][irca][irch]->Scale(1.0/Output.hsyst1D[isys][ivar][irca][irch]->Integral());
 	    } // if(irca)
 	    else {
-	      Output.hsyst2D[isys][ivar][irch] = (TH2D*)fInputSys[ivar]->Get(Cut + "/" + nch[irch] + "/" + "h2DCSV_" + nca[irca] + "_" + nch[irch] + "_" + Cut)->Clone();
+	      Output.hsyst2D[isys][ivar][irch] = (TH2D*)fInputSys[ivar]->Get(Cut + "/" + nch[irch] + "/" + nca[irca] + "_" + nch[irch] + "_" + Cut)->Clone();
 	      // Avoid negative entries (from aMC@NLO MC)
 	      for(int ibinX = 1; ibinX<= Output.hsyst2D[isys][ivar][irch]->GetNbinsX();ibinX++){
 		for(int ibinY = 1; ibinY<= Output.hsyst2D[isys][ivar][irch]->GetNbinsX();ibinY++){
@@ -783,8 +1166,8 @@ RooPlot *PlotPDFModel(RooRealVar *var, RooHistPdf *Model, RooDataHist *DataHis, 
   RooPlot *Plot = var->frame();
 
   RooArgSet* model_comps = Model->getComponents() ;
-  model_comps->Print("v");
-  cout << model_comps->contentsString () << endl; 
+  // model_comps->Print("v");
+  // cout << model_comps->contentsString () << endl; 
 
   cout << "Plotting " << Model->getTitle() << endl;
 
@@ -841,42 +1224,53 @@ RooPlot *PlotPDFModel(RooRealVar *var, RooHistPdf *Model, RooDataHist *DataHis, 
 }
 
 
-RooPlot *PlotPDF_NuMo(RooRealVar *var, RooHistPdf *Model, RooDataHist *DataHis, bool PlotData, TLegend *leg, RooRealVar *k, RooRealVar *R){
+RooPlot *PlotPDF_NuMo(RooRealVar *var, RooWorkspace *WS, RooDataHist *DataHis, bool PlotData, TLegend *leg){
   using namespace RooFit;
+
+  // Normalization
+  float nttjj = WS->var("n_ttjj_var")->getVal()*WS->var("k")->getVal();
+  float FRatio = WS->var("FRatio_ttbbttjj")->getVal();
+  float CRatio = WS->var("CRatio_ttbjttbb")->getVal();
   
-  float vk = k->getVal();
-  float vR = R->getVal();
+  float nttbb   = FRatio*nttjj; 
+  float nttbj   = FRatio*CRatio*nttjj; 
+  float nttccLF = (1.-FRatio-FRatio*CRatio)*nttjj; 
+  
+  float nbin = 20.;
 
   RooPlot *Plot = var->frame();
+  RooArgSet* model_comps = WS->function("TotModel23_SysCons")->getComponents() ;
+  // model_comps->Print("v");
+  // cout << model_comps->contentsString () << endl; 
 
-  RooArgSet* model_comps = Model->getComponents() ;
-  model_comps->Print("v");
-  cout << model_comps->contentsString () << endl; 
-
-  cout << "-- Plotting: " << Model->getTitle() << endl;
-  
-  //Normalization(2340,RooAbsReal::NumEvent),
-  //Normalization(1.,RooAbsReal::Relative),
-  
   if (PlotData) DataHis->plotOn (Plot, 
 				 Name("Data"));
   else DataHis->plotOn (Plot, 
 			Name("Data"), Invisible());
-  Model->plotOn (Plot, 
-  		 LineColor(kRed), 
-  		 Name("FullModel"));
-  Model->plotOn (Plot, 
-  		 Components("Bkgtt_PInterSyst23,BkgOther_PInterSyst23"), 
-  		 LineColor(colors[BkgFull]), 
-  		 Name("Bkg"));
-  Model->plotOn (Plot, 
-  		 Components("ttjj_PInterSyst23"),
-  		 LineColor(colors[ttjj]), 
-  		 RooFit::Name("ttjj"));
-  // Model->plotOn (Plot,
-  // 		 Components("ttbb_PInterSyst23"),
-  // 		 LineColor(colors[ttbb]),
-  // 		 RooFit::Name("ttbb"));
+
+  WS->function("TotModel23_SysCons")->plotOn (Plot, 
+					      LineColor(kRed), 
+					      Name("FullModel"));
+  WS->function("TotModel23_SysCons")->plotOn (Plot, 
+					      Components("Bkgtt_PInterSyst23,BkgOther_PInterSyst23"), 
+					      LineColor(colors[BkgFull]), 
+					      Name("Bkg"));
+  WS->function("TotModel23_SysCons")->plotOn (Plot, 
+					      Components("ttjj_PInterSyst23"),
+					      LineColor(colors[ttjj]), 
+					      RooFit::Name("ttjj"));
+  WS->function("ttbb_PInterSyst23")->plotOn (Plot,
+					     LineColor(colors[ttbb]),
+					     Normalization(nttbb/(nbin)),
+					     RooFit::Name("ttbb"));
+  WS->function("ttb_PInterSyst23")->plotOn (Plot,
+					    LineColor(colors[ttb]),
+					    RooFit::Name("ttb"),
+					    Normalization(nttbj/(nbin)));
+  WS->function("ttccLF_PInterSyst23")->plotOn (Plot,
+  					       LineColor(colors[ttccLF]),
+  					       Normalization(nttccLF/(nbin)),
+  					       RooFit::Name("ttccLF"));
   
   // legend
   leg->Clear();
@@ -891,9 +1285,10 @@ RooPlot *PlotPDF_NuMo(RooRealVar *var, RooHistPdf *Model, RooDataHist *DataHis, 
   leg->AddEntry(Plot->findObject("FullModel"),"Total Fit","l");
   leg->AddEntry(Plot->findObject("Bkg"),"Bkg","l");
   leg->AddEntry(Plot->findObject("ttjj"),"ttjj","l");
-  //leg->AddEntry(Plot->findObject("ttbb"),"ttbb","l");
-  // leg->AddEntry(Plot->findObject("ttb"),"ttbj","l");
-  // leg->AddEntry(Plot->findObject("ttccLF"),"ttcc+ttLF","l");
-
+  leg->AddEntry(Plot->findObject("ttbb"),"ttbb","l");
+  leg->AddEntry(Plot->findObject("ttb"),"ttbj","l");
+  leg->AddEntry(Plot->findObject("ttccLF"),"ttcc+ttLF","l");
+  
   return Plot;  
 }
+

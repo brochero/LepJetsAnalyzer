@@ -43,7 +43,8 @@ typedef struct HistoFit{
 
 
 TString dirnameIn= "TopResults/";
-TString fl  = "hSF-pTj30_FitBin20-v3_Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1";  
+//TString fl  = "hSF-pTj30_FitBin20-v3_Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1";  
+TString fl  = "hSF-NuiPar-v1_Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1";  
 
 enum Channel{muJets,eJets,LepJet};
 TString name_ch[3] = {"muJets","eJets","LepJets"};
@@ -80,5 +81,6 @@ TString VarNam[3]= {"Nom", "Down", "Up"};
 
 HistoFit LoadSample(TString FileName);
 RooPlot *PlotPDFModel(RooRealVar *var, RooHistPdf *Model, RooDataHist *DataHis, bool PlotData, TLegend *leg);
-RooPlot *PlotPDF_NuMo(RooRealVar *var, RooHistPdf *Model, RooDataHist *DataHis, bool PlotData, TLegend *leg, RooRealVar *k, RooRealVar *R);
+RooPlot *PlotPDF_NuMo(RooRealVar *var, RooWorkspace *WS,  RooDataHist *DataHis, bool PlotData, TLegend *leg);
+TH1 *HistoPDF_NuMo(TString var, RooWorkspace *WS, RooDataHist *DataHis, bool PlotData, TLegend *leg);
 

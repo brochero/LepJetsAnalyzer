@@ -474,9 +474,10 @@ int main(int argc, const char* argv[]){
   /************************
     Normalization Weights
   *************************/  
-  float NormWeight = 0.0;
+  float NormWeight[2] = {0.0, 0.0}; // mu, e
   // NormWeight = Lumi*(1.0/N_Gen_events)*(Xsec)
-  NormWeight = SFLumi(fname, LuminNorm, nNorm_Event);  
+  NormWeight[0] = SFLumi(fname, LuminNorm_Mu, nNorm_Event);  
+  NormWeight[1] = SFLumi(fname, LuminNorm_El, nNorm_Event);  
 
   std::cout << "-----------------------                                 -------------------------" << std::endl;
   std::cout << "Number of Events     = " << nNorm_Event << std::endl;
@@ -503,7 +504,7 @@ int main(int argc, const char* argv[]){
     else PUWeight = (*PUWeight_sys)[0];
     
     // Luminosity Weight + MCatNLO GEN Weights (For MC@NLO) 
-    PUWeight = PUWeight * NormWeight * GENWeight;
+    PUWeight = PUWeight * NormWeight[Channel] * GENWeight;
     
     // Scale reweight: Syst. Unc.
     if (_syst && syst_varname.Contains("ScaleR"))
@@ -513,18 +514,22 @@ int main(int argc, const char* argv[]){
     
     TLorentzVector Lep;
     
-    if (_syst && syst_varname.Contains("LES_Up"))        Lep.SetPtEtaPhiE(Lep_pT + (Lep_pT*Lep_LES),
-									  Lep_eta,
-									  Lep_phi,
-									  Lep_E);
-    else if (_syst && syst_varname.Contains("LES_Down")) Lep.SetPtEtaPhiE(Lep_pT - (Lep_pT*Lep_LES),
-									  Lep_eta,
-									  Lep_phi,
-									  Lep_E);
+    if (_syst && syst_varname.Contains("LES_Up")) 
+      Lep.SetPtEtaPhiE(Lep_pT + (Lep_pT*Lep_LES),
+		       Lep_eta,
+		       Lep_phi,
+		       Lep_E);
+    else if (_syst && syst_varname.Contains("LES_Down")) 
+      Lep.SetPtEtaPhiE(Lep_pT - (Lep_pT*Lep_LES),
+		       Lep_eta,
+		       Lep_phi,
+		       Lep_E);
     else Lep.SetPtEtaPhiE(Lep_pT,Lep_eta,Lep_phi,Lep_E);    
-
-    // Lep pT >30GeV
-    if(Lep.Pt() < 30)  continue; 
+    
+    // Lep pT_mu > 30GeV
+    if(Channel == 0 && Lep.Pt() < 30)  continue; 
+    // Lep pT_e  > 35GeV
+    if(Channel == 1 && Lep.Pt() < 35)  continue; 
     
     // Transverse W Mass
     TLorentzVector METv;

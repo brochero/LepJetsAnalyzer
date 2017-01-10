@@ -66,8 +66,9 @@ const TString currentDateTime();
 float DiJetMassCorrection(std::vector<ComJet> &Jets, bool ReArrange);
 bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id);
 
-// Luminosity
-float LuminNorm = 15941.38; //[pb-1]
+// Luminosity per channel (due to trigger PreScale)
+float LuminNorm_Mu = 36811.; //[pb-1]
+float LuminNorm_El = 20834.; //[pb-1]
 // Output Dir
 TString dirname="TopResults";
 // Number of Histograms

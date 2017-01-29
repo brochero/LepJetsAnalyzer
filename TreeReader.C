@@ -36,7 +36,7 @@ int main(int argc, const char* argv[]){
   const char * _output   = 0;
   const char * _input    = 0;
   // TopTrees directory
-  const char * _dir      = "/xrootd/store/user/brochero/v8-0-1/";
+  const char * _dir      = "/xrootd/store/user/brochero/v8-0-4/";
   const char * _syst_var = 0;
   const char * _ttbar_id = 0;
   
@@ -145,6 +145,7 @@ int main(int argc, const char* argv[]){
 
   theTree.SetBranchAddress( "jet_CSV",           &Jet_CSV );
   theTree.SetBranchAddress( "jet_SF_CSV_30",     &Jet_SF_CSV );
+  theTree.SetBranchAddress( "jet_SF_CSV",        &Jet_SF_CSVg );
   theTree.SetBranchAddress( "jet_partonFlavour", &Jet_partonFlavour );
   theTree.SetBranchAddress( "jet_CvsB",          &Jet_CvsB );
   theTree.SetBranchAddress( "jet_CvsL",          &Jet_CvsL );
@@ -424,9 +425,9 @@ int main(int argc, const char* argv[]){
   ***************************/
   if(_ttbar_cat) fname += ttbar_id; // add in the sample name the ttbar category
 
-  // New WP for 76X: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation76X
-  //float CSV_WP = 0.800; // Medium
-  float CSV_WP = 0.935; // Tight
+  // New WP for 80X: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
+  // float CSV_WP = 0.8484; // Medium Moriond-17
+  float CSV_WP = 0.9535; // Tight Moriond-17
   int btagSysPar = 0;
 
   // Global SF uncertainty: 18 Components
@@ -480,8 +481,9 @@ int main(int argc, const char* argv[]){
   NormWeight[1] = SFLumi(fname, LuminNorm_El, nNorm_Event);  
 
   std::cout << "-----------------------                                 -------------------------" << std::endl;
-  std::cout << "Number of Events     = " << nNorm_Event << std::endl;
-  std::cout << "Normalization Factor = " << NormWeight  << std::endl;
+  std::cout << "Number of Events         = " << nNorm_Event << std::endl;
+  std::cout << "Normalization Factor[Mu] = " << NormWeight[0]  << std::endl;
+  std::cout << "Normalization Factor[EG] = " << NormWeight[1]  << std::endl;
   std::cout << "---------------------------------------------------------------------------------" << std::endl;
 
   /********************************

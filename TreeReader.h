@@ -69,6 +69,7 @@ bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id);
 // Luminosity per channel (due to trigger PreScale)
 float LuminNorm_Mu = 36811.; //[pb-1]
 float LuminNorm_El = 20834.; //[pb-1]
+//float LuminNorm_El = 36811.; //[pb-1]
 // Output Dir
 TString dirname="TopResults";
 // Number of Histograms
@@ -151,6 +152,7 @@ std::vector<int>   *Jet_GENmatched=0;
 std::vector<int>   *Jet_Mom=0; // From GenCone
 std::vector<float> *Jet_CSV=0;
 std::vector<float> *Jet_SF_CSV=0;
+std::vector<float> *Jet_SF_CSVg=0;
 std::vector<float> *Jet_CvsB=0, *Jet_CvsL=0;
 std::vector<float> *Jet_JER_Up=0, *Jet_JER_Nom=0, *Jet_JER_Down=0;
 std::vector<float> *Jet_JES_Up=0, *Jet_JES_Down=0;

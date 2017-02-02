@@ -208,14 +208,20 @@ int main(int argc, const char* argv[]){
   NTotal_Weight = h_NumberEvt->GetBinContent(2);
   for (unsigned int ibin = 1; ibin< 7; ibin++) NTotal_ScalemuRF_Weight[ibin]= h_ScaleWeights->GetBinContent(ibin);
 
+  // Number of events
+  int MaxEvt = theTree.GetEntries();
+  if(_NUserEvt > 0) MaxEvt = std::min(MaxEvt, _NUserEvt);
+
   // MCatNLO Weights
   if(fname.Contains("aMCatNLO")){
     theTree.SetBranchAddress( "genweight", &GENWeight );
     nNorm_Event = NTotal_Weight;    
+    if(_NUserEvt > 0) nNorm_Event = MaxEvt*(NTotal_Weight/theTree.GetEntries());
   }
   else{
     GENWeight = 1.0;
     nNorm_Event = NTotal_Event;
+    if(_NUserEvt > 0) nNorm_Event = MaxEvt*(NTotal_Event/theTree.GetEntries());
   }
 
   /*********************************
@@ -226,7 +232,7 @@ int main(int argc, const char* argv[]){
     
   for(int j=0; j<Nhcuts; j++){   // Cut
     for(int i=0; i<Nhch; i++){ // Channel
-      hPV[j][i]         = new TH1D("hPV_"+namech[i]+"_"+namecut[j],"PV Distribution  " + titlenamech[i] + ";PV",15,0,30);
+      hPV[j][i]         = new TH1D("hPV_"+namech[i]+"_"+namecut[j],"PV Distribution  " + titlenamech[i] + ";PV",30,0,60);
       hMET[j][i]        = new TH1D("hMET_"+ namech[i]+"_"+namecut[j],"#slash{E}_{T} " + titlenamech[i] + ";#slash{E}_{T}[GeV]",10,0,200);
       hMET_Phi[j][i]    = new TH1D("hMET_Phi_"+ namech[i]+"_"+namecut[j],"#Phi_{#slash{E}_{T}} " + titlenamech[i] + ";#Phi_{#slash{E}_{T}}[rad]",16,0,3.2);
       hmT[j][i]         = new TH1D("hmT_"+ namech[i]+"_"+namecut[j],"transverse Mass Lepton/MET " + titlenamech[i] + ";m_{T}[GeV]",40,0,160);
@@ -489,10 +495,6 @@ int main(int argc, const char* argv[]){
   /********************************
              Event Loop
   ********************************/
-  // Number of events
-  int MaxEvt = theTree.GetEntries();
-  if(_NUserEvt > 0) MaxEvt = std::min(MaxEvt, _NUserEvt);
-
   std::cout << "--- Processing: " << MaxEvt << " events" << std::endl;
   
   for (Long64_t ievt=0; ievt<MaxEvt; ievt++) {
@@ -504,7 +506,7 @@ int main(int argc, const char* argv[]){
     if (_syst && syst_varname.Contains("PileUp"))
       PUWeight = (*PUWeight_sys)[pileupSysPar]; // Up
     else PUWeight = (*PUWeight_sys)[0];
-    
+        
     // Luminosity Weight + MCatNLO GEN Weights (For MC@NLO) 
     PUWeight = PUWeight * NormWeight[Channel] * GENWeight;
     

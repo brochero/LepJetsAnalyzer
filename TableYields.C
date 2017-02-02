@@ -34,6 +34,7 @@ struct Yields{
 
 Yields loadhistoYields(int SelCut, TString TName, TString namefile);
 void   EntryPrinter   (FILE *file, Yields Sample);
+void   AddhistoYields (Yields *s1, Yields *s2);
 
 void display_usage()
 {
@@ -108,11 +109,13 @@ int main (int argc, char *argv[]){
   ///////////////////////////////////////
 
   int cut;
-  if      (cutname=="lepton")   cut = 0;
-  else if (cutname=="6Jets")    cut = 1;
-  else if (cutname=="2btag")    cut = 2;
-  else if (cutname=="3btag")    cut = 3;
-
+  if      (cutname=="lepton")    cut = 0;
+  else if (cutname=="6Jets")     cut = 1;
+  else if (cutname=="2btag")     cut = 2;
+  else if (cutname=="3btag")     cut = 3;
+  else if (cutname=="4Jets")     cut = 4;
+  else if (cutname=="4Jets2btag")cut = 5;
+  else if (cutname=="Only2btag") cut = 6;
   else{
     std::cerr << "Invalid cut name!!!" << std::endl;
     std::exit(0); 
@@ -120,38 +123,34 @@ int main (int argc, char *argv[]){
 
   std::vector<Yields> Samples;
 
-  Yields Data;
-  Data = loadhistoYields(cut, "Data", fdir + fname + "_DataSingleLep");
-  Samples.push_back(Data);
-
+  Yields ttbar_1;
+  ttbar_1 = loadhistoYields(cut, "ttbar Herwig", fdir + fname + "_ttbar_PowhegHerwig");
+  Samples.push_back(ttbar_1);
+  Yields ttbar_2;
+  ttbar_2 = loadhistoYields(cut, "ttbar Evt", fdir + fname + "_ttbar_PowhegPythiaEvt");
+  Samples.push_back(ttbar_2);
   Yields ttbar;
-  ttbar = loadhistoYields(cut, "\\ttbar", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3FullPhSp");
+  ttbar = loadhistoYields(cut, "\\ttbar", fdir + fname + "_ttbar_LepJetsPowhegPythia");
   Samples.push_back(ttbar);
-  Yields ttbar_aMCatNLO;
-  ttbar_aMCatNLO = loadhistoYields(cut, "ttbar aMCatNLO", fdir + fname + "_ttbar_aMCatNLOPythia");
-  Samples.push_back(ttbar_aMCatNLO);
-  Yields ttbar_Madgraph;
-  ttbar_Madgraph = loadhistoYields(cut, "ttbar Madgraph", fdir + fname + "_ttbar_MadgraphPythia");
-  Samples.push_back(ttbar_Madgraph);
     
   Yields ttbb;
-  ttbb = loadhistoYields(cut, "\\ttbar\\bbbar", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttbbFullPhSp");
+  ttbb = loadhistoYields(cut, "\\ttbar\\bbbar", fdir + fname + "_ttbar_LepJetsPowhegPythiattbb");
   Samples.push_back(ttbb);
   Yields ttb;
-  ttb = loadhistoYields(cut, "\\ttbar\\qb", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttbjFullPhSp");
+  ttb = loadhistoYields(cut, "\\ttbar\\qb", fdir + fname + "_ttbar_LepJetsPowhegPythiattbj");
   Samples.push_back(ttb);
   Yields ttcc;
-  ttcc = loadhistoYields(cut, "\\ttbar\\ccbar", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttccFullPhSp");
+  ttcc = loadhistoYields(cut, "\\ttbar\\ccbar", fdir + fname + "_ttbar_LepJetsPowhegPythiattcc");
   Samples.push_back(ttcc);
   Yields ttLF;
-  ttLF = loadhistoYields(cut, "\\ttbar LF", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttLFFullPhSp");
+  ttLF = loadhistoYields(cut, "\\ttbar LF", fdir + fname + "_ttbar_LepJetsPowhegPythiattLF");
   Samples.push_back(ttLF);
   Yields ttjj;
-  ttjj = loadhistoYields(cut, "\\ttbar\\jj", fdir + fname + "_ttbar_LepJetsPowhegPythiaTranche3ttjjFullPhSp");
+  ttjj = loadhistoYields(cut, "\\ttbar\\jj", fdir + fname + "_ttbar_LepJetsPowhegPythiattjj");
   Samples.push_back(ttjj);
 
   Yields ttOther;
-  ttOther = loadhistoYields(cut, "\\ttbar\\ Other", fdir + fname + "_BkgOther");
+  ttOther = loadhistoYields(cut, "\\ttbar\\ Other", fdir + fname + "_ttbar_PowhegPythiaBkgtt");
   Samples.push_back(ttOther);
 
   Yields tW;
@@ -166,6 +165,10 @@ int main (int argc, char *argv[]){
   ZJets = loadhistoYields(cut, "Z+Jets", fdir + fname + "_ZJets_aMCatNLO");
   Samples.push_back(ZJets);
 
+  Yields VV;
+  VV = loadhistoYields(cut, "VV", fdir + fname + "_VV");
+  Samples.push_back(VV);
+
   Yields QCD;
   QCD = loadhistoYields(cut, "QCD", fdir + fname + "_QCD");
   Samples.push_back(QCD);
@@ -178,6 +181,27 @@ int main (int argc, char *argv[]){
   ttV = loadhistoYields(cut, "\\ttbar V", fdir + fname + "_ttV_Madgraph");
   Samples.push_back(ttV);
 
+  Yields Full;
+  Full = loadhistoYields(cut, "Total Bkg MC", fdir + fname + "_BkgFull");
+  Samples.push_back(Full);
+
+  Yields TotalMC;
+  TotalMC = loadhistoYields(cut, "Total MC", fdir + fname + "_ttbar_LepJetsPowhegPythiattjj");
+  AddhistoYields(&TotalMC,&ttOther);
+  AddhistoYields(&TotalMC,&tW);
+  AddhistoYields(&TotalMC,&WJets);
+  AddhistoYields(&TotalMC,&ZJets);
+  AddhistoYields(&TotalMC,&VV);
+  AddhistoYields(&TotalMC,&QCD);
+  AddhistoYields(&TotalMC,&ttH);
+  AddhistoYields(&TotalMC,&ttV);
+ 
+  Samples.push_back(TotalMC);
+
+  Yields Data;
+  Data = loadhistoYields(cut, "Data", fdir + fname + "_DataSingleLep");
+  Samples.push_back(Data);
+  
 
   // LaTeX table
   TString dirTeXname;
@@ -189,12 +213,18 @@ int main (int argc, char *argv[]){
   TString YieldsTeXfile  = dirTeXname + "Yields_" + cutname + ".tex";
   FILE*   Yields         = fopen(YieldsTeXfile, "w");
 
+  fprintf(Yields,"~{\\Tiny \\def \\arraystretch{2} \\tabcolsep=4pt \n");
   fprintf(Yields,"\\begin{tabular}{|l|r@{~$\\pm$~}l|r@{~$\\pm$~}l|r@{~$\\pm$~}l|}\\hline\n");
   fprintf(Yields,"Source & \\multicolumn{2}{c|}{${\\mu}$+Jets} & \\multicolumn{2}{c|}{${\\e}$+Jets} & \\multicolumn{2}{c|}{${\\ell}$+Jets} \\\\\\hline\\hline\n");
   
   for(int ns = 0; ns < Samples.size(); ns++)  EntryPrinter(Yields, Samples.at(ns));
 
-  fprintf(Yields,"\\end{tabular}\n");
+  fprintf(Yields,"Data/MC & %.2f & -- & %.2f & -- & %.2f & --   \\\\\\hline\n", 
+	  Data.Evt[0]/TotalMC.Evt[0],
+	  Data.Evt[1]/TotalMC.Evt[1],
+	  Data.Evt[2]/TotalMC.Evt[2]);
+  
+  fprintf(Yields,"\\end{tabular}\n }");
 
   fclose(Yields);
 
@@ -205,6 +235,15 @@ int main (int argc, char *argv[]){
 
 }// end Code
 
+void AddhistoYields(Yields *s1, Yields *s2){
+
+  for (unsigned int i = 0; i < 3; i++){ 
+    s1->Evt[i] = s1->Evt[i] + s2->Evt[i];
+    float Error2 = s1->Error[i]*s1->Error[i] + s2->Error[i]*s2->Error[i];
+    s1->Error[i] = sqrt(Error2);
+  }
+
+}
 
 Yields loadhistoYields(int SelCut, TString TName,TString namefile){
 
@@ -216,13 +255,13 @@ Yields loadhistoYields(int SelCut, TString TName,TString namefile){
     std::exit(0);
   }
 
-  if(SelCut > 3 || SelCut < 0) {
+  if(SelCut > 6 || SelCut < 0) {
     std::cerr << "ERROR: Incorrect selection cut name!!! "  << std::endl;
     std::exit(0);
   }
 
-  float aYields[4][3];
-  float aError [4][3];
+  float aYields[7][3];
+  float aError [7][3];
 
   Yields output;
 
@@ -231,7 +270,7 @@ Yields loadhistoYields(int SelCut, TString TName,TString namefile){
   YieldsSample = (TH1F*)file->Get("Yields");
 
   int nbin = 1;
-  for(int nc = 0; nc < 4; nc++){
+  for(int nc = 0; nc < 7; nc++){
     for(int nch = 0; nch < 3; nch++){
 
       aYields[nc][nch] = YieldsSample->GetBinContent(nbin);

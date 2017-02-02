@@ -18,7 +18,7 @@ float SFLumi(TString filename,
   float NormWeight = 0.0;
   // NormWeight = Lumi*(1.0/N_Gen_events)*(Xsec)*(Br)
 
-  if(filename.Contains("QCD_MuEnr_20to30"))     NormWeight = Lumi * (1.0/NGenEvents) * (1273190000.0) * (0.003); // [pb] (cross section) * (Filter Eff)
+  if(filename.Contains("QCD_MuEnr_15to20"))     NormWeight = Lumi * (1.0/NGenEvents) * (1273190000.0) * (0.003); // [pb] (cross section) * (Filter Eff)
   if(filename.Contains("QCD_MuEnr_20to30"))     NormWeight = Lumi * (1.0/NGenEvents) * (558528000.0) * (0.0053); // [pb] (cross section) * (Filter Eff)
   if(filename.Contains("QCD_MuEnr_30to50"))     NormWeight = Lumi * (1.0/NGenEvents) * (139803000.0) * (0.0118); // [pb] (cross section) * (Filter Eff)
   if(filename.Contains("QCD_MuEnr_50to80"))     NormWeight = Lumi * (1.0/NGenEvents) * (19222500.0) * (0.02276); // [pb] (cross section) * (Filter Eff)
@@ -27,6 +27,7 @@ float SFLumi(TString filename,
   if(filename.Contains("QCD_MuEnr_170to300"))   NormWeight = Lumi * (1.0/NGenEvents) * (117989.0) * (0.07335);   // [pb] (cross section) * (Filter Eff)
   if(filename.Contains("QCD_MuEnr_300to470"))   NormWeight = Lumi * (1.0/NGenEvents) * (7820.25) * (0.10196);    // [pb] (cross section) * (Filter Eff)
   if(filename.Contains("QCD_MuEnr_470to600"))   NormWeight = Lumi * (1.0/NGenEvents) * (645.528) * (0.12242);    // [pb] (cross section) * (Filter Eff)
+  if(filename.Contains("QCD_MuEnr_600to800"))   NormWeight = Lumi * (1.0/NGenEvents) * (187.09) * (0.13412);     // [pb] (cross section) * (Filter Eff)
   if(filename.Contains("QCD_MuEnr_800to1000"))  NormWeight = Lumi * (1.0/NGenEvents) * (32.3486) * (0.14552);    // [pb] (cross section) * (Filter Eff)
   if(filename.Contains("QCD_MuEnr_1000toInf"))  NormWeight = Lumi * (1.0/NGenEvents) * (10.4305) * (0.15544);    // [pb] (cross section) * (Filter Eff)
 
@@ -40,7 +41,7 @@ float SFLumi(TString filename,
   if(filename.Contains("QCD_EGEnr_300toInf"))   NormWeight = Lumi * (1.0/NGenEvents) * (9000.0) * (0.15);         // [pb] (cross section) * (Filter Eff)
 
 
-  if(filename.Contains("ttHbb"))      NormWeight = Lumi * (1.0/NGenEvents) * (0.577*0.5058); // [pb]
+  if(filename.Contains("ttHbb"))          NormWeight = Lumi * (1.0/NGenEvents) * (0.577*0.5058); // [pb]
   if(filename.Contains("ZJets_M50"))      NormWeight = Lumi * (1.0/NGenEvents) * (6025.2);   // [pb]
   if(filename.Contains("ZJets_M10to50"))  NormWeight = Lumi * (1.0/NGenEvents) * (18610.0);  // [pb]
   if(filename.Contains("WJets"))          NormWeight = Lumi * (1.0/NGenEvents) * (61526.7);  // [pb]

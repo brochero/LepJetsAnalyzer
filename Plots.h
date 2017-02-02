@@ -47,5 +47,11 @@ void overwritehistograms (std::vector<histos> newhistos, TString plots, TString 
  Files and Directories
 ************************/
 TString dirnameIn= "TopResults/";
-TString fl  = "hSF-NuiPar-v0_Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1";
-// TString fl  = "hSF-pTj30_FitBin20-CatFullPhSp-CSVT-v0_Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1";
+// TString fl  = "hSF-NuiPar-v0_Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1";
+// TString fl  = "hSF-NoeTr_Tree_LepJets_NewCSVSF_v8-0-4_Spring16-80X_36814pb-1";
+// TString fl  = "hSF-CSVM-v0_Tree_LepJets_NewCSVSF_v8-0-4_Spring16-80X_36814pb-1";
+// TString fl  = "hSF-SFcsv30-v0_Tree_LepJets_NewCSVSF_v8-0-4_Spring16-80X_36814pb-1";
+// TString fl  = "hSF-SFcsvGlobal-v0_Tree_LepJets_NewCSVSF_v8-0-4_Spring16-80X_36814pb-1";
+// TString fl  = "hSF-NoSFcsv-v0_Tree_LepJets_NewCSVSF_v8-0-4_Spring16-80X_36814pb-1";
+// TString fl  = "hSF-ElecFixCSVT-v0_Tree_LepJets_NewCSVSF_v8-0-4_Spring16-80X_36814pb-1";
+TString fl  = "hSF-Full-v0_Tree_LepJets_PileUp17_v8-0-4_Spring16-80X_36814pb-1";

@@ -36,7 +36,7 @@ int main(int argc, const char* argv[]){
   const char * _output   = 0;
   const char * _input    = 0;
   // TopTrees directory
-  const char * _dir      = "/xrootd/store/user/brochero/v8-0-1/";
+  const char * _dir      = "/xrootd/store/user/brochero/v8-0-4/";
   const char * _syst_var = 0;
   const char * _ttbar_id = 0;
   
@@ -145,6 +145,7 @@ int main(int argc, const char* argv[]){
 
   theTree.SetBranchAddress( "jet_CSV",           &Jet_CSV );
   theTree.SetBranchAddress( "jet_SF_CSV_30",     &Jet_SF_CSV );
+  theTree.SetBranchAddress( "jet_SF_CSV",        &Jet_SF_CSVg );
   theTree.SetBranchAddress( "jet_partonFlavour", &Jet_partonFlavour );
   theTree.SetBranchAddress( "jet_CvsB",          &Jet_CvsB );
   theTree.SetBranchAddress( "jet_CvsL",          &Jet_CvsL );
@@ -207,14 +208,20 @@ int main(int argc, const char* argv[]){
   NTotal_Weight = h_NumberEvt->GetBinContent(2);
   for (unsigned int ibin = 1; ibin< 7; ibin++) NTotal_ScalemuRF_Weight[ibin]= h_ScaleWeights->GetBinContent(ibin);
 
+  // Number of events
+  int MaxEvt = theTree.GetEntries();
+  if(_NUserEvt > 0) MaxEvt = std::min(MaxEvt, _NUserEvt);
+
   // MCatNLO Weights
   if(fname.Contains("aMCatNLO")){
     theTree.SetBranchAddress( "genweight", &GENWeight );
     nNorm_Event = NTotal_Weight;    
+    if(_NUserEvt > 0) nNorm_Event = MaxEvt*(NTotal_Weight/theTree.GetEntries());
   }
   else{
     GENWeight = 1.0;
     nNorm_Event = NTotal_Event;
+    if(_NUserEvt > 0) nNorm_Event = MaxEvt*(NTotal_Event/theTree.GetEntries());
   }
 
   /*********************************
@@ -225,7 +232,7 @@ int main(int argc, const char* argv[]){
     
   for(int j=0; j<Nhcuts; j++){   // Cut
     for(int i=0; i<Nhch; i++){ // Channel
-      hPV[j][i]         = new TH1D("hPV_"+namech[i]+"_"+namecut[j],"PV Distribution  " + titlenamech[i] + ";PV",15,0,30);
+      hPV[j][i]         = new TH1D("hPV_"+namech[i]+"_"+namecut[j],"PV Distribution  " + titlenamech[i] + ";PV",30,0,60);
       hMET[j][i]        = new TH1D("hMET_"+ namech[i]+"_"+namecut[j],"#slash{E}_{T} " + titlenamech[i] + ";#slash{E}_{T}[GeV]",10,0,200);
       hMET_Phi[j][i]    = new TH1D("hMET_Phi_"+ namech[i]+"_"+namecut[j],"#Phi_{#slash{E}_{T}} " + titlenamech[i] + ";#Phi_{#slash{E}_{T}}[rad]",16,0,3.2);
       hmT[j][i]         = new TH1D("hmT_"+ namech[i]+"_"+namecut[j],"transverse Mass Lepton/MET " + titlenamech[i] + ";m_{T}[GeV]",40,0,160);
@@ -424,9 +431,9 @@ int main(int argc, const char* argv[]){
   ***************************/
   if(_ttbar_cat) fname += ttbar_id; // add in the sample name the ttbar category
 
-  // New WP for 76X: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation76X
-  //float CSV_WP = 0.800; // Medium
-  float CSV_WP = 0.935; // Tight
+  // New WP for 80X: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
+  // float CSV_WP = 0.8484; // Medium Moriond-17
+  float CSV_WP = 0.9535; // Tight Moriond-17
   int btagSysPar = 0;
 
   // Global SF uncertainty: 18 Components
@@ -480,17 +487,14 @@ int main(int argc, const char* argv[]){
   NormWeight[1] = SFLumi(fname, LuminNorm_El, nNorm_Event);  
 
   std::cout << "-----------------------                                 -------------------------" << std::endl;
-  std::cout << "Number of Events     = " << nNorm_Event << std::endl;
-  std::cout << "Normalization Factor = " << NormWeight  << std::endl;
+  std::cout << "Number of Events         = " << nNorm_Event << std::endl;
+  std::cout << "Normalization Factor[Mu] = " << NormWeight[0]  << std::endl;
+  std::cout << "Normalization Factor[EG] = " << NormWeight[1]  << std::endl;
   std::cout << "---------------------------------------------------------------------------------" << std::endl;
 
   /********************************
              Event Loop
   ********************************/
-  // Number of events
-  int MaxEvt = theTree.GetEntries();
-  if(_NUserEvt > 0) MaxEvt = std::min(MaxEvt, _NUserEvt);
-
   std::cout << "--- Processing: " << MaxEvt << " events" << std::endl;
   
   for (Long64_t ievt=0; ievt<MaxEvt; ievt++) {
@@ -502,7 +506,7 @@ int main(int argc, const char* argv[]){
     if (_syst && syst_varname.Contains("PileUp"))
       PUWeight = (*PUWeight_sys)[pileupSysPar]; // Up
     else PUWeight = (*PUWeight_sys)[0];
-    
+        
     // Luminosity Weight + MCatNLO GEN Weights (For MC@NLO) 
     PUWeight = PUWeight * NormWeight[Channel] * GENWeight;
     

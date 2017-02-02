@@ -96,7 +96,7 @@ int main(int argc, const char* argv[]){
   const char * _output   = 0;
   const char * _input    = 0;
   // TopTrees directory
-  const char * _dir      = "/xrootd/store/user/brochero/v8-0-1/";
+  const char * _dir      = "/xrootd/store/user/brochero/v8-0-4/";
   const char * _syst_var = 0;
   const char * _ttbar_id = "";
 

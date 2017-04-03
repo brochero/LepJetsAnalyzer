@@ -1,6 +1,6 @@
 #include "SFIDISOTrigger.h"
 
-void GetSFHistogram (TString fSFdir, TString fSFname, TH2F *hmuIDISOSF, TH2F *hmuTriggerSF, TH2F *heIDISOSF,  TH2F *heTriggerSF){
+void GetSFHistogram(TString fSFdir, TString fSFname, TH2F **hmuIDISOSF, TH2F **hmuTriggerSF, TH2F **heIDISOSF,  TH2F **heTriggerSF){
   // Lepton SFs: ID and ISO with stat. + syst. Errors
   TString MuFile = fSFdir + "MuonSF_" + fSFname + ".root";
   TString ElFile = fSFdir + "ElectronSF_" + fSFname + ".root";
@@ -17,17 +17,20 @@ void GetSFHistogram (TString fSFdir, TString fSFname, TH2F *hmuIDISOSF, TH2F *hm
     std::exit(0);
   }
   
-  hmuIDISOSF = (TH2F*) MuSF->Get("GlobalSF")->Clone("muIDISOSF");
-  hmuTriggerSF = (TH2F*) MuSF->Get("TriggerSF")->Clone("muTriggerSF");
+  *hmuIDISOSF = (TH2F*) MuSF->Get("muIDISOSF")->Clone("muIDISOSF");
+  *hmuTriggerSF = (TH2F*) MuSF->Get("muTriggerSF")->Clone("muTriggerSF");
   if(!hmuIDISOSF || !hmuTriggerSF){
     std::cerr << "ERROR [MuonSF]: Could not find " << MuFile << " for SF reweighting" << std::endl;
+    std::exit(0);
   }
   
-  heIDISOSF = (TH2F*) ElSF->Get("GlobalSF")->Clone("eIDISOSF");
-  heTriggerSF = (TH2F*) ElSF->Get("TriggerSF")->Clone("eTriggerSF");
+  *heIDISOSF = (TH2F*) ElSF->Get("eTriggerSF")->Clone("eIDISOSF");
+  *heTriggerSF = (TH2F*) ElSF->Get("eTriggerSF")->Clone("eTriggerSF");
   if(!heIDISOSF || !heTriggerSF){
     std::cerr << "ERROR [ElectronSF]: Could not find " << ElFile <<  " for SF reweighting" << std::endl;
+    std::exit(0);
   }
+
 }
 
 /***************************
@@ -59,7 +62,7 @@ void SFIDISOTrigger(std::vector<float> &result,
     
     std::vector<float> Vbinmueta; // muon eta values
     std::vector<float> VbinmupT;  // muon pT values
-    
+
     // X-axis (eta)
     for(int nbx=1; nbx <= Nbinmueta; nbx++)  Vbinmueta.push_back( hmuIDISOSF->GetXaxis()->GetBinLowEdge(nbx) );
     Vbinmueta.push_back( hmuIDISOSF->GetXaxis()->GetBinLowEdge(Nbinmueta + 1) ); // Add upper edge of the last bin
@@ -87,7 +90,8 @@ void SFIDISOTrigger(std::vector<float> &result,
     
     // Y-axis (pT)
     for(int nby=1; nby <= NbinTrmupT; nby++)  VbinTrmupT.push_back( hmuTriggerSF->GetYaxis()->GetBinLowEdge(nby) );
-    VbinTrmupT.push_back( hmuTriggerSF->GetYaxis()->GetBinLowEdge(NbinTrmupT + 1) ); // Add upper edge of the last bin
+    //VbinTrmupT.push_back( hmuTriggerSF->GetYaxis()->GetBinLowEdge(NbinTrmupT + 1) ); // Add upper edge of the last bin
+    VbinTrmupT.push_back(1000.0); // Add Max pT for the last bin
     
     //--------------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------
@@ -145,7 +149,8 @@ void SFIDISOTrigger(std::vector<float> &result,
     
     // Y-axis (pT)
     for(int nby=1; nby <= NbinepT; nby++)  VbinepT.push_back( heIDISOSF->GetYaxis()->GetBinLowEdge(nby) );
-    VbinepT.push_back( heIDISOSF->GetYaxis()->GetBinLowEdge(NbinepT + 1) ); // Add upper edge of the last bin
+    // VbinepT.push_back( heIDISOSF->GetYaxis()->GetBinLowEdge(NbinepT + 1) ); // Add upper edge of the last bin
+    VbinepT.push_back(1000.0); // Add Max pT for the last bin
     
     // Binning for Electron Trigger histo
     int NbinTreeta = heTriggerSF->GetNbinsX(); // X-axis (eta)
@@ -160,8 +165,9 @@ void SFIDISOTrigger(std::vector<float> &result,
     
     // Y-axis (pT)
     for(int nby=1; nby <= NbinTrepT; nby++)  VbinTrepT.push_back( heTriggerSF->GetYaxis()->GetBinLowEdge(nby) );
-    VbinTrepT.push_back( heTriggerSF->GetYaxis()->GetBinLowEdge(NbinTrepT + 1) ); // Add upper edge of the last bin
-    
+    // VbinTrepT.push_back( heTriggerSF->GetYaxis()->GetBinLowEdge(NbinTrepT + 1) ); // Add upper edge of the last bin
+    VbinTrepT.push_back(1000.0); // Add Max pT for the last bin
+
     //--------------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------
     

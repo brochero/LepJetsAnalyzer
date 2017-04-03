@@ -41,13 +41,12 @@
 ***************************************************************************************************************************************/
 #include "ttbar_category.h"
 
-bool ttbar_category(TString ttbarCatName, int ttbarGenCatId){
+bool ttbar_category(TString ttbarCatName, int ttbarGenCatId, int NGenJets){
 
   bool tt_Evt   = false;
   bool ttb_Evt  = false;
   bool tt2b_Evt = false;
-  bool ttc_Evt  = false;
-  bool ttjj_Evt = false;
+  bool ttLF_Evt = false;
   bool ttbb_Evt = false;
   bool ttcc_Evt = false;
 
@@ -58,21 +57,27 @@ bool ttbar_category(TString ttbarCatName, int ttbarGenCatId){
   t  = tu / 10;
   u  = tu % 10;
     
-  if      (tu == 0)                          tt_Evt   = true;
+  if (tu == 0){
+    //(Inside Acceptance (pT>25,|eta|<2.4))
+    // if      ((h == 2 || h==102) && NGenJets>5) ttLF_Evt = true;
+    // else if ((h == 1 || h==101) && NGenJets>4) ttLF_Evt = true;
+    // else if ((h == 0 || h==100) && NGenJets>3) ttLF_Evt = true;
+    // else tt_Evt   = true;
+    tt_Evt   = true;
+  }
   else if (tu == 55 || tu == 54 || tu == 53) ttbb_Evt = true;
   else if (tu == 52)                         tt2b_Evt = true;
   else if (tu == 51)                         ttb_Evt  = true;
   else if (tu == 45 || tu == 44 || tu == 43) ttcc_Evt = true;
-  else if (tu == 42 || tu == 41)             ttc_Evt  = true;
+  // ttcj included in ttLF
+  else if (tu == 42 || tu == 41)             tt_Evt  = true;
   
   if (ttbarCatName == "tt")   return tt_Evt;
-  else if (ttbarCatName == "ttc")  return ttc_Evt;
   else if (ttbarCatName == "ttb")  return ttb_Evt;
   else if (ttbarCatName == "tt2b") return tt2b_Evt;
-  else if (ttbarCatName == "ttjj") return ttjj_Evt;
   else if (ttbarCatName == "ttcc") return ttcc_Evt;
   else if (ttbarCatName == "ttbb") return ttbb_Evt;    
-  
+  else return false;
 }
 
 TString ttbar_Wjjcategory(int ttbarGenCatId){

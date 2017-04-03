@@ -157,11 +157,15 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress( "jet_JER_Nom", &Jet_JER_Nom );
     theTree.SetBranchAddress( "jet_JER_Down",&Jet_JER_Down );
   }
-  // ttbar event categorization
+  
   if(fname.Contains("ttbar") && !fname.Contains("Bkg")){
+    // ttbar event categorization  
+    theTree.SetBranchAddress("genconecatid",      &GenConeCat);
+    // ttH Categorization
+    theTree.SetBranchAddress("genhiggscatid",      &GenttHCat);
+
     theTree.SetBranchAddress("scaleweight",       &ScaleWeight );
 
-    theTree.SetBranchAddress("genconecatid",      &GenConeCat);
     theTree.SetBranchAddress("gencone_gjet_pT",   &GenCone_pT);
     theTree.SetBranchAddress("gencone_gjet_eta",  &GenCone_eta);
     theTree.SetBranchAddress("gencone_gjet_phi",  &GenCone_phi);
@@ -281,8 +285,8 @@ int main(int argc, const char* argv[]){
       h2DSFbtag_Global[j][i]   = new TH2D("h2DSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} Vs  #Delta SF_{b-tag} " + titlenamech[i] + ";SF_{b-tag};#Delta SF_{b-tag}", 40, 0.0, 4.0, 50, 0.0, 0.5);
       hSFbtag_Global[j][i]     = new TH1D("hSFbtag_Global_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} " + titlenamech[i] + ";SF_{b-tag}",40, 0.0, 4.0);
       hSFbtag_Global_var[j][i] = new TH1D("hSFbtag_Global_var_"+namech[i]+"_"+namecut[j], "Global #Delta SF_{b-tag} " + titlenamech[i] + ";#Delta SF_{b-tag}", 20, 0.0, 0.10);
-      pSFCSVVsCSV[j][i]        = new TProfile("pSFCSVVsCSV_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag}" + titlenamech[i] + ";CSV;SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
-      pSFCSVErrorVsCSV[j][i]   = new TProfile("pSFCSVErrorVsCSV_"+namech[i]+"_"+namecut[j], "#Delta SF_{b-tag}" + titlenamech[i] + ";CSV;#Delta SF_{b-tag}", 20, 0.0, 1.0, -1.0, 1.0);
+      pSFCSVVsCSVAll[j][i]     = new TProfile("pSFCSVVsCSVAll_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag}" + titlenamech[i] + ";CSV;SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
+      pSFCSVErrorVsCSVAll[j][i]= new TProfile("pSFCSVErrorVsCSVAll_"+namech[i]+"_"+namecut[j], "#Delta SF_{b-tag}" + titlenamech[i] + ";CSV;#Delta SF_{b-tag}", 20, 0.0, 1.0, -1.0, 1.0);
 
       // B-tag efficiency histograms
       h2DSFbtag_b[j][i]    = new TH2D("hSFbtag_b_"+namech[i]+"_"+namecut[j], "N^{b}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
@@ -358,7 +362,11 @@ int main(int argc, const char* argv[]){
       hKinAdd1CSV[j][i]   = new TH1D("hKinAdd1CSV_"  + namech[i] + "_" + namecut[j], "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",20,0,1);
       hKinAdd2CSV[j][i]   = new TH1D("hKinAdd2CSV_"  + namech[i] + "_" + namecut[j], "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",20,0,1);
       h2DKinAddCSV[j][i]  = new TH2D("h2DKinAddCSV_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for the Add (kin) Jets " + titlenamech[i], 20,0,1,30,0,1);
-
+      
+      pSFCSVVsCSVAdd[j][i]  = new TProfile("pSFCSVVsCSVAdd_"+namech[i]+"_"+namecut[j], "Global SF_{b-tag} Add. Jets " + titlenamech[i] + ";CSV;SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
+      pSFCSVUpVsCSVAdd[j][i]= new TProfile("pSFCSVUpVsCSVAdd_"+namech[i]+"_"+namecut[j], "#Delta_{Up} SF_{b-tag} Add. Jets " + titlenamech[i] + ";CSV;#Delta SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
+      pSFCSVDownVsCSVAdd[j][i]= new TProfile("pSFCSVDownVsCSVAdd_"+namech[i]+"_"+namecut[j], "#Delta_{Down} SF_{b-tag} Add. Jets " + titlenamech[i] + ";CSV;#Delta SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
+      
       TString kinJetname[4];
       kinJetname[0] = "bFromH";
       kinJetname[1] = "W1";
@@ -381,6 +389,7 @@ int main(int argc, const char* argv[]){
       hGenTagAdd2CSV[j][i]   = new TH1D("hGenTagAdd2CSV_"  + namech[i] + "_" + namecut[j], "CSV For add Jet-2 from GenTag " + titlenamech[i] + ";CSVv2",20,0,1);
       h2DGenTagAddCSV[j][i]  = new TH2D("h2DGenTagAddCSV_" + namech[i] + "_" + namecut[j], "CSVv2 Discriminant for the Add (GenTag) Jets " + titlenamech[i], 20,0,1,30,0,1);
 
+      effCatHiggs[j][i] = new TEfficiency ("effCatHiggs_" + namech[i] + "_" + namecut[j], "Cat Vs Higgs Cat. " + titlenamech[i] + "; Category; Match Eff.", 5,0,5);
 
 
     }//for(i->channel)
@@ -416,12 +425,13 @@ int main(int argc, const char* argv[]){
   /************************
      SF Parametrization
   *************************/
-  TH2F *hmuIDISOSF, *hmuTriggerSF;
+  TH2F *hmuIDISOSF, *hmuTriggerSF, *hmuTrackerSF;
   TH2F *heIDISOSF,  *heTriggerSF;
 
-  GetSFHistogram ("ScaleFactors/", 
-		  "IDISO_Trigger_POG25ns",
-		  hmuIDISOSF, hmuTriggerSF, heIDISOSF,  heTriggerSF);
+  GetSFHistogram ("TopTools/SF_ID-ISO-Trigger/", 
+		  "IDISO_Trigger_POGMoriond17",
+		  &hmuIDISOSF, &hmuTriggerSF, &hmuTrackerSF, 
+		  &heIDISOSF, &heTriggerSF);
 
   // Jet uncertainties (btag, JES and JER)
   if(_syst) fname += "_SYS_" + syst_varname;
@@ -467,7 +477,12 @@ int main(int argc, const char* argv[]){
   else if(_syst && syst_varname.Contains("ScaleRdF_Down")) scaleSysPar = 5; // muR=Down, muF=Down
   // Normalization for Scale Weights:
   if (_syst && syst_varname.Contains("Scale")){
-    if(scaleSysPar < 6) nNorm_Event = NTotal_ScalemuRF_Weight[scaleSysPar];
+    if(scaleSysPar < 6){
+      std::cout << "Scale normalization: Weighted events = " << NTotal_ScalemuRF_Weight[scaleSysPar] << std::endl;
+      nNorm_Event = NTotal_ScalemuRF_Weight[scaleSysPar];
+      if(_NUserEvt > 0) nNorm_Event = MaxEvt*(NTotal_ScalemuRF_Weight[scaleSysPar]/theTree.GetEntries());
+
+    }
     else{
       std::cerr << "No entry for Scale normalization! Check HISTO!"  << std::endl;
       std::exit(0);
@@ -496,7 +511,7 @@ int main(int argc, const char* argv[]){
              Event Loop
   ********************************/
   std::cout << "--- Processing: " << MaxEvt << " events" << std::endl;
-  
+
   for (Long64_t ievt=0; ievt<MaxEvt; ievt++) {
     
     theTree.GetEntry(ievt);  
@@ -544,14 +559,20 @@ int main(int argc, const char* argv[]){
     NJets      = 0;
     NBtagJets  = 0;
     
-    // Global SF_b-tag
+    // Shape Method
     // From: https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration
     float btagUnc_val = 0.0;
+    float btagUnc_TotalUp = 0.0, btagUnc_TotalDown = 0.0;
     if (!fname.Contains("Data")){
       if(_syst && btagSysPar != 0 && syst_varname.Contains("Up"))
 	btagUnc_val = 1.0 * (*Jet_SF_CSV)[btagSysPar];
       else if(_syst && btagSysPar != 0 && syst_varname.Contains("Down")) 
 	btagUnc_val = -1.0 * (*Jet_SF_CSV)[btagSysPar];      
+      
+      for (unsigned int ibtag = btagUnc::JES_UP; ibtag <= btagUnc::CFERR2_DN; ibtag++){
+	if (ibtag%2) btagUnc_TotalUp   += ((*Jet_SF_CSV)[ibtag])*((*Jet_SF_CSV)[ibtag]); 
+	else         btagUnc_TotalDown += ((*Jet_SF_CSV)[ibtag])*((*Jet_SF_CSV)[ibtag]); 
+      }
       // SF estimated for jets with pT = 25, 30, 35 and 40 GeV
       PUWeight = PUWeight * ((*Jet_SF_CSV)[btagUnc::CENTRAL] + btagUnc_val);
     }// if(!data)
@@ -570,10 +591,7 @@ int main(int argc, const char* argv[]){
       KinJetIndex[ikj] = (*KinJet_Index)[ikj];
       KinJet[ikj].SetPtEtaPhiE((*KinJet_pT)[ikj],(*KinJet_eta)[ikj],(*KinJet_phi)[ikj],(*KinJet_E)[ikj]);
     }
-    bool isKinEvt = true; // TEMPORAL SOLUTION -> Change default indexes from 0 to -999
-    if (KinJetIndex[0] == 0 && KinJetIndex[1] == 0 &&
-	KinJetIndex[2] == 0 && KinJetIndex[3] == 0 ) isKinEvt = false;
- 
+
     std::vector<ComJet> Jets;    
     for(int ijet=0; ijet < Jet_pT->size(); ijet++){
 
@@ -615,11 +633,9 @@ int main(int argc, const char* argv[]){
       // [1] j from W
       // [2] j from W
       // [3] b from leptonic leg
-      if ( isKinEvt ){
-	if (ijet == KinJetIndex[0] || ijet == KinJetIndex[3] ) jet.KinMom = 6;
-	if (ijet == KinJetIndex[1] || ijet == KinJetIndex[2] ) jet.KinMom = 24;
-      }
-
+      if (ijet == KinJetIndex[0] || ijet == KinJetIndex[3] ) jet.KinMom = 6;
+      if (ijet == KinJetIndex[1] || ijet == KinJetIndex[2] ) jet.KinMom = 24;
+      
       if(jet.Pt() > 30){ // Jet pT Cut
 
 	Jets.push_back(jet);
@@ -627,13 +643,6 @@ int main(int argc, const char* argv[]){
 	/*******************************************
                        b-tagging
 	*******************************************/    
-	// OLD b-tagging Method: 
-	// b-tagging WP from https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagging
-	// Not recommended for analysis with observables that depends ontagging.
-	// if (fname.Contains("Data")) btagDisc = fBTagSF->IsTagged((*Jet_CSV)[ijet], -999999, jet.Pt(), jet.Eta());
-	// else btagDisc = fBTagSF->IsTagged((*Jet_CSV)[ijet], JetFlav, jet.Pt(), jet.Eta()); 
-	// New Method (Event SF from tth group)
-	// https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration
 	if(jet.CSV > CSV_WP) NBtagJets++; // Number of b-tagged jets
 	
       } // if(Jet_pT)
@@ -679,14 +688,14 @@ int main(int argc, const char* argv[]){
     }
     
     else {
-      // Second Method: Taking SF from root file
-      // SFIDISOTrigger(SF_ID_ISO_Tr,
-      // 		     Lep, Channel,
-      // 		     hmuIDISOSF, hmuTriggerSF,
-      // 		     heIDISOSF,  heTriggerSF);
-      
       // From CATTuple
-      SF_ID_ISO_Tr = (*Lep_SF);
+      // SF_ID_ISO_Tr = (*Lep_SF);
+      
+      // Second Method: Taking SF from root file
+      SFIDISOTrigger(SF_ID_ISO_Tr,
+      		     Lep, Channel,
+      		     hmuIDISOSF, hmuTriggerSF, hmuTrackerSF,
+      		     heIDISOSF,  heTriggerSF);
       
       if(_syst && syst_varname.Contains("LepSF")){
 	float SFSystUnc = SF_ID_ISO_Tr[0]*0.015; //Additional??
@@ -742,10 +751,10 @@ int main(int argc, const char* argv[]){
       *******************/
       hSFIDISOTr[icut][Channel]->Fill(SF_ID_ISO_Tr[0],PUWeight);
       hSFIDISOTrError[icut][Channel]->Fill((SF_ID_ISO_Tr[1] - SF_ID_ISO_Tr[0]),PUWeight);
-      //hSFIDISO[icut][Channel]->Fill(SF_ID_ISO_Tr[1],PUWeight);
-      //hSFIDISOError[icut][Channel]->Fill(SF_ID_ISO_Tr[2],PUWeight);
-      //hSFTrigger[icut][Channel]->Fill(SF_ID_ISO_Tr[3],PUWeight);
-      //hSFTriggerError[icut][Channel]->Fill(SF_ID_ISO_Tr[4],PUWeight);
+      hSFIDISO[icut][Channel]->Fill(SF_ID_ISO_Tr[1],PUWeight);
+      hSFIDISOError[icut][Channel]->Fill(SF_ID_ISO_Tr[2],PUWeight);
+      hSFTrigger[icut][Channel]->Fill(SF_ID_ISO_Tr[3],PUWeight);
+      hSFTriggerError[icut][Channel]->Fill(SF_ID_ISO_Tr[4],PUWeight);
     
       /******************
           Acc. / Eff. 
@@ -796,8 +805,8 @@ int main(int argc, const char* argv[]){
 	  if(jet.CSV > CSV_WP) h2DSFbtag_btag_l[icut][Channel]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight);  
 	}
 	// SF_btag Profile
-	pSFCSVVsCSV[icut][Channel]->Fill(jet.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL], PUWeight);
-	pSFCSVErrorVsCSV[icut][Channel]->Fill(jet.CSV, btagUnc_val, PUWeight);
+	pSFCSVVsCSVAll[icut][Channel]->Fill(jet.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL], PUWeight);
+	pSFCSVErrorVsCSVAll[icut][Channel]->Fill(jet.CSV, btagUnc_val, PUWeight);
 	
 	// Jet variables
 	if (ijet < NhJets){
@@ -840,12 +849,28 @@ int main(int argc, const char* argv[]){
 	    hKinAdd1CSV   [icut][Channel]->Fill(jet.CSV,      PUWeight);
 	    hKinAdd2CSV   [icut][Channel]->Fill(jet_.CSV,     PUWeight);
 	    h2DKinAddCSV  [icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
+
+	    pSFCSVVsCSVAdd  [icut][Channel]->Fill(jet.CSV,  (*Jet_SF_CSV)[btagUnc::CENTRAL],                   PUWeight);
+	    pSFCSVUpVsCSVAdd[icut][Channel]->Fill(jet.CSV,  (*Jet_SF_CSV)[btagUnc::CENTRAL]+btagUnc_TotalUp,   PUWeight);
+	    pSFCSVDownVsCSVAdd[icut][Channel]->Fill(jet.CSV,  (*Jet_SF_CSV)[btagUnc::CENTRAL]-btagUnc_TotalDown, PUWeight);
+
+	    pSFCSVVsCSVAdd    [icut][Channel]->Fill(jet_.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL],                   PUWeight);
+	    pSFCSVUpVsCSVAdd  [icut][Channel]->Fill(jet_.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL]+btagUnc_TotalUp,   PUWeight);
+	    pSFCSVDownVsCSVAdd[icut][Channel]->Fill(jet_.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL]-btagUnc_TotalDown, PUWeight);
+
 	    fKinAddjj = false;
 	  }
 	}// for(jjet)
 
 	// Jet Tag Efficiencies
 	if(NJets > 3){ 
+	  // Categorization Comp
+	  effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttbb",GenttHCat,NGenJets), 0.5);
+	  effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttb", GenttHCat,NGenJets), 1.5);
+	  effCatHiggs [icut][Channel]-> Fill(ttbar_category("tt2b",GenttHCat,NGenJets), 2.5);
+	  effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttcc",GenttHCat,NGenJets), 3.5);
+	  effCatHiggs [icut][Channel]-> Fill(ttbar_category("tt",  GenttHCat,NGenJets), 4.5);
+
 	  // -- CSV purity
 	  // Jets from Top
 	  if(ijet < 2)                   purTagCSV[icut][Channel]-> Fill(jet.Mom == 6, 0.5);
@@ -1014,8 +1039,8 @@ int main(int argc, const char* argv[]){
       h2DSFbtag_Global[j][i]  ->Write();
       hSFbtag_Global[j][i]    ->Write();
       hSFbtag_Global_var[j][i]->Write();
-      pSFCSVVsCSV[j][i]       ->Write();
-      pSFCSVErrorVsCSV[j][i]  ->Write();
+      pSFCSVVsCSVAll[j][i]       ->Write();
+      pSFCSVErrorVsCSVAll[j][i]  ->Write();
 
       for(int ij=0; ij<NhJets; ij++){
   	hJetPt[ij][j][i]->Write();
@@ -1075,6 +1100,10 @@ int main(int argc, const char* argv[]){
       hKinAdd2CSV    [j][i]->Write();
       h2DKinAddCSV   [j][i]->Write();
 
+      pSFCSVVsCSVAdd    [j][i]->Write();
+      pSFCSVUpVsCSVAdd  [j][i]->Write();
+      pSFCSVDownVsCSVAdd[j][i]->Write();
+
       for(int ikj=0; ikj<4;ikj++) hKinJetPt[ikj][j][i]->Write();
 
       hTJetPosition [j][i]->Write();
@@ -1095,6 +1124,8 @@ int main(int argc, const char* argv[]){
       effTagCSV     [j][i]->Write();
       purTagCSV     [j][i]->Write();
       
+      effCatHiggs   [j][i]->Write();
+
     }//for(i)
 
   }//for(j)
@@ -1215,20 +1246,20 @@ bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id){
   if(cone_NbJets > 1 && cone_NJets > 5) Isttjj = true;
   
   // Categorization based in the Visible Ph-Sp
-  if      (cone_NbJets > 3  && cone_NJets > 5) Isttbb = true;
-  else if (cone_NbJets > 2  && cone_NJets > 5) Isttb  = true;
-  else if (cone_NbJets > 1  && cone_NJets > 5 && cone_NcJets > 1) Isttcc = true;
-  else if (cone_NbJets > 1  && cone_NJets > 5) IsttLF = true;
-  else Istt = true;
+  // if      (cone_NbJets > 3  && cone_NJets > 5) Isttbb = true;
+  // else if (cone_NbJets > 2  && cone_NJets > 5) Isttb  = true;
+  // else if (cone_NbJets > 1  && cone_NJets > 5 && cone_NcJets > 1) Isttcc = true;
+  // else if (cone_NbJets > 1  && cone_NJets > 5) IsttLF = true;
+  // else Istt = true;
   
   // Categorization based in the Full Ph-Sp
-  // if      (cone_NaddJets > 1) Isttjj = true;
+  if      (cone_NaddJets > 1) Isttjj = true;
   
-  // if      (cone_NaddbJets > 1) Isttbb = true;
-  // else if (cone_NaddbJets > 0) Isttb  = true;
-  // else if (cone_NaddcJets > 1) Isttcc = true;
-  // else if (cone_NaddJets  > 0) IsttLF = true;
-  // else Istt = true;
+  if      (cone_NaddbJets > 1) Isttbb = true;
+  else if (cone_NaddbJets > 0) Isttb  = true;
+  else if (cone_NaddcJets > 1) Isttcc = true;
+  else if (cone_NaddJets  > 0) IsttLF = true;
+  else Istt = true;
   
   bool IsttbarCat = true;
   if(ttbar_id == "ttjj" && !Isttjj) IsttbarCat = false;

@@ -18,16 +18,16 @@ void GetSFHistogram(TString fSFdir, TString fSFname, TH2F **hmuIDISOSF, TH2F **h
     std::exit(0);
   }
   
-  *hmuIDISOSF = (TH2F*) MuSF->Get("GlobalSF")->Clone("muIDISOSF");
-  *hmuTriggerSF = (TH2F*) MuSF->Get("TriggerSF")->Clone("muTriggerSF");
-  *hmuTrackerSF = (TH2F*) MuSF->Get("TrackerSF")->Clone("muTrackerSF");
+  *hmuIDISOSF   = (TH2F*) MuSF->Get("muIDISOSF")  ->Clone("muIDISOSF");
+  *hmuTriggerSF = (TH2F*) MuSF->Get("muTriggerSF")->Clone("muTriggerSF");
+  *hmuTrackerSF = (TH2F*) MuSF->Get("muTrackerSF")->Clone("muTrackerSF");
 
-  if(!hmuIDISOSF || !hmuTriggerSF || hmuTrackerSF){
+  if(!(*hmuIDISOSF) || !hmuTriggerSF || !hmuTrackerSF){
     std::cerr << "ERROR [MuonSF]: Could not find " << MuFile << " for SF reweighting" << std::endl;
     std::exit(0);
   }
   
-  *heIDISOSF = (TH2F*) ElSF->Get("eTriggerSF")->Clone("eIDISOSF");
+  *heIDISOSF   = (TH2F*) ElSF->Get("eIDISOSF")  ->Clone("eIDISOSF");
   *heTriggerSF = (TH2F*) ElSF->Get("eTriggerSF")->Clone("eTriggerSF");
   if(!heIDISOSF || !heTriggerSF){
     std::cerr << "ERROR [ElectronSF]: Could not find " << ElFile <<  " for SF reweighting" << std::endl;

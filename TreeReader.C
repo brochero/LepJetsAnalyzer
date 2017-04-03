@@ -36,7 +36,7 @@ int main(int argc, const char* argv[]){
   const char * _output   = 0;
   const char * _input    = 0;
   // TopTrees directory
-  const char * _dir      = "/xrootd/store/user/brochero/v8-0-4/";
+  const char * _dir      = "/xrootd/store/user/brochero/v8-0-6/";
   const char * _syst_var = 0;
   const char * _ttbar_id = 0;
   
@@ -693,7 +693,7 @@ int main(int argc, const char* argv[]){
       
       // Second Method: Taking SF from root file
       SFIDISOTrigger(SF_ID_ISO_Tr,
-      		     Lep, Channel,
+      		     Lep, Channel, GoodPV,
       		     hmuIDISOSF, hmuTriggerSF, hmuTrackerSF,
       		     heIDISOSF,  heTriggerSF);
       
@@ -751,10 +751,10 @@ int main(int argc, const char* argv[]){
       *******************/
       hSFIDISOTr[icut][Channel]->Fill(SF_ID_ISO_Tr[0],PUWeight);
       hSFIDISOTrError[icut][Channel]->Fill((SF_ID_ISO_Tr[1] - SF_ID_ISO_Tr[0]),PUWeight);
-      hSFIDISO[icut][Channel]->Fill(SF_ID_ISO_Tr[1],PUWeight);
-      hSFIDISOError[icut][Channel]->Fill(SF_ID_ISO_Tr[2],PUWeight);
-      hSFTrigger[icut][Channel]->Fill(SF_ID_ISO_Tr[3],PUWeight);
-      hSFTriggerError[icut][Channel]->Fill(SF_ID_ISO_Tr[4],PUWeight);
+      hSFIDISO[icut][Channel]->Fill(SF_ID_ISO_Tr[3],PUWeight);
+      hSFIDISOError[icut][Channel]->Fill(SF_ID_ISO_Tr[4],PUWeight);
+      hSFTrigger[icut][Channel]->Fill(SF_ID_ISO_Tr[5],PUWeight);
+      hSFTriggerError[icut][Channel]->Fill(SF_ID_ISO_Tr[6],PUWeight);
     
       /******************
           Acc. / Eff. 

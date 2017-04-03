@@ -6,11 +6,11 @@
 #include "TLorentzVector.h"
 #include<iostream>
 
-void GetSFHistogram (TString fSFdir, TString fSFname, TH2F *hmuIDISOSF, TH2F *hmuTriggerSF, TH2F *heIDISOSF,  TH2F *heTriggerSF);  
+void GetSFHistogram (TString fSFdir, TString fSFname, TH2F *hmuIDISOSF, TH2F *hmuTriggerSF, TH2F *hmuTrackerSF, TH2F *heIDISOSF,  TH2F *heTriggerSF);  
 
 void SFIDISOTrigger(std::vector<float> &result,
-		    TLorentzVector Lep, int channel,
-		    TH2F *hmuIDISOSF, TH2F *hmuTriggerSF,
+		    TLorentzVector Lep, int channel, int nVtx,
+		    TH2F *hmuIDISOSF, TH2F *hmuTriggerSF, TH2F *hmuTrackerSF,
 		    TH2F *heIDISOSF, TH2F *heTriggerSF);
 
  

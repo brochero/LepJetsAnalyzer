@@ -101,7 +101,8 @@ int main(int argc, const char* argv[]){
   TString ttbar_id(_ttbar_id);
 
   // eos directory
-  if(_eos) fdir = "root://eoscms.cern.ch//eos/cms/store/user/brochero/" + fdir + "/";
+  // if(_eos) fdir = "root://eoscms.cern.ch//eos/cms/store/user/brochero/" + fdir + "/";
+  if(_eos) fdir = "root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/brochero/v8-0-6/";
   //make a dir if output does not exist!!
   struct stat st;
   if(stat(dirname,&st) != 0) system("mkdir " + dirname);

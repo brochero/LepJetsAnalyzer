@@ -1,6 +1,7 @@
 #include "SFIDISOTrigger.h"
 
-void GetSFHistogram (TString fSFdir, TString fSFname, TH2F *hmuIDISOSF, TH2F *hmuTriggerSF, TH2F *heIDISOSF,  TH2F *heTriggerSF){
+void GetSFHistogram(TString fSFdir, TString fSFname, TH2F **hmuIDISOSF, TH2F **hmuTriggerSF, TH2F **hmuTrackerSF, TH2F **heIDISOSF,  TH2F **heTriggerSF){
+
   // Lepton SFs: ID and ISO with stat. + syst. Errors
   TString MuFile = fSFdir + "MuonSF_" + fSFname + ".root";
   TString ElFile = fSFdir + "ElectronSF_" + fSFname + ".root";
@@ -17,25 +18,30 @@ void GetSFHistogram (TString fSFdir, TString fSFname, TH2F *hmuIDISOSF, TH2F *hm
     std::exit(0);
   }
   
-  hmuIDISOSF = (TH2F*) MuSF->Get("GlobalSF")->Clone("muIDISOSF");
-  hmuTriggerSF = (TH2F*) MuSF->Get("TriggerSF")->Clone("muTriggerSF");
-  if(!hmuIDISOSF || !hmuTriggerSF){
+  *hmuIDISOSF   = (TH2F*) MuSF->Get("muIDISOSF")  ->Clone("muIDISOSF");
+  *hmuTriggerSF = (TH2F*) MuSF->Get("muTriggerSF")->Clone("muTriggerSF");
+  *hmuTrackerSF = (TH2F*) MuSF->Get("muTrackerSF")->Clone("muTrackerSF");
+
+  if(!(*hmuIDISOSF) || !hmuTriggerSF || !hmuTrackerSF){
     std::cerr << "ERROR [MuonSF]: Could not find " << MuFile << " for SF reweighting" << std::endl;
+    std::exit(0);
   }
   
-  heIDISOSF = (TH2F*) ElSF->Get("GlobalSF")->Clone("eIDISOSF");
-  heTriggerSF = (TH2F*) ElSF->Get("TriggerSF")->Clone("eTriggerSF");
+  *heIDISOSF   = (TH2F*) ElSF->Get("eIDISOSF")  ->Clone("eIDISOSF");
+  *heTriggerSF = (TH2F*) ElSF->Get("eTriggerSF")->Clone("eTriggerSF");
   if(!heIDISOSF || !heTriggerSF){
     std::cerr << "ERROR [ElectronSF]: Could not find " << ElFile <<  " for SF reweighting" << std::endl;
+    std::exit(0);
   }
+
 }
 
 /***************************
   SF: ID, ISO and Trigger
 ***************************/      
 void SFIDISOTrigger(std::vector<float> &result,
-		    TLorentzVector Lep, int channel,
-		    TH2F *hmuIDISOSF, TH2F *hmuTriggerSF,
+		    TLorentzVector Lep, int channel, int nVtx,
+		    TH2F *hmuIDISOSF, TH2F *hmuTriggerSF, TH2F *hmuTrackerSF,
 		    TH2F *heIDISOSF,  TH2F *heTriggerSF){
 
   /***************************
@@ -59,7 +65,7 @@ void SFIDISOTrigger(std::vector<float> &result,
     
     std::vector<float> Vbinmueta; // muon eta values
     std::vector<float> VbinmupT;  // muon pT values
-    
+
     // X-axis (eta)
     for(int nbx=1; nbx <= Nbinmueta; nbx++)  Vbinmueta.push_back( hmuIDISOSF->GetXaxis()->GetBinLowEdge(nbx) );
     Vbinmueta.push_back( hmuIDISOSF->GetXaxis()->GetBinLowEdge(Nbinmueta + 1) ); // Add upper edge of the last bin
@@ -87,7 +93,24 @@ void SFIDISOTrigger(std::vector<float> &result,
     
     // Y-axis (pT)
     for(int nby=1; nby <= NbinTrmupT; nby++)  VbinTrmupT.push_back( hmuTriggerSF->GetYaxis()->GetBinLowEdge(nby) );
+
     VbinTrmupT.push_back( hmuTriggerSF->GetYaxis()->GetBinLowEdge(NbinTrmupT + 1) ); // Add upper edge of the last bin
+
+    // Binning for Muon Tracker SF
+    int NbinTckmueta = hmuTrackerSF->GetNbinsX(); // X-axis (eta)
+    int NbinTckmuvtx = hmuTrackerSF->GetNbinsY(); // Y-axis (Vtx)
+    
+    std::vector<float> VbinTckmueta; // muon eta values
+    std::vector<float> VbinTckmuvtx; // muon vtx values
+    
+    // X-axis (eta)
+    for(int nbx=1; nbx <= NbinTckmueta; nbx++)  VbinTckmueta.push_back( hmuTrackerSF->GetXaxis()->GetBinLowEdge(nbx) );
+    VbinTckmueta.push_back( hmuTrackerSF->GetXaxis()->GetBinLowEdge(NbinTckmueta + 1) ); // Add upper edge of the last bin
+    
+    // Y-axis (Vtx)
+    for(int nby=1; nby <= NbinTckmuvtx; nby++)  VbinTckmuvtx.push_back( hmuTrackerSF->GetYaxis()->GetBinLowEdge(nby) );
+    //VbinmupT.push_back( hmuIDISOSF->GetYaxis()->GetBinLowEdge(NbinmupT + 1) ); // Add upper edge of the last bin
+    VbinTckmuvtx.push_back(1000.0); // Add Max Vtx for the last bin
     
     //--------------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------
@@ -125,7 +148,26 @@ void SFIDISOTrigger(std::vector<float> &result,
 	
       }// if(Lep.Pt())
     }// for(binTrmupT)
-    
+
+    // -- Tracker
+    float SF_Tck = 1.0;
+    for(int binTckmuvtx=0; binTckmuvtx<NbinTckmuvtx; binTckmuvtx++){
+      if(nVtx>VbinTckmuvtx[binTckmuvtx] && nVtx<=VbinTckmuvtx[binTckmuvtx+1]){ 
+	
+	for(int binTckmueta=0; binTckmueta<NbinTckmueta; binTckmueta++){
+	  if(Lep.Eta()>VbinTckmueta[binTckmueta] && Lep.Eta()<=VbinTckmueta[binTckmueta+1]){ 
+	    
+	    SF_Tck = hmuTrackerSF->GetBinContent(binTckmueta+1,binTckmuvtx+1);
+	    
+	    break;
+	  }// if(Lep.Eta())
+	}// for(binTckmueta)
+	
+      }// if(Lep.Pt())
+    }// for(binTckmuvtx)
+
+    SF_ID_ISO = SF_ID_ISO*SF_Tck;
+      
   }// if(channel == muon)
   
   /***************************
@@ -145,7 +187,8 @@ void SFIDISOTrigger(std::vector<float> &result,
     
     // Y-axis (pT)
     for(int nby=1; nby <= NbinepT; nby++)  VbinepT.push_back( heIDISOSF->GetYaxis()->GetBinLowEdge(nby) );
-    VbinepT.push_back( heIDISOSF->GetYaxis()->GetBinLowEdge(NbinepT + 1) ); // Add upper edge of the last bin
+    // VbinepT.push_back( heIDISOSF->GetYaxis()->GetBinLowEdge(NbinepT + 1) ); // Add upper edge of the last bin
+    VbinepT.push_back(1000.0); // Add Max pT for the last bin
     
     // Binning for Electron Trigger histo
     int NbinTreeta = heTriggerSF->GetNbinsX(); // X-axis (eta)
@@ -160,8 +203,9 @@ void SFIDISOTrigger(std::vector<float> &result,
     
     // Y-axis (pT)
     for(int nby=1; nby <= NbinTrepT; nby++)  VbinTrepT.push_back( heTriggerSF->GetYaxis()->GetBinLowEdge(nby) );
-    VbinTrepT.push_back( heTriggerSF->GetYaxis()->GetBinLowEdge(NbinTrepT + 1) ); // Add upper edge of the last bin
-    
+    // VbinTrepT.push_back( heTriggerSF->GetYaxis()->GetBinLowEdge(NbinTrepT + 1) ); // Add upper edge of the last bin
+    VbinTrepT.push_back(1000.0); // Add Max pT for the last bin
+
     //--------------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------
     
@@ -217,3 +261,6 @@ void SFIDISOTrigger(std::vector<float> &result,
   
 }
  
+
+
+

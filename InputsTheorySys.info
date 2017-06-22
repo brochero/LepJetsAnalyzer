@@ -1,0 +1,34 @@
+# First, CATTuples version
+v8-0-6
+
+# Header
+Tree_LepJets_Final_v8-0-6_Spring16-80X_36814pb-1
+
+# Output Reference
+TckSF-v0
+
+##########################
+# Samples to be processed
+##########################
+# ----------
+# MonteCarlo Signal
+# ----------
+
+# ttjj Category
+ttbar_PowhegPythiattjj
+ttbar_PowhegPythiattjj_SYS_FSR_Down
+ttbar_PowhegPythiattjj_SYS_FSR_Up
+ttbar_PowhegPythiattjj_SYS_ISR_Down
+ttbar_PowhegPythiattjj_SYS_ISR_Up
+ttbar_PowhegPythiattjj_SYS_UE_Down
+ttbar_PowhegPythiattjj_SYS_UE_Up
+
+# ttbb Category
+ttbar_PowhegPythiattbb
+ttbar_PowhegPythiattbb_SYS_FSR_Down
+ttbar_PowhegPythiattbb_SYS_FSR_Up
+ttbar_PowhegPythiattbb_SYS_ISR_Down
+ttbar_PowhegPythiattbb_SYS_ISR_Up
+ttbar_PowhegPythiattbb_SYS_UE_Down
+ttbar_PowhegPythiattbb_SYS_UE_Up
+

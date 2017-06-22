@@ -67,15 +67,9 @@ float DiJetMassCorrection(std::vector<ComJet> &Jets, bool ReArrange);
 bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id);
 
 // Luminosity per channel (due to trigger PreScale)
+float LuminNorm_Mu = 35870; //[pb-1]
+float LuminNorm_El = 35870; //[pb-1]
 
-float LuminNorm_Mu = 36500; //[pb-1]
-float LuminNorm_El = 36500; //[pb-1]
-
-//float LuminNorm_Mu = 217; //[pb-1]
-//float LuminNorm_El = 217; //[pb-1]
-//float LuminNorm_Mu = 36811.; //[pb-1]
-//float LuminNorm_El = 20834.; //[pb-1]
-//float LuminNorm_El = 36811.; //[pb-1]
 // Output Dir
 TString dirname="TopResults";
 // Number of Histograms
@@ -107,6 +101,8 @@ Histos hPV;
 Histos hMET, hMET_Phi, hHT;
 Histos hmT;
 Histos hNJets, hNBtagJets;
+// Categorization
+Eff effCatHiggs;
 // Lepton
 Histos hLepPt, hLepEta, hLepPhi;
 // Jets
@@ -120,7 +116,7 @@ Histos   hSFIDISOTr, hSFIDISOTrError, hSFIDISO, hSFIDISOError, hSFTrigger, hSFTr
 Histos2D h2DSFbtag_Global;
 Histos   hSFbtag_Global, hSFbtag_Global_var;
 Histos2D h2DSFbtag_b, h2DSFbtag_c, h2DSFbtag_l, h2DSFbtag_btag_b, h2DSFbtag_btag_c, h2DSFbtag_btag_l;
-Prof     pSFCSVVsCSV, pSFCSVErrorVsCSV;
+Prof     pSFCSVVsCSVAll, pSFCSVErrorVsCSVAll;
 // Kinematic Fitter
 Histos    hKinChi2;
 Histos2D  h2DKinChi2_JetMatch;
@@ -136,6 +132,7 @@ Histos   hTJetPosition, hWJetPosition, hOJetPosition;
 Histos   hGenTagWMass, hGenTagAddMass, hGenTagAddDR, hGenTagAdd1CSV, hGenTagAdd2CSV;
 Histos2D h2DGenTagAddCSV;
 Eff    effTagCSV, purTagCSV;
+Prof pSFCSVVsCSVAdd, pSFCSVUpVsCSVAdd, pSFCSVDownVsCSVAdd;
 TH2D *h2DTJetPosition, *h2DWJetPosition, *h2DttbarNGenJets;
 //----------------------------------------
 //           Tree branches
@@ -162,6 +159,8 @@ std::vector<float> *Jet_SF_CSVg=0;
 std::vector<float> *Jet_CvsB=0, *Jet_CvsL=0;
 std::vector<float> *Jet_JER_Up=0, *Jet_JER_Nom=0, *Jet_JER_Down=0;
 std::vector<float> *Jet_JES_Up=0, *Jet_JES_Down=0;
+// ttH Categorization
+int  GenttHCat;
 // GenCone Info
 std::vector<int>    *GenConeCat=0;
 std::vector <float> *GenCone_pT=0;

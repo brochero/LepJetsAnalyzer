@@ -23,12 +23,12 @@ void roo2Dfit(TString SystVar = "", TString nModel = "RttbCon"){
 
   InFile[data] = LoadSample("_DataSingleLep.root");
 
-  //InFile[ttbb]   = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttbb"   + SystVar + ".root");
-  InFile[ttbb]   = LoadSample("_ttbb_aMCatNLOPythia.root");
-  InFile[ttb]    = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttbj"   + SystVar + ".root");
-  InFile[ttcc]   = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttcc"   + SystVar + ".root");
-  InFile[ttLF]   = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttLF"   + SystVar + ".root"); // Includes ttc
-  InFile[ttccLF] = LoadSample("_ttbar_LepJetsPowhegPythiaTranche3ttccLF" + SystVar + ".root");
+  InFile[ttbb]   = LoadSample("_ttbar_LepJetsPowhegPythiattbb"   + SystVar + ".root");
+  //InFile[ttbb]   = LoadSample("_ttbb_aMCatNLOPythia.root");
+  InFile[ttb]    = LoadSample("_ttbar_LepJetsPowhegPythiattbj"   + SystVar + ".root");
+  InFile[ttcc]   = LoadSample("_ttbar_LepJetsPowhegPythiattcc"   + SystVar + ".root");
+  InFile[ttLF]   = LoadSample("_ttbar_LepJetsPowhegPythiattLF"   + SystVar + ".root"); // Includes ttc
+  InFile[ttccLF] = LoadSample("_ttbar_LepJetsPowhegPythiattccLF" + SystVar + ".root");
 
   // infile[ttbb]   = LoadSample("_ttbar_PowhegPythiattbb" + SystVar + ".root");
   // InFile[ttb]    = LoadSample("_ttbar_PowhegPythiattb"  + SystVar + ".root");

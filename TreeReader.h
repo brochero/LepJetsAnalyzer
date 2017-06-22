@@ -125,11 +125,11 @@ Histos    hKinWhMass, hKinWhpT, hKinthMass, hKinthpT;
 Histos    hKinWMass, hKinWpT, hKinTagWMass, hKinTagAddMass, hKinTagAddDR;
 Eff       effKinGenIndex, purKinGenIndex, effKinGenIndexVsChi2;
 HistosJet hKinJetPt, hGENJetPt;
-Histos    hKinAdd1CSV, hKinAdd2CSV;
+Histos    hKinAdd1CSV, hKinAdd2CSV, hKinAdd12CSV;
 Histos2D  h2DKinAddCSV;
 // GenCone
 Histos   hTJetPosition, hWJetPosition, hOJetPosition;
-Histos   hGenTagWMass, hGenTagAddMass, hGenTagAddDR, hGenTagAdd1CSV, hGenTagAdd2CSV;
+Histos   hGenTagWMass, hGenTagAddMass, hGenTagAddDR, hGenTagAdd1CSV, hGenTagAdd2CSV, hGenTagAdd12CSV;
 Histos2D h2DGenTagAddCSV;
 Eff    effTagCSV, purTagCSV;
 Prof pSFCSVVsCSVAdd, pSFCSVUpVsCSVAdd, pSFCSVDownVsCSVAdd;

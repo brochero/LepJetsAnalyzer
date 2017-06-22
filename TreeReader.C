@@ -211,7 +211,7 @@ int main(int argc, const char* argv[]){
   float NTotal_Event, NTotal_Weight, nNorm_Event, NTotal_ScalemuRF_Weight[6];
   NTotal_Event  = h_NumberEvt->GetBinContent(1);
   NTotal_Weight = h_NumberEvt->GetBinContent(2);
-  for (unsigned int ibin = 1; ibin< 7; ibin++) NTotal_ScalemuRF_Weight[ibin]= h_ScaleWeights->GetBinContent(ibin);
+  for (unsigned int ibin = 1; ibin< 7; ibin++) NTotal_ScalemuRF_Weight[ibin-1]= h_ScaleWeights->GetBinContent(ibin);
 
   // Number of events
   int MaxEvt = theTree.GetEntries();
@@ -761,7 +761,7 @@ int main(int argc, const char* argv[]){
           Acc. / Eff. 
       ******************/
       AccEvent[icut][Channel]++;
-      EffEvent[icut][Channel]= EffEvent[icut][Channel] + PUWeight;
+      EffEvent[icut][Channel]+=  PUWeight;
 
       /******************
         Kinematic Var.
@@ -981,22 +981,29 @@ int main(int argc, const char* argv[]){
   std::cout << std::endl;
 
   //Acceptance-Efficiency
-  TH1D *Yields;
-  Yields = new TH1D("Yields", "Yields",(Nhcuts)*(Nhch+1),0,(Nhcuts)*(Nhch+1));
-  int nbin = 1;
-  
+  TH1D *Yields, *YieldsNoWeights;
+  Yields = new TH1D("Yields", "Yields",(Nhcuts)*(Nhch+1)+1,0,(Nhcuts)*(Nhch+1)+1);
+  YieldsNoWeights = new TH1D("YieldsNoWeights", "Yields W/O Weights",(Nhcuts)*(Nhch+1)+1,0,(Nhcuts)*(Nhch+1)+1);
+
+  int nbin = 1;  
   for(int nc = 0; nc < Nhcuts; nc++){
     AccEvent[nc][2] = AccEvent[nc][0] + AccEvent[nc][1];
     EffEvent[nc][2] = EffEvent[nc][0] + EffEvent[nc][1];
     
     for(int nch = 0; nch < Nhch+1; nch++){            
-      float EffError;
+      float AccError, EffError;
+      AccError =  sqrt(AccEvent[nc][nch]);
       if (AccEvent[nc][nch] != 0.0) EffError = sqrt(AccEvent[nc][nch])*EffEvent[nc][nch]/AccEvent[nc][nch];
       else EffError = 0.0;
       
       Yields->GetXaxis()->SetBinLabel(nbin, namecut[nc] + " " + namech[nch]);
       Yields->SetBinContent(nbin, EffEvent[nc][nch]);
       Yields->SetBinError  (nbin, EffError);
+
+      YieldsNoWeights->GetXaxis()->SetBinLabel(nbin, namecut[nc] + " " + namech[nch]);
+      YieldsNoWeights->SetBinContent(nbin, AccEvent[nc][nch]);
+      YieldsNoWeights->SetBinError  (nbin, AccError);
+
       nbin++;
       
       std::cout << "-- Acceptace  " << namecut[nc] << " " << namech[nch] << ": " << AccEvent[nc][nch] << std::endl;
@@ -1005,6 +1012,11 @@ int main(int argc, const char* argv[]){
     }
     std::cout << "-----------------------------" << std::endl;
   }
+
+  Yields         ->GetXaxis()->SetBinLabel(nbin, "Norm. Factor");
+  YieldsNoWeights->GetXaxis()->SetBinLabel(nbin, "Norm. Factor");
+  Yields         ->SetBinContent(nbin, NormWeight[0]);
+  YieldsNoWeights->SetBinContent(nbin, NormWeight[0]);
   
   
   // --- Write histograms
@@ -1014,6 +1026,7 @@ int main(int argc, const char* argv[]){
   target->cd();
   
   Yields->Write();
+  YieldsNoWeights->Write();
 
   for(int j=0; j<Nhcuts; j++){
     

@@ -35,12 +35,18 @@
   
 #ifndef __CINT__
 
+enum ncat{ttjj,ttbb};
+enum nch {mujets,ejets,lepjets};
+TString namecat[2] = {"ttjj","ttbb"};
+TString namech[3]  = {"mujets","ejets","lepjets"};
+
 void display_usage()
 {
   std::cout << "\033[1;37musage:\033[1;m skimfile cutindex [options]" << std::endl;
   std::cout << "" << std::endl;
   std::cout << "Options:" << std::endl;
   std::cout << "    -i   inputfile  Input file without .root" << std::endl;
+  std::cout << "    -eos input files located in eos lxplus" << std::endl;
   std::cout << "    -o   name in the output file \"h_\"" << std::endl;
   std::cout << "    -cat ttbar categorization" << std::endl;
   std::cout << "    -d   Input file directory. Default directory: InputTrees" << std::endl;
@@ -91,6 +97,7 @@ int main(int argc, const char* argv[]){
 
   gSystem->Load("libTree");
 
+  bool _eos         = false;
   bool   _ttbar_cat = false;
   bool   _syst      = false;
   const char * _output   = 0;
@@ -114,6 +121,9 @@ int main(int argc, const char* argv[]){
 	if( strcmp(argv[i],"-i") == 0 ){
 	  _input = argv[i+1];
 	  i++;
+	}
+	if( strcmp(argv[i],"-eos") == 0 ){
+	  _eos = true;
 	}
 	if( strcmp(argv[i],"-d") == 0 ){
 	  _dir = argv[i+1];
@@ -153,6 +163,8 @@ int main(int argc, const char* argv[]){
   TString ttbar_id(_ttbar_id);
   TString syst_varname(_syst_var);
   
+  if(_eos) fdir = "root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/brochero/v8-0-6/";
+
   TChain theTree("ttbbLepJets/gentree"); 
   
   std::cout << "---------------------------------------------------------------------------------" << std::endl;
@@ -199,10 +211,6 @@ int main(int argc, const char* argv[]){
   // TH1::SetDefaultSumw2(kTRUE);  
   
   TH1F *hNJets[2];
-
-  TString namech[2];
-  namech[0]="mujets";
-  namech[1]="ejets";
   
   TString titlenamech[2];
   titlenamech[0]="#mu+Jets";
@@ -233,20 +241,33 @@ int main(int argc, const char* argv[]){
   ///////////////////////////////////////
   TCanvas *mydummycanvas=new TCanvas();// 
   ///////////////////////////////////////
-  // Number de events for acceptance
-  //          [Channel]
-  float fAccEvent_full_ttbb[2] = {0.0,0.0};
-  float fAccEvent_full_ttjj[2] = {0.0,0.0};  
-  float fAccEvent_vis_ttbb [2] = {0.0,0.0};
-  float fAccEvent_vis_ttjj [2] = {0.0,0.0};
 
-  int AccEvent_full_ttbb[2] = {0,0};
-  int AccEvent_full_ttjj[2] = {0,0};
-  int AccEvent_vis_ttbb [2] = {0,0};
-  int AccEvent_vis_ttjj [2] = {0,0};
+  // Number de events for acceptance
+  //          [ttcat][Channel]
+  float NEvt_full[2][3];
+  float NEvt_vis [2][3];
+
+  for(unsigned int ibinx=0; ibinx<3; ibinx++){
+    for(unsigned int ibiny=0; ibiny<2; ibiny++){
+      NEvt_full[ibiny][ibinx] = 0.0;
+      NEvt_vis [ibiny][ibinx] = 0.0;
+    }
+  }
 
   // Uncertainties file name
   if(_syst) fname += "_SYS_" + syst_varname;
+
+    /******************
+      Scale Weights
+    ******************/
+
+    int scaleSysPar;
+    if     (_syst && syst_varname.Contains("ScaleRnF_Up"))   scaleSysPar = 0; // muR=Nom,  muF=Up
+    else if(_syst && syst_varname.Contains("ScaleRnF_Down")) scaleSysPar = 1; // muR=Nom,  muF=Down
+    else if(_syst && syst_varname.Contains("ScaleRuF_Nom"))  scaleSysPar = 2; // muR=Up,   muF=Nom
+    else if(_syst && syst_varname.Contains("ScaleRuF_Up"))   scaleSysPar = 3; // muR=Up,   muF=Up
+    else if(_syst && syst_varname.Contains("ScaleRdF_Nom"))  scaleSysPar = 4; // muR=Down, muF=Nom
+    else if(_syst && syst_varname.Contains("ScaleRdF_Down")) scaleSysPar = 5; // muR=Down, muF=Down
 
   /********************************
              Event Loop
@@ -267,14 +288,6 @@ int main(int argc, const char* argv[]){
     /******************
       Scale Weights
     ******************/
-
-    int scaleSysPar;
-    if     (_syst && syst_varname.Contains("ScaleRnF_Up"))   scaleSysPar = 0; // muR=Nom,  muF=Up
-    else if(_syst && syst_varname.Contains("ScaleRnF_Down")) scaleSysPar = 1; // muR=Nom,  muF=Down
-    else if(_syst && syst_varname.Contains("ScaleRuF_Nom"))  scaleSysPar = 2; // muR=Up,   muF=Nom
-    else if(_syst && syst_varname.Contains("ScaleRuF_Up"))   scaleSysPar = 3; // muR=Up,   muF=Up
-    else if(_syst && syst_varname.Contains("ScaleRdF_Nom"))  scaleSysPar = 4; // muR=Down, muF=Nom
-    else if(_syst && syst_varname.Contains("ScaleRdF_Down")) scaleSysPar = 5; // muR=Down, muF=Down
     
     if (_syst && syst_varname.Contains("ScaleR"))
       EvtStep = EvtStep*(*ScaleWeight)[scaleSysPar];
@@ -297,23 +310,25 @@ int main(int argc, const char* argv[]){
     // pT(jet) > 20GeV && |eta(Jet)| < 2.5
     int cone_NaddJets  = (*GenConeCat)[5];
     int cone_NaddbJets = (*GenConeCat)[6];
-
+    
     /******************
-         Acceptace
+        Acceptace
     ******************/
-  
-  // Full Phase Space 
-    if(cone_NaddJets  > 1) fAccEvent_full_ttjj[Channel]+=EvtStep;
-    if(cone_NaddbJets > 1) fAccEvent_full_ttbb[Channel]+=EvtStep;
-
+    
+    // Full Phase Space 
+    if(cone_NaddJets  > 1)                       NEvt_full[ttjj][Channel] += EvtStep;
+    if(cone_NaddJets  > 1 && cone_NaddbJets > 1) NEvt_full[ttbb][Channel] += EvtStep;
+    
     float Lep_pT_CUT = 30; // Muon
     if (Channel==1) Lep_pT_CUT = 35; // Electron
-
+    
     if(Lep_pT > Lep_pT_CUT && abs(Lep_eta) < 2.1){
       // Visible Phase Space 
-      if(cone_NbJets > 1 && cone_NJets > 5) fAccEvent_vis_ttjj[Channel]+=EvtStep;
-      if(cone_NbJets > 3 && cone_NJets > 5) fAccEvent_vis_ttbb[Channel]+=EvtStep;    
+      if(cone_NbJets > 1 && cone_NJets > 5) NEvt_vis[ttjj][Channel] += EvtStep;
+      if(cone_NbJets > 3 && cone_NJets > 5) NEvt_vis[ttbb][Channel] += EvtStep;    
     }
+
+    // std::cout << Channel << " - " << EvtStep << std::endl;
     
     // Jets 
     int NJets = 0;    
@@ -330,21 +345,43 @@ int main(int argc, const char* argv[]){
       } // if(jet.pT > 30)
     }// for(jets)
     
+    hNJets[Channel]->Fill(NJets,EvtStep);
+    
   }//for(events)
   
+  NEvt_vis[ttjj][2] = NEvt_vis[ttjj][0] + NEvt_vis[ttjj][1];
+  NEvt_vis[ttbb][2] = NEvt_vis[ttbb][0] + NEvt_vis[ttbb][1];
 
-  AccEvent_full_ttjj[0] = fAccEvent_full_ttjj[0];
-  AccEvent_full_ttbb[0] = fAccEvent_full_ttbb[0];
+  NEvt_full[ttjj][2] = NEvt_full[ttjj][0] + NEvt_full[ttjj][1];
+  NEvt_full[ttbb][2] = NEvt_full[ttbb][0] + NEvt_full[ttbb][1];
+    
 
-  AccEvent_vis_ttjj[0] = fAccEvent_vis_ttjj[0];
-  AccEvent_vis_ttbb[0] = fAccEvent_vis_ttbb[0];
+  //Acceptance-Efficiency
+  TH2D *Yields_full, *Yields_vis;
+  Yields_full = new TH2D("Yields_FullPh-Sp", "Yields in the Full Ph-Sp",   3,0,3,2,0,2);
+  Yields_vis  = new TH2D("Yields_VisPh-Sp",  "Yields in the Visible Ph-Sp",3,0,3,2,0,2);
+  Yields_full->SetOption("COLTEXT");
+  Yields_vis ->SetOption("COLTEXT");
 
-  AccEvent_full_ttjj[1] = fAccEvent_full_ttjj[1];
-  AccEvent_full_ttbb[1] = fAccEvent_full_ttbb[1];
+  for(unsigned int ibinx=0; ibinx<3; ibinx++){
+    Yields_full->GetXaxis()->SetBinLabel(ibinx+1, namech[ibinx]);
+    Yields_vis ->GetXaxis()->SetBinLabel(ibinx+1, namech[ibinx]);
+  }
+  for(unsigned int ibiny=0; ibiny<2; ibiny++){
+    Yields_full->GetYaxis()->SetBinLabel(ibiny+1, namecat[ibiny]);
+    Yields_vis ->GetYaxis()->SetBinLabel(ibiny+1, namecat[ibiny]);
+  }
 
-  AccEvent_vis_ttjj[1] = fAccEvent_vis_ttjj[1];
-  AccEvent_vis_ttbb[1] = fAccEvent_vis_ttbb[1];
+  for(unsigned int ibinx=0; ibinx<3; ibinx++){
+    for(unsigned int ibiny=0; ibiny<2; ibiny++){
+
+      Yields_full->SetBinContent(ibinx+1,ibiny+1,NEvt_full[ibiny][ibinx]);
+      Yields_vis ->SetBinContent(ibinx+1,ibiny+1,NEvt_vis [ibiny][ibinx]);
   
+    }
+  }
+  
+
   // Get elapsed time
   sw.Stop();
   std::cout << "==================================================] 100% " << std::endl;
@@ -352,51 +389,18 @@ int main(int argc, const char* argv[]){
   
   
   //Acceptance-Efficiency
-  std::cout << "--------  Acceptace Full Ph-Sp  --------" << std::endl;
-  std::cout << "Number of RAW-mu+Jets events:" << std::endl;
-  std::cout << "ttjj Acceptance Full Ph-Sp: " << AccEvent_full_ttjj[0] << std::endl;
-  std::cout << "ttbb Acceptance Full Ph-Sp: " << AccEvent_full_ttbb[0] << std::endl;
-  std::cout << "ttbb/ttjj Full Ph-Sp: " << 1.0*AccEvent_full_ttbb[0]/AccEvent_full_ttjj[0] << std::endl;
-  std::cout << "-----------------------------" << std::endl;
-  std::cout << "Number of RAW-e+Jets events:" << std::endl;
-  std::cout << "ttjj Acceptance Full Ph-Sp: " << AccEvent_full_ttjj[1] << std::endl;
-  std::cout << "ttbb Acceptance: Full Ph-Sp: " << AccEvent_full_ttbb[1] << std::endl;
-  std::cout << "ttbb/ttjj Full Ph-Sp: " << 1.0*AccEvent_full_ttbb[1]/AccEvent_full_ttjj[1] << std::endl;
-  std::cout << "-----------------------------" << std::endl;
-  std::cout << "Number of RAW-l+Jets events:" << std::endl;
-  std::cout << "ttjj Acceptance Full Ph-Sp: " << AccEvent_full_ttjj[0] + AccEvent_full_ttjj[1] << std::endl;
-  std::cout << "ttbb Acceptance Full Ph-Sp: " << AccEvent_full_ttbb[0] + AccEvent_full_ttbb[1] << std::endl;
-  std::cout << "ttbb/ttjj Full Ph-Sp: " << 1.0*(AccEvent_full_ttbb[0] + AccEvent_full_ttbb[1])/(AccEvent_full_ttjj[0] + AccEvent_full_ttjj[1]) << std::endl;
-  std::cout << "-----------------------------" << std::endl;
-  std::cout << "-----------------------------" << std::endl;
-  std::cout << "-----------------------------" << std::endl;
-  std::cout << "--------  Acceptace Visible Ph-Sp  --------" << std::endl;
-  std::cout << "Number of RAW-mu+Jets events:" << std::endl;
-  std::cout << "ttjj Acceptance Visible Ph-Sp: " << AccEvent_vis_ttjj[0] << std::endl;
-  std::cout << "ttbb Acceptance Visible Ph-Sp: " << AccEvent_vis_ttbb[0] << std::endl;
-  std::cout << "ttbb/ttjj Visible Ph-Sp: " << 1.0*AccEvent_vis_ttbb[0]/AccEvent_vis_ttjj[0] << std::endl;
-  std::cout << "-----------------------------" << std::endl;
-  std::cout << "Number of RAW-e+Jets events:" << std::endl;
-  std::cout << "ttjj Acceptance Visible Ph-Sp: " << AccEvent_vis_ttjj[1] << std::endl;
-  std::cout << "ttbb Acceptance: Visible Ph-Sp: " << AccEvent_vis_ttbb[1] << std::endl;
-  std::cout << "ttbb/ttjj Visible Ph-Sp: " << 1.0*AccEvent_vis_ttbb[1]/AccEvent_vis_ttjj[1] << std::endl;
-  std::cout << "-----------------------------" << std::endl;
-  std::cout << "Number of RAW-l+Jets events:" << std::endl;
-  std::cout << "ttjj Acceptance Visible Ph-Sp: " << AccEvent_vis_ttjj[0] + AccEvent_vis_ttjj[1] << std::endl;
-  std::cout << "ttbb Acceptance Visible Ph-Sp: " << AccEvent_vis_ttbb[0] + AccEvent_vis_ttbb[1] << std::endl;
-  std::cout << "ttbb/ttjj Visible Ph-Sp: " << 1.0*(AccEvent_vis_ttbb[0] + AccEvent_vis_ttbb[1])/(AccEvent_vis_ttjj[0] + AccEvent_vis_ttjj[1]) << std::endl;
-  std::cout << "-----------------------------" << std::endl;
-  std::cout << "-----------------------------" << std::endl;
-  std::cout << "-----------------------------" << std::endl;
-  std::cout << "--------  ttbb Acceptace  --------" << std::endl;
-  std::cout << "ttbb Acceptance (mu+Jets): " << 1.0*AccEvent_vis_ttbb[0]/AccEvent_full_ttbb[0] << std::endl;
-  std::cout << "ttbb Acceptance (e+Jets): "  << 1.0*AccEvent_vis_ttbb[1]/AccEvent_full_ttbb[1] << std::endl;
-  std::cout << "ttbb Acceptance (l+Jets): "  << 1.0*(AccEvent_vis_ttbb[0] + AccEvent_vis_ttbb[1])/(AccEvent_full_ttbb[0] + AccEvent_full_ttbb[1]) << std::endl;
-  std::cout << "--------  ttjj Acceptace  --------" << std::endl;
-  std::cout << "ttjj Acceptance (mu+Jets): " << 1.0*AccEvent_vis_ttjj[0]/AccEvent_full_ttjj[0] << std::endl;
-  std::cout << "ttjj Acceptance (e+Jets): "  << 1.0*AccEvent_vis_ttjj[1]/AccEvent_full_ttjj[1] << std::endl;
-  std::cout << "ttjj Acceptance (l+Jets): "  << 1.0*(AccEvent_vis_ttjj[0] + AccEvent_vis_ttjj[1])/(AccEvent_full_ttjj[0] + AccEvent_full_ttjj[1]) << std::endl;
 
+  for(unsigned int ich=0; ich<3; ich++){
+    std::cout << "--------  Acceptace Full Ph-Sp  --------" << std::endl;
+    std::cout << "--------     " << namech[ich] << "     --------" << std::endl;
+    std::cout << "Number of RAW events:" << std::endl;
+    std::cout << "ttbb/ttjj Full Ph-Sp: " << NEvt_full[ttbb][ich]/NEvt_full[ttjj][ich] << std::endl;
+    std::cout << "ttbb/ttjj Visible Ph-Sp: " << NEvt_vis[ttbb][ich]/NEvt_vis[ttjj][ich] << std::endl;
+    std::cout << "ttbb Acceptance: " << NEvt_vis[ttbb][ich]/NEvt_full[ttbb][ich] << std::endl;
+    std::cout << "ttjj Acceptance: " << NEvt_vis[ttjj][ich]/NEvt_full[ttjj][ich] << std::endl;
+    std::cout << "-----------------------------" << std::endl;
+    std::cout << "-----------------------------" << std::endl;
+  }
   //Output Dir
   TString dirname="TopResults";   
   // make a dir if it does not exist!!
@@ -409,6 +413,9 @@ int main(int argc, const char* argv[]){
   //TString outfname=dirname + "/hAcc-" + hname + "_" + fname + ttbar_id + ".root";
   TFile *target  = new TFile(outfname,"RECREATE" );  
   
+  Yields_vis ->Write();
+  Yields_full->Write();
+
   for(int i=0; i<2; i++){    
 
     hNJets[i]->Write();

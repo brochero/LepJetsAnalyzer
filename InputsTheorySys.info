@@ -14,8 +14,17 @@ TckSF-v0
 # MonteCarlo Signal
 # ----------
 
+# ttjj Category
+ttbar_PowhegPythiattjj
+ttbar_PowhegPythiattjj_SYS_FSR_Down
+ttbar_PowhegPythiattjj_SYS_FSR_Up
+ttbar_PowhegPythiattjj_SYS_ISR_Down
+ttbar_PowhegPythiattjj_SYS_ISR_Up
+ttbar_PowhegPythiattjj_SYS_UE_Down
+ttbar_PowhegPythiattjj_SYS_UE_Up
+
 # ttbb Category
-ttbar_PowhegPythiattbb_SYS_Central
+ttbar_PowhegPythiattbb
 ttbar_PowhegPythiattbb_SYS_FSR_Down
 ttbar_PowhegPythiattbb_SYS_FSR_Up
 ttbar_PowhegPythiattbb_SYS_ISR_Down
@@ -23,11 +32,3 @@ ttbar_PowhegPythiattbb_SYS_ISR_Up
 ttbar_PowhegPythiattbb_SYS_UE_Down
 ttbar_PowhegPythiattbb_SYS_UE_Up
 
-# ttbb Category
-ttbar_PowhegPythiattjj_SYS_Central
-ttbar_PowhegPythiattjj_SYS_FSR_Down
-ttbar_PowhegPythiattjj_SYS_FSR_Up
-ttbar_PowhegPythiattjj_SYS_ISR_Down
-ttbar_PowhegPythiattjj_SYS_ISR_Up
-ttbar_PowhegPythiattjj_SYS_UE_Down
-ttbar_PowhegPythiattjj_SYS_UE_Up

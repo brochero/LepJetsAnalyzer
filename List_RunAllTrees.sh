@@ -1,5 +1,5 @@
 #!/bin/sh
-file="Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1"
+file="Tree_LepJets_TrMC_v8-0-4_Spring16-80X_36814pb-1"
 
 #######################################
 # $2 should be '-o OutputName... etc' #
@@ -22,33 +22,35 @@ file="Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1"
 # ./TreeReader.run -i ${file}_ttbar_PowhegPythiattAlphaS   $1  & disown
 # ./TreeReader.run -i ${file}_ttbar_PowhegPythiattjjAlphaS $1  & disown
 
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattbb $1 & disown
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattbj $1 & disown
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattcc $1 
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattLF $1 & disown
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiatt   $1 & disown
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattjj $1 & disown
+./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattbb $1 & disown
+./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattbj $1 & disown
+./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattcc $1 
+./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattLF $1 & disown
+./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiatt   $1 & disown
+#./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattjj $1 & disown
 
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattbbAlphaS $1 & disown
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattbjAlphaS $1 & disown
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattccAlphaS $1 
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattLFAlphaS $1 & disown
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattAlphaS   $1 & disown
-# ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattjjAlphaS $1 & disown
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattbbAlphaS $1 & disown
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattbjAlphaS $1 & disown
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattccAlphaS $1 
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattLFAlphaS $1 & disown
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattAlphaS   $1 & disown
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiattjjAlphaS $1 & disown
 
 
-./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3ttbb $1 & disown
-./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3ttbj $1 & disown
-./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3ttcc $1 
-./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3ttLF $1 & disown
-./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3tt   $1 & disown
-./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3ttjj $1 & disown
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3ttbb $1 & disown
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3ttbj $1 & disown
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3ttcc $1 
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3ttLF $1 & disown
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3tt   $1 & disown
+# # ./TreeReader.run -i ${file}_ttbar_LepJetsPowhegPythiaTranche3ttjj $1 & disown
 
-./TreeReader.run -i ${file}_ttbb_aMCatNLOPythia $1  & disown
+./TreeReader.run -i ${file}_ttbar_PowhegPythiaEvt   $1  & disown
+./TreeReader.run -i ${file}_ttbar_PowhegHerwig      $1  & disown
 
-./TreeReader.run -i ${file}_ttbar_MadgraphPythia $1  & disown
-./TreeReader.run -i ${file}_ttbar_aMCatNLOPythia $1  
+# ./TreeReader.run -i ${file}_ttbb_aMCatNLOPythia $1  & disown
 
+# ./TreeReader.run -i ${file}_ttbar_MadgraphPythia $1  & disown
+# ./TreeReader.run -i ${file}_ttbar_aMCatNLOPythia $1  
 
 ./TreeReader.run -i ${file}_ttbar_PowhegPythiaBkg $1 
 
@@ -65,8 +67,8 @@ file="Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1"
 ./TreeReader.run -i ${file}_WZ_Pythia $1 & disown 
 ./TreeReader.run -i ${file}_ZZ_Pythia $1  
 
-./TreeReader.run -i ${file}_WJets_aMCatNLO         $1 & disown
 #./TreeReader.run -i ${file}_WJets_Madgraph         $1 & disown
+./TreeReader.run -i ${file}_WJets_aMCatNLO         $1 & disown
 ./TreeReader.run -i ${file}_ZJets_M50_aMCatNLO     $1 & disown
 ./TreeReader.run -i ${file}_ZJets_M10to50_aMCatNLO $1 
 
@@ -76,12 +78,12 @@ file="Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1"
 ./TreeReader.run -i ${file}_QCD_MuEnr_80to120   $1
 ./TreeReader.run -i ${file}_QCD_MuEnr_120to170  $1
 ./TreeReader.run -i ${file}_QCD_MuEnr_170to300  $1
-./TreeReader.run -i ${file}_QCD_MuEnr_300to470  $1
+# ./TreeReader.run -i ${file}_QCD_MuEnr_300to470  $1
 ./TreeReader.run -i ${file}_QCD_MuEnr_470to600  $1
 ./TreeReader.run -i ${file}_QCD_MuEnr_800to1000 $1
 ./TreeReader.run -i ${file}_QCD_MuEnr_1000toInf $1
 
-./TreeReader.run -i ${file}_QCD_EGEnr_15to20      $1
+# ./TreeReader.run -i ${file}_QCD_EGEnr_15to20      $1
 ./TreeReader.run -i ${file}_QCD_EGEnr_20to30      $1
 ./TreeReader.run -i ${file}_QCD_EGEnr_30to50      $1
 ./TreeReader.run -i ${file}_QCD_EGEnr_50to80      $1

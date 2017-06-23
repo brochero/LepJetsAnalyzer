@@ -372,9 +372,14 @@ int main(int argc, const char* argv[]){
       hKinthMass[j][i] = new TH1D("hKinthMass_" + namech[i] + "_" + namecut[j]+syst_varname, "Inv. Mass of Top(had) from Kin Reco " + titlenamech[i] + "; M_{t_{h}} [GeV]", 100, 100, 300);
       hKinthpT[j][i]   = new TH1D("hKinthpT_"   + namech[i] + "_" + namecut[j]+syst_varname, "p_{T} of Top(had) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
 
-      hKinAdd1CSV[j][i]   = new TH1D("hKinAdd1CSV_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",20,0.,1.);
-      hKinAdd2CSV[j][i]   = new TH1D("hKinAdd2CSV_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",20,0.,1.);
-      hKinAdd12CSV[j][i]  = new TH1D("hKinAdd12CSV_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit "  + titlenamech[i] + ";CSVv2",40,0.,2.);
+      hKinAdd1CSV[j][i]   = new TH1D("hKinAdd1CSV_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",40,0.,1.);
+      hKinAdd2CSV[j][i]   = new TH1D("hKinAdd2CSV_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",40,0.,1.);
+      hKinAdd12CSV[j][i]  = new TH1D("hKinAdd12CSV_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit "  + titlenamech[i] + ";CSVv2",80,0.,2.);
+
+      hKinAdd1CSV_30[j][i]   = new TH1D("hKinAdd1CSV_30_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",30,0.,1.);
+      hKinAdd2CSV_30[j][i]   = new TH1D("hKinAdd2CSV_30_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",30,0.,1.);
+      hKinAdd12CSV_30[j][i]  = new TH1D("hKinAdd12CSV_30_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit "  + titlenamech[i] + ";CSVv2",60,0.,2.);
+
       h2DKinAddCSV[j][i]  = new TH2D("h2DKinAddCSV_" + namech[i] + "_" + namecut[j]+syst_varname, "CSVv2 Discriminant for the Add (kin) Jets " + titlenamech[i], 20,0.,1.,20,0.,1.);
       
       pSFCSVVsCSVAdd[j][i]  = new TProfile("pSFCSVVsCSVAdd_"+namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag} Add. Jets " + titlenamech[i] + ";CSV;SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
@@ -871,6 +876,11 @@ int main(int argc, const char* argv[]){
 	    hKinAdd12CSV  [icut][Channel]->Fill((1.0 + jet_.CSV),  PUWeight);
 	    h2DKinAddCSV  [icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
 
+	    hKinAdd1CSV_30   [icut][Channel]->Fill(jet.CSV,      PUWeight);
+	    hKinAdd2CSV_30   [icut][Channel]->Fill(jet_.CSV,     PUWeight);
+	    hKinAdd12CSV_30  [icut][Channel]->Fill(jet.CSV,      PUWeight);
+	    hKinAdd12CSV_30  [icut][Channel]->Fill((1.0 + jet_.CSV),  PUWeight);
+
 	    pSFCSVVsCSVAdd  [icut][Channel]->Fill(jet.CSV,  (*Jet_SF_CSV)[btagUnc::CENTRAL],                   PUWeight);
 	    pSFCSVUpVsCSVAdd[icut][Channel]->Fill(jet.CSV,  (*Jet_SF_CSV)[btagUnc::CENTRAL]+btagUnc_TotalUp,   PUWeight);
 	    pSFCSVDownVsCSVAdd[icut][Channel]->Fill(jet.CSV,  (*Jet_SF_CSV)[btagUnc::CENTRAL]-btagUnc_TotalDown, PUWeight);
@@ -1139,6 +1149,20 @@ int main(int argc, const char* argv[]){
       hKinAdd2CSV    [j][i]->Write();
       hKinAdd12CSV   [j][i]->Write();
       h2DKinAddCSV   [j][i]->Write();
+
+      TH1D *hKinAdd1CSV_20 = (TH1D*)hKinAdd1CSV[j][i]  ->Clone((TString)hKinAdd1CSV[j][i]->GetName() + "_20");
+      hKinAdd1CSV_20->Rebin();
+      hKinAdd1CSV_20->Write();
+      TH1D *hKinAdd2CSV_20 = (TH1D*)hKinAdd2CSV[j][i]  ->Clone((TString)hKinAdd2CSV[j][i]->GetName() + "_20");
+      hKinAdd2CSV_20->Rebin();
+      hKinAdd2CSV_20->Write();
+      TH1D *hKinAdd12CSV_20 = (TH1D*)hKinAdd12CSV[j][i]->Clone((TString)hKinAdd12CSV[j][i]->GetName() + "_20");
+      hKinAdd12CSV_20->Rebin();
+      hKinAdd12CSV_20->Write();
+
+      hKinAdd1CSV_30    [j][i]->Write();
+      hKinAdd2CSV_30    [j][i]->Write();
+      hKinAdd12CSV_30   [j][i]->Write();
 
       pSFCSVVsCSVAdd    [j][i]->Write();
       pSFCSVUpVsCSVAdd  [j][i]->Write();

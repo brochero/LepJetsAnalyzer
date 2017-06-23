@@ -267,7 +267,7 @@ Yields loadhistoYields(int SelCut, TString TName,TString namefile){
 
   // Histograms
   TH1F *YieldsSample;
-  YieldsSample = (TH1F*)file->Get("Yields");
+  YieldsSample = (TH1F*)file->Get("central/Yields");
 
   int nbin = 1;
   for(int nc = 0; nc < 7; nc++){

@@ -594,7 +594,7 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
   histoname.push_back("hKinTagAddDR");
 
   for(unsigned int h=0; h<histoname.size(); h++){
-    for(unsigned int ch=0; ch<2; ch++) histofile.hist[ch] = (TH1D*)file->Get(plots + "/" + channel[ch] + "/" +  histoname[h] + "_" + channel[ch] + "_" + plots);
+    for(unsigned int ch=0; ch<2; ch++) histofile.hist[ch] = (TH1D*)file->Get("central/" + plots + "/" + channel[ch] + "/" +  histoname[h] + "_" + channel[ch] + "_" + plots);
     // lep + jets
     histofile.hist[2] = (TH1D*)histofile.hist[0]->Clone();
     histofile.hist[2]->Add(histofile.hist[0], histofile.hist[1]);

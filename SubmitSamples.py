@@ -90,7 +90,7 @@ requirements            = OpSysMajorVer == 6
         for isam in SamNam:
             for isys in SysCom:
                 for ivar in SysVar:
-                    systematic = " -s " + isys + "_" + ivar
+                    systematic = " -s " + isys + " " + ivar
                     print>>fout, "filesample=" + isam
                     print>>fout, """arguments  = " '$(filehead)$(filesample)' '$(outputref)""" + systematic + """ '" """
                     print>>fout, "queue 1"

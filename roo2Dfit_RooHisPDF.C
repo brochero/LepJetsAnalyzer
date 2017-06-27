@@ -18,11 +18,11 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
   InFile[data] = LoadSample("DataSingleLep");
 
   // MC: Signal
-  InFile[ttbb]   = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttbbFullPhSp");
-  InFile[ttb]    = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttbjFullPhSp");
-  InFile[ttcc]   = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttccFullPhSp");
-  InFile[ttLF]   = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttLFFullPhSp"); // Includes ttc
-  InFile[ttccLF] = LoadSample("ttbar_LepJetsPowhegPythiaTranche3ttccLFFullPhSp");
+  InFile[ttbb]   = LoadSample("ttbar_LepJetsPowhegPythiattbb");
+  InFile[ttb]    = LoadSample("ttbar_LepJetsPowhegPythiattbj");
+  InFile[ttcc]   = LoadSample("ttbar_LepJetsPowhegPythiattcc");
+  InFile[ttLF]   = LoadSample("ttbar_LepJetsPowhegPythiattLF"); // Includes ttc
+  InFile[ttccLF] = LoadSample("ttbar_LepJetsPowhegPythiattccLF");
 
   // MC: Backgrounds
   InFile[Bkgtt]    = LoadSample("ttbar_PowhegPythiaBkgtt"); // ttbarBkg + tt
@@ -39,7 +39,7 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
   // ----------------------------------------------------------------------------------
   // Initial Parameters
   // ----------------------------------------------------------------------------------
-  // Cross Sections from MC 
+  // -- Cross Sections from MC 
   RooRealVar *Vis_Xsecttjj   = new RooRealVar("Vis_Xsecttjj",  "ttjj cross section Vis Ph-Sp",   26.40,  10.0,   50.0);// mu
   RooRealVar *Vis_Xsecttbb   = new RooRealVar("Vis_Xsecttbb",  "ttbb cross section Vis Ph-Sp",    0.375,  0.001,  1.5);// mu
   RooRealVar *Full_Xsecttjj  = new RooRealVar("Full_Xsecttjj", "ttjj cross section Full Ph-Sp", 290.2,  150.0,  350.0);
@@ -52,34 +52,29 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
   RooRealVar *Vis_C_Xsecttbb_Xsecttjj   = new RooRealVar("Vis_C_Xsecttbb_Xsecttjj",  "Xsecttbb/Xsecttjj Vis-PhSp",  0.375/26.40,  0.001,  0.5); // 0.0142
   RooRealVar *Full_C_Xsecttbb_Xsecttjj  = new RooRealVar("Full_C_Xsecttbb_Xsecttjj", "Xsecttbb/Xsecttjj Full-PhSp", 3.900/290.2,  0.001,  0.5); // 0.0134
 
+  
+  // -- Efficiency
+  vEffttjj[muJets] = 0.05;  vEffttjj[eJets] = 0.05;  vEffttjj[LepJets] = 0.0561;
+  vEffttbb[muJets] = 0.22;  vEffttbb[eJets] = 0.22;  vEffttbb[LepJets] = 0.2216;
+  // -- Acceptance
+  vAccttjj[muJets] = 0.25*0.34;  vAccttjj[eJets] = 0.25*0.34;  vAccttjj[LepJets] = 0.2413*0.34;
+  vAccttbb[muJets] = 0.29*0.34;  vAccttbb[eJets] = 0.29*0.34;  vAccttbb[LepJets] = 0.2914*0.34;
+  // -- Luminosity 
+  vLumi = 36814.; // Full 2016 Dataset
 
-  // Efficiencies ttjj
-  RooRealVar *Effttjj_nom[3];
-  Effttjj_nom[0] = new RooRealVar("Effttjj_nom_" + name_ch[0],  "Nom. ttjj Efficiency for "  + name_ch[0],  0.0213);
-  Effttjj_nom[1] = new RooRealVar("Effttjj_nom_" + name_ch[2],  "Nom. ttjj Efficiency for "  + name_ch[1],  0.1);
-  Effttjj_nom[2] = new RooRealVar("Effttjj_nom_" + name_ch[3],  "Nom. ttjj Efficiency for "  + name_ch[2],  0.1);
-  // Efficiencies ttbb
-  RooRealVar *Effttbb_nom[3];
-  Effttbb_nom[0] = new RooRealVar("Effttbb_nom_" + name_ch[0],  "Nom. ttbb Efficiency for "  + name_ch[0],  0.1084);
-  Effttbb_nom[1] = new RooRealVar("Effttbb_nom_" + name_ch[2],  "Nom. ttbb Efficiency for "  + name_ch[1],  0.1);
-  Effttbb_nom[2] = new RooRealVar("Effttbb_nom_" + name_ch[3],  "Nom. ttbb Efficiency for "  + name_ch[2],  0.1);
-
-  // Aceptancies ttjj
-  RooRealVar *Accttjj_nom[3];
-  Accttjj_nom[0] = new RooRealVar("Accttjj_nom_" + name_ch[0],  "Nom. ttjj Acceptancy for "  + name_ch[0],  0.0910);
-  Accttjj_nom[1] = new RooRealVar("Accttjj_nom_" + name_ch[2],  "Nom. ttjj Acceptancy for "  + name_ch[1],  0.3);
-  Accttjj_nom[2] = new RooRealVar("Accttjj_nom_" + name_ch[3],  "Nom. ttjj Acceptancy for "  + name_ch[2],  0.3);
-  // Aceptancies ttbb
-  RooRealVar *Accttbb_nom[3];
-  Accttbb_nom[0] = new RooRealVar("Accttbb_nom_" + name_ch[0],  "Nom. ttbb Acceptancy for "  + name_ch[0],  0.0961);
-  Accttbb_nom[1] = new RooRealVar("Accttbb_nom_" + name_ch[2],  "Nom. ttbb Acceptancy for "  + name_ch[1],  0.2);
-  Accttbb_nom[2] = new RooRealVar("Accttbb_nom_" + name_ch[3],  "Nom. ttbb Acceptancy for "  + name_ch[2],  0.2);
-
-  // Luminosity
-  RooRealVar *Lumi_nom  = new RooRealVar("Lumi_nom",  "Luminosity",  15941.38);
-
-
-  for (unsigned int ch=0; ch<1; ch++){
+  for (unsigned int ch=2; ch<3; ch++){
+    // Efficiencies ttjj
+    RooRealVar *Effttjj_nom = new RooRealVar("Effttjj_nom", "ttjj Nom. Efficiency", vEffttjj[ch]);
+    // Efficiencies ttbb
+    RooRealVar *Effttbb_nom = new RooRealVar("Effttbb_nom", "ttbb Nom. Efficiency", vEffttbb[ch]);
+    
+    // Aceptancies ttjj
+    RooRealVar *Accttjj_nom = new RooRealVar("Accttjj_nom",  "ttjj Nom. Acceptancy", vAccttjj[ch]);
+    // Aceptancies ttbb
+    RooRealVar *Accttbb_nom = new RooRealVar("Accttbb_nom",  "ttbb Nom. Acceptancy", vAccttbb[ch]);
+    
+    // Luminosity
+    RooRealVar *Lumi_nom  = new RooRealVar("Lumi_nom",  "Luminosity", vLumi);
     
     // Variables CSV2 and CSV3
     // + 0.1 to avoid empty bins
@@ -277,17 +272,17 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
 
     // Visible and Full Ph-Sp
     WS_StMo->import(*Lumi_nom);
-    WS_StMo->import(*Accttjj_nom[ch]);
-    WS_StMo->import(*Accttbb_nom[ch]);
-    WS_StMo->import(*Effttjj_nom[ch]);
-    WS_StMo->import(*Effttbb_nom[ch]);
+    WS_StMo->import(*Accttjj_nom);
+    WS_StMo->import(*Accttbb_nom);
+    WS_StMo->import(*Effttjj_nom);
+    WS_StMo->import(*Effttbb_nom);
     WS_StMo->import(*Vis_Xsecttbb_Xsecttjj);
     WS_StMo->import(*Full_Xsecttbb_Xsecttjj);
     WS_StMo->import(*Vis_C_Xsecttbb_Xsecttjj);
     WS_StMo->import(*Full_C_Xsecttbb_Xsecttjj);
 
-    WS_StMo->factory("expr::Effttbbttjj('Effttbb_nom_muJets/Effttjj_nom_muJets',Effttbb_nom_muJets,Effttjj_nom_muJets)");
-    WS_StMo->factory("expr::Accttbbttjj('Accttbb_nom_muJets/Accttjj_nom_muJets',Accttbb_nom_muJets,Accttjj_nom_muJets)");
+    WS_StMo->factory("expr::Effttbbttjj('Effttbb_nom/Effttjj_nom',Effttbb_nom,Effttjj_nom)");
+    WS_StMo->factory("expr::Accttbbttjj('Accttbb_nom/Accttjj_nom',Accttbb_nom,Accttjj_nom)");
 
     // Visible Ph-Sp
     WS_StMo->factory("prod::Vis_XsecRatiottbbttjj(Effttbbttjj,Vis_Xsecttbb_Xsecttjj)");
@@ -296,10 +291,10 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     WS_StMo->factory("prod::Vis_k(Vis_Xsecttjj,0.03788)"); // 0.03788 from 1/26.40
     // Model: Visible Ph-Sp -> Cross Sections
     WS_StMo->factory("SUM::Vis_ttjj_hispdf23(Vis_XsecRatiottbbttjj*ttbb_hispdf23,prod(Vis_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_hispdf23, ttccLF_hispdf23)");
-    WS_StMo->factory("SUM::Vis_TotModel23(prod(Vis_Nttjj,Effttjj_nom_muJets)*Vis_ttjj_hispdf23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
+    WS_StMo->factory("SUM::Vis_TotModel23(prod(Vis_Nttjj,Effttjj_nom)*Vis_ttjj_hispdf23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
     // Model: Visible Ph-Sp -> Cross Section and Ratio
     WS_StMo->factory("SUM::Vis_C_ttjj_hispdf23(Vis_C_XsecRatiottbbttjj*ttbb_hispdf23,prod(Vis_C_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_hispdf23, ttccLF_hispdf23)");
-    WS_StMo->factory("SUM::Vis_C_TotModel23(prod(Vis_Nttjj,Effttjj_nom_muJets)*Vis_C_ttjj_hispdf23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
+    WS_StMo->factory("SUM::Vis_C_TotModel23(prod(Vis_Nttjj,Effttjj_nom)*Vis_C_ttjj_hispdf23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
 
 
     // Full Ph-Sp
@@ -309,10 +304,10 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     WS_StMo->factory("prod::Full_k(Full_Xsecttjj,0.00345)"); // 0.00345 from 1/290.2
     // Model: Visible Ph-Sp -> Cross Section
     WS_StMo->factory("SUM::Full_ttjj_hispdf23(Full_XsecRatiottbbttjj*ttbb_hispdf23,prod(Full_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_hispdf23, ttccLF_hispdf23)");
-    WS_StMo->factory("SUM::Full_TotModel23(prod(Full_Nttjj,Effttjj_nom_muJets,Accttjj_nom_muJets)*Full_ttjj_hispdf23, prod(Full_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
+    WS_StMo->factory("SUM::Full_TotModel23(prod(Full_Nttjj,Effttjj_nom,Accttjj_nom)*Full_ttjj_hispdf23, prod(Full_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
     // Model: Visible Ph-Sp -> Cross Section and Ratio
     WS_StMo->factory("SUM::Full_C_ttjj_hispdf23(Full_C_XsecRatiottbbttjj*ttbb_hispdf23,prod(Full_C_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_hispdf23, ttccLF_hispdf23)");
-    WS_StMo->factory("SUM::Full_C_TotModel23(prod(Full_Nttjj,Effttjj_nom_muJets,Accttjj_nom_muJets)*Full_C_ttjj_hispdf23, prod(Full_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
+    WS_StMo->factory("SUM::Full_C_TotModel23(prod(Full_Nttjj,Effttjj_nom,Accttjj_nom)*Full_C_ttjj_hispdf23, prod(Full_k,n_Bkgtt_var)*Bkgtt_hispdf23, n_BkgOther_var*BkgOther_hispdf23)");
 
 
     // ----------------------------------------------------------------------------------
@@ -323,8 +318,8 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     RooHistPdf  *HisPdfSys[18][3][14][3];  // [sample][case][syst][var]
     RooArgList  *arg_PdfVar[18][3][3];     // [sample][case][var]
 
-    RooRealVar *AlphaSys[14][3]; // [syst][var]   
-    RooArgList *arg_AlphaSys[3]; // [var]
+    RooRealVar *AlphaSys[14][3]; // [syst][case]   
+    RooArgList *arg_AlphaSys[3]; // [case]
 
     PiecewiseInterpolation *PInterSyst[18][3]; // [sample][case]
     
@@ -338,9 +333,9 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
 
     // Set of Nuisance parameters    
     for(int isys=0; isys<14; isys++){      
-      AlphaSys[isys][0] = new RooRealVar("AlphaSys2"  + SystNam[isys], "Alpha Syst " + SystNam[isys], -5.0, 5.0);
-      AlphaSys[isys][1] = new RooRealVar("AlphaSys3"  + SystNam[isys], "Alpha Syst " + SystNam[isys], -5.0, 5.0);
-      AlphaSys[isys][2] = new RooRealVar("AlphaSys23" + SystNam[isys], "Alpha Syst " + SystNam[isys], -5.0, 5.0);
+      AlphaSys[isys][0] = new RooRealVar("AlphaSys2"  + SystNam[isys], "Alpha Syst " + SystNam[isys], 0.0, -5.0, 5.0);
+      AlphaSys[isys][1] = new RooRealVar("AlphaSys3"  + SystNam[isys], "Alpha Syst " + SystNam[isys], 0.0, -5.0, 5.0);
+      AlphaSys[isys][2] = new RooRealVar("AlphaSys23" + SystNam[isys], "Alpha Syst " + SystNam[isys], 0.0, -5.0, 5.0);
 
       // if(isys == PileUp || isys == JES
       // 	 || isys == LES || isys == LepSF || isys == JER){
@@ -433,6 +428,7 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     // ----------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------
 
+
     /////////////////////////////////////
     // WorkSpace 2: Fit with Nuisance  //
     /////////////////////////////////////
@@ -467,17 +463,52 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
 
     // Visible and Full Ph-Sp
     WS_NuMo->import(*Lumi_nom);
-    WS_NuMo->import(*Accttjj_nom[ch]);
-    WS_NuMo->import(*Accttbb_nom[ch]);
-    WS_NuMo->import(*Effttjj_nom[ch]);
-    WS_NuMo->import(*Effttbb_nom[ch]);
+    WS_NuMo->import(*Accttjj_nom);
+    WS_NuMo->import(*Accttbb_nom);
+    WS_NuMo->import(*Effttjj_nom);
+    WS_NuMo->import(*Effttbb_nom);
     WS_NuMo->import(*Vis_Xsecttbb_Xsecttjj);
     WS_NuMo->import(*Full_Xsecttbb_Xsecttjj);
     WS_NuMo->import(*Vis_C_Xsecttbb_Xsecttjj);
     WS_NuMo->import(*Full_C_Xsecttbb_Xsecttjj);
 
-    WS_NuMo->factory("expr::Effttbbttjj('Effttbb_nom_muJets/Effttjj_nom_muJets',Effttbb_nom_muJets,Effttjj_nom_muJets)");
-    WS_NuMo->factory("expr::Accttbbttjj('Accttbb_nom_muJets/Accttjj_nom_muJets',Accttbb_nom_muJets,Accttjj_nom_muJets)");
+
+    // Nuisance Parameters for Theoretical Uncertainties 
+    RooRealVar *EttbbAlphaThSys[3], *EttjjAlphaThSys[3]; // [thsyst]
+    for(int isys=0; isys<3; isys++){
+      cout << "EttjjAlphaThSys" << SystThNam[isys] << endl;
+      EttjjAlphaThSys[isys] = new RooRealVar("EttjjAlphaThSys" + SystThNam[isys], "Ettjj_Alpha Syst " + SystThNam[isys], -5.0, 5.0);    
+      EttbbAlphaThSys[isys] = new RooRealVar("EttbbAlphaThSys" + SystThNam[isys], "Ettbb_Alpha Syst " + SystThNam[isys], -5.0, 5.0);
+
+      WS_NuMo->import(*EttjjAlphaThSys[isys]);
+      WS_NuMo->import(*EttbbAlphaThSys[isys]);
+
+    }
+
+    // -- Luminosity
+    // kappaLumi is 1.062 -> Uncertainty in the Luminosity 6.2% 
+    WS_NuMo->factory("expr::betaLumi('pow(kappaLumi,AlphaThSysLumi)',kappaLumi[1.062],AlphaThSysLumi[-5.,5.])");
+    WS_NuMo->factory("prod::Lumi(Lumi_nom,betaLumi)");
+    // -- Scale
+    //ttjjkappaScale is 1.010 -> Scale contribution to the error in Eff   
+    WS_NuMo->factory("expr::EttjjbetaScale('pow(EttjjkappaScale,EttjjAlphaThSysScale)',EttjjkappaScale[1.010],EttjjAlphaThSysScale)");
+    WS_NuMo->factory("expr::EttbbbetaScale('pow(EttbbkappaScale,EttbbAlphaThSysScale)',EttbbkappaScale[1.010],EttbbAlphaThSysScale)");
+    // -- PS
+    //ttjjkappaPS is 1.010 -> PS contribution to the error in Eff   
+    WS_NuMo->factory("expr::EttjjbetaPS('pow(EttjjkappaPS,EttjjAlphaThSysPS)',EttjjkappaPS[1.010],EttjjAlphaThSysPS)");
+    WS_NuMo->factory("expr::EttbbbetaPS('pow(EttbbkappaPS,EttbbAlphaThSysPS)',EttbbkappaPS[1.010],EttbbAlphaThSysPS)");
+    // -- PDF
+    //kappaPDF is 1.010 -> PDF contribution to the error in Eff   
+    WS_NuMo->factory("expr::EttjjbetaPDF('pow(EttjjkappaPDF,EttjjAlphaThSysPDF)',EttjjkappaPDF[1.010],EttjjAlphaThSysPDF)");
+    WS_NuMo->factory("expr::EttbbbetaPDF('pow(EttbbkappaPDF,EttbbAlphaThSysPDF)',EttbbkappaPDF[1.010],EttbbAlphaThSysPDF)");
+
+
+    // -- Efficiency with Nuisance Parameters
+    WS_NuMo->factory("prod::Effttbb(Effttbb_nom,EttbbbetaScale,EttbbbetaPS,EttbbbetaPDF)");
+    WS_NuMo->factory("prod::Effttjj(Effttjj_nom,EttjjbetaScale,EttjjbetaPS,EttjjbetaPDF)");
+    // -- Efficiencies and Acceptance rations 
+    WS_NuMo->factory("expr::Effttbbttjj('Effttbb_nom/Effttjj_nom',Effttbb_nom,Effttjj_nom)");
+    WS_NuMo->factory("expr::Accttbbttjj('Accttbb_nom/Accttjj_nom',Accttbb_nom,Accttjj_nom)");
 
     // Visible Ph-Sp
     WS_NuMo->factory("prod::Vis_XsecRatiottbbttjj(Effttbbttjj,Vis_Xsecttbb_Xsecttjj)");
@@ -486,10 +517,10 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     WS_NuMo->factory("prod::Vis_k(Vis_Xsecttjj,0.03788)"); // 0.03788 from 1/26.40
     // Model: Visible Ph-Sp -> Cross Sections
     WS_NuMo->factory("ASUM::Vis_ttjj_PInterSyst23(Vis_XsecRatiottbbttjj*ttbb_PInterSyst23,prod(Vis_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_PInterSyst23, ttccLF_PInterSyst23)");
-    WS_NuMo->factory("ASUM::Vis_TotModel23_sys(prod(Vis_Nttjj,Effttjj_nom_muJets)*Vis_ttjj_PInterSyst23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
+    WS_NuMo->factory("ASUM::Vis_TotModel23_sys(prod(Vis_Nttjj,Effttjj_nom)*Vis_ttjj_PInterSyst23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
     // Model: Visible Ph-Sp -> Cross Section and Ratio
     WS_NuMo->factory("ASUM::Vis_C_ttjj_PInterSyst23(Vis_C_XsecRatiottbbttjj*ttbb_PInterSyst23,prod(Vis_C_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_PInterSyst23, ttccLF_PInterSyst23)");
-    WS_NuMo->factory("ASUM::Vis_C_TotModel23_sys(prod(Vis_Nttjj,Effttjj_nom_muJets)*Vis_C_ttjj_PInterSyst23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
+    WS_NuMo->factory("ASUM::Vis_C_TotModel23_sys(prod(Vis_Nttjj,Effttjj_nom)*Vis_C_ttjj_PInterSyst23, prod(Vis_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
 
 
     // Full Ph-Sp
@@ -499,10 +530,10 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     WS_NuMo->factory("prod::Full_k(Full_Xsecttjj,0.00345)"); // 0.00345 from 1/290.2
     // Model: Full Ph-Sp -> Cross Section
     WS_NuMo->factory("ASUM::Full_ttjj_PInterSyst23(Full_XsecRatiottbbttjj*ttbb_PInterSyst23,prod(Full_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_PInterSyst23, ttccLF_PInterSyst23)");
-    WS_NuMo->factory("ASUM::Full_TotModel23_sys(prod(Full_Nttjj,Effttjj_nom_muJets,Accttjj_nom_muJets)*Full_ttjj_PInterSyst23, prod(Full_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
+    WS_NuMo->factory("ASUM::Full_TotModel23_sys(prod(Full_Nttjj,Effttjj_nom,Accttjj_nom)*Full_ttjj_PInterSyst23, prod(Full_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
     // Model: Full Ph-Sp -> Cross Section and Ratio
     WS_NuMo->factory("ASUM::Full_C_ttjj_PInterSyst23(Full_C_XsecRatiottbbttjj*ttbb_PInterSyst23,prod(Full_C_XsecRatiottbbttjj,CRatio_ttbjttbb)*ttb_PInterSyst23, ttccLF_PInterSyst23)");
-    WS_NuMo->factory("ASUM::Full_C_TotModel23_sys(prod(Full_Nttjj,Effttjj_nom_muJets,Accttjj_nom_muJets)*Full_C_ttjj_PInterSyst23, prod(Full_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
+    WS_NuMo->factory("ASUM::Full_C_TotModel23_sys(prod(Full_Nttjj,Effttjj_nom,Accttjj_nom)*Full_C_ttjj_PInterSyst23, prod(Full_k,n_Bkgtt_var)*Bkgtt_PInterSyst23, n_BkgOther_var*BkgOther_PInterSyst23)");
 
 
 
@@ -522,9 +553,9 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     for(int isys=0; isys<14; isys++){
       // if(isys == PileUp || isys == JES
       // 	 || isys == LES || isys == LepSF || isys == JER){
-	sTotModel2_sys  += ",Gaussian(0.0,AlphaSys2"  + SystNam[isys] + ",1.0)"; 
-	sTotModel3_sys  += ",Gaussian(0.0,AlphaSys3"  + SystNam[isys] + ",1.0)"; 
-	sTotModel23_sys += ",Gaussian(0.0,AlphaSys23" + SystNam[isys] + ",1.0)"; 
+	sTotModel2_sys  += ",Gaussian(AlphaSys2"  + SystNam[isys] + ",0,1)"; 
+	sTotModel3_sys  += ",Gaussian(AlphaSys3"  + SystNam[isys] + ",0,1)"; 
+	sTotModel23_sys += ",Gaussian(AlphaSys23" + SystNam[isys] + ",0,1)"; 
 	// }
     }
     // To close the model definition
@@ -578,7 +609,7 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     // More precise estimation of the parameter uncertainties
     // MINOS uses a likelihood scan
     // m_NuMo.minos();
-
+    
     // Save the current fit result
     RooFitResult* r_NuMo = m_NuMo.save() ;
 
@@ -605,15 +636,15 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     // Contribution of each source
     for(int isys=0; isys<14; isys++){ 
       
-      // cout << "\n" <<endl;
-      // cout << "Setting new values........................." << endl;
-      // cout << "\n" <<endl;
+      cout << "\n" <<endl;
+      cout << "Setting new values........................." << endl;
+      cout << "\n" <<endl;
       
       for(int jsys=0; jsys<14; jsys++){
-	TString NuiParName = "AlphaSys23" + SystNam[jsys];
-	// WS_NuMo->var(NuiParName)->setVal(0.0);
-	WS_NuMo->var(NuiParName)->setVal(val_AlphaSys[jsys]);
-	WS_NuMo->var(NuiParName)->setConstant(kFALSE);    
+    	TString NuiParName = "AlphaSys23" + SystNam[jsys];
+    	// WS_NuMo->var(NuiParName)->setVal(0.0);
+    	WS_NuMo->var(NuiParName)->setVal(val_AlphaSys[jsys]);
+    	WS_NuMo->var(NuiParName)->setConstant(kFALSE);    
       }
       TString NuiParName = "AlphaSys23" + SystNam[isys];
       //WS_NuMo->var(NuiParName)->setVal();
@@ -622,7 +653,7 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
       m_NuMo.migrad();
       m_NuMo.hesse();
       
-      r_NuMo_sys[isys] = m_NuMo.save() ;
+    r_NuMo_sys[isys] = m_NuMo.save() ;
       
     }
 
@@ -690,7 +721,7 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     float vk_StMo =  k_StMo->getVal();
     float vk_error_StMo =  k_StMo->getError();
 
-    RooRealVar *FRatio_ttbbttjj_StMo = WS_StMo->var("Full_Xsecttbb");
+    RooRealVar *FRatio_ttbbttjj_StMo = WS_StMo->var("Full_C_Xsecttbb_Xsecttjj");
     float vFRatio_ttbbttjj_StMo =  FRatio_ttbbttjj_StMo->getVal();
     float vFRatio_ttbbttjj_error_StMo =  FRatio_ttbbttjj_StMo->getError();
 
@@ -721,11 +752,11 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     canvas_par_StMo->SaveAs("Canvas_par_StMo.pdf");
 
 
-    RooRealVar *k_NuMo  = WS_NuMo->var("Vis_Xsecttjj");
+    RooRealVar *k_NuMo  = WS_NuMo->var("Full_Xsecttjj");
     float vk_NuMo       = k_NuMo->getVal();
     float vk_error_NuMo = k_NuMo->getError();
 
-    RooRealVar *FRatio_ttbbttjj_NuMo  = WS_NuMo->var("Vis_Xsecttbb");
+    RooRealVar *FRatio_ttbbttjj_NuMo  = WS_NuMo->var("Full_Xsecttbb");
     float vFRatio_ttbbttjj_NuMo       = FRatio_ttbbttjj_NuMo->getVal();
     float vFRatio_ttbbttjj_error_NuMo = FRatio_ttbbttjj_NuMo->getError();
 
@@ -884,6 +915,7 @@ void roo2Dfit_RooHisPDF(TString nModel = "RttbCon"){
     per_Xsecttjj_nom[0] = 100.;
     per_Xsecttjj_nom[1] = 100.*r_Full_Xsecttjj_nom[1]/r_Full_Xsecttjj_nom[0];
     per_Xsecttjj_nom[2] = 100.*r_Full_Xsecttjj_nom[2]/r_Full_Xsecttjj_nom[0];
+    cout << "kk" <<endl;
     float per_XsecRatiottbbttjj_nom[3];
     per_XsecRatiottbbttjj_nom[0] = 100.;
     per_XsecRatiottbbttjj_nom[1] = 100.*r_Full_XsecRatiottbbttjj_nom[1]/r_Full_XsecRatiottbbttjj_nom[0];
@@ -1100,14 +1132,10 @@ HistoFit LoadSample(TString FileName){
       TFile* fInputSys[3];
       fInputSys[Nom]  = new TFile(dirnameIn + fl + "_" + FileName + ".root");
       
-      //if(isys == PileUp || isys == JES){
       fInputSys[Up]    = new TFile(dirnameIn + fl + "_" + FileName + "_SYS_" + SystNam[isys] + "_Up.root");
       fInputSys[Down]  = new TFile(dirnameIn + fl + "_" + FileName + "_SYS_" + SystNam[isys] + "_Down.root");
-      //}
-      //else{
-      //fInputSys[Up]   = new TFile(dirnameIn + fl + "_" + FileName + ".root");
-      //fInputSys[Down] = new TFile(dirnameIn + fl + "_" + FileName + ".root");
-      //}
+      // fInputSys[Up]   = new TFile(dirnameIn + fl + "_" + FileName + ".root");
+      // fInputSys[Down] = new TFile(dirnameIn + fl + "_" + FileName + ".root");
       
       if(!fInputSys[Nom]->GetFile() || !fInputSys[Up]->GetFile() || !fInputSys[Down]->GetFile()){
 	std::cerr << SystNam[isys] << " systematic variation for " << dirnameIn + fl +  FileName << " not Found!!!" << std::endl;
@@ -1144,10 +1172,14 @@ HistoFit LoadSample(TString FileName){
 	  if (irca<2){
 	    Output.hsyst1D[isys][ivar][irca][2] = (TH1D*)Output.hsyst1D[isys][ivar][irca][0]->Clone();
 	    Output.hsyst1D[isys][ivar][irca][2]->Add(Output.hsyst1D[isys][ivar][irca][1]);
+	    // Normalize wrt the number of events in the nominal??? (to take into account the yields variations... Is it needed?)
+	    Output.hsyst1D[isys][ivar][irca][2]->Scale(1.0/Output.hsyst1D[isys][ivar][irca][2]->Integral());
 	  }
 	  else{
 	    Output.hsyst2D[isys][ivar][2] = (TH2D*)Output.hsyst2D[isys][ivar][0]->Clone();
 	    Output.hsyst2D[isys][ivar][2]->Add(Output.hsyst2D[isys][ivar][1]);    
+	    // Normalize wrt the number of events in the nominal??? (to take into account the yields variations... Is it needed?)
+	    Output.hsyst2D[isys][ivar][2]->Scale(1.0/Output.hsyst2D[isys][ivar][2]->Integral());
 	  }
 	} // for(irca)
       } // for(ivar)
@@ -1256,7 +1288,7 @@ RooPlot *PlotPDF_NuMo(RooRealVar *var, RooWorkspace *WS, RooDataHist *DataHis, b
 					      LineColor(colors[BkgFull]), 
 					      Name("Bkg"));
   WS->function("TotModel23_SysCons")->plotOn (Plot, 
-					      Components("ttjj_PInterSyst23"),
+					      Components("Full_C_ttjj_PInterSyst23"),
 					      LineColor(colors[ttjj]), 
 					      RooFit::Name("ttjj"));
   WS->function("ttbb_PInterSyst23")->plotOn (Plot,

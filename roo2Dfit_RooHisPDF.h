@@ -43,10 +43,17 @@ typedef struct HistoFit{
 
 
 TString dirnameIn= "TopResults/";
-//TString fl  = "hSF-pTj30_FitBin20-v3_Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1";  
-TString fl  = "hSF-NuiPar-v1_Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1";  
+//TString fl  = "hSF-KF-CSVT-v0_Tree_LepJets_QCDInfo_v8-0-4_Spring16-80X_36814pb-1";  
+TString fl  = "hSF-NuiPar10M-v0_Tree_LepJets_PileUp17_v8-0-4_Spring16-80X_36814pb-1";  
+//TString fl  = "hSF-NuiPar-v1_Tree_LepJets_KFCSVOrder01NoSkim_v8-0-1_Spring16-80X_15920pb-1";  
 
-enum Channel{muJets,eJets,LepJet};
+float vEffttjj[3];
+float vEffttbb[3];
+float vAccttjj[3];
+float vAccttbb[3];
+float vLumi;
+
+enum Channel{muJets,eJets,LepJets};
 TString name_ch[3] = {"muJets","eJets","LepJets"};
 
 enum FileSample{data, 
@@ -76,6 +83,9 @@ TString SystNam[14]= {"PileUp",
 		      "LES", "LepSF",
 		      "btagjes", "btaglf", "btaghf", "btaghfsI", "btaghfsII", "btaglfsI", "btaglfsII", "btagcfI", "btagcfII"};
 
+enum TheorySystematic{Lumi,Scale,PS,PDF};
+TString SystThNam[3]= {"Scale","PS","PDF"};
+
 enum FileVariation{Nom, Down, Up};
 TString VarNam[3]= {"Nom", "Down", "Up"};
 
@@ -84,3 +94,8 @@ RooPlot *PlotPDFModel(RooRealVar *var, RooHistPdf *Model, RooDataHist *DataHis, 
 RooPlot *PlotPDF_NuMo(RooRealVar *var, RooWorkspace *WS,  RooDataHist *DataHis, bool PlotData, TLegend *leg);
 TH1 *HistoPDF_NuMo(TString var, RooWorkspace *WS, RooDataHist *DataHis, bool PlotData, TLegend *leg);
 
+void NuiParameterPlot_2 (TCanvas *canvas_sys_NuMo, RooWorkspace *WS, TString cat = "ttbb", TString par = "btagcfI");
+void NuiParameterPlot_3 (TCanvas *canvas_sys_NuMo, RooWorkspace *WS, TString cat = "ttbb", TString par = "btagcfI");
+//TCanvas *NuiParameterPlot_23(RooWorkspace *WS, TString cat = "ttbb", TString par = "btagcfI");
+void NuiParameterPlot_23(TCanvas *canvas_sys_NuMo, RooWorkspace *WS, TString cat = "ttbb", TString par = "btagcfI");
+ 

@@ -37,7 +37,7 @@ struct Yields{
 Yields loadhistoYields(int SelCut, TString TName, TString HeadFile, TString SampleFile, TString AddToDC = "");
 void   EntryPrinter   (FILE *file, Yields Sample);
 void   AddhistoYields (Yields *s1, Yields *s2);
-void   CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel, TString HeadFile);
+void   CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel, TString HeadFile,  TString HistoName);
 
 void display_usage()
 {
@@ -48,6 +48,7 @@ void display_usage()
   std::cout << "    -o name of the output directory. Default: Yields" << std::endl;
   std::cout << "    -d Input file directory. Default directory: TopResults" << std::endl;
   std::cout << "    -combine datacardname Create datacard for COMBINE." << std::endl;
+  std::cout << "    -his Histo name to use in COMBINE." << std::endl;
   std::cout << "    -h displays this help message and exits " << std::endl;
   std::cout << "" << std::endl;
 }
@@ -62,6 +63,7 @@ int main (int argc, char *argv[]){
   const char * _input    = 0;
   const char * _dir      = "TopResults/";
   const char * _cut      = 0;
+  const char * _histoDC = "hKinAdd12CSV";  
   
   bool _createDC = false;
 
@@ -91,7 +93,10 @@ int main (int argc, char *argv[]){
 	_outputDC= argv[i+1];
 	i++;
       }
-
+      if( strcmp(argv[i],"-his") == 0 ){
+	_histoDC= argv[i+1];
+	i++;
+      }
       if( strcmp(argv[i],"-cut") == 0 ){
 	_cut= argv[i+1];
 	i++;
@@ -116,6 +121,7 @@ int main (int argc, char *argv[]){
   TString outDataCard(_outputDC);
   TString fdir(_dir);
   TString cutname(_cut);
+  TString hisComname(_histoDC);
 
   ///////////////////////////////////////
   // Please, IGNORE. Temporal solution //
@@ -264,16 +270,16 @@ int main (int argc, char *argv[]){
     // make a dir if it does not exist!!
     gSystem->mkdir(dirCombinename, kTRUE);
 
-    TString CombineDCfile_mu  = dirCombinename + "DataCard_mujets_" + fname + "_" + cutname + ".txt";
+    TString CombineDCfile_mu  = dirCombinename +  outDataCard + "_mujets_" + fname + "_" + cutname + ".txt";
     FILE*   DataCard_mu       = fopen(CombineDCfile_mu, "w");
   
-    CreateDataCard(DataCard_mu, Samples, "mujets", fdir + fname);
+    CreateDataCard(DataCard_mu, Samples, "mujets", fdir + fname, hisComname);
     fclose(DataCard_mu);
 
-    TString CombineDCfile_e  = dirCombinename + "DataCard_ejets_" + fname + "_" + cutname + ".txt";
+    TString CombineDCfile_e  = dirCombinename + outDataCard + "_ejets_" + fname + "_" + cutname + ".txt";
     FILE*   DataCard_e       = fopen(CombineDCfile_e, "w");
   
-    CreateDataCard(DataCard_e, Samples, "ejets", fdir + fname);
+    CreateDataCard(DataCard_e, Samples, "ejets", fdir + fname, hisComname);
     fclose(DataCard_e);
 
   }
@@ -364,7 +370,8 @@ void  EntryPrinter(FILE *file, Yields Sample){
 	  Sample.Evt[2], Sample.Error[2]);
 }
 
-void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel, TString HeadFile){
+void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel, TString HeadFile,  TString HistoName){
+
   int ich;
   if (ljchannel == "mujets") ich = 0;
   else if (ljchannel == "ejets") ich = 1;
@@ -408,15 +415,18 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
     Yields samEntry = Samples.at(ns);
     if(samEntry.InDataCard == "DCSys"){
       TString namefile = HeadFile + "_" + samEntry.SamComName + "_SYS.root" ;
-	fprintf(file,"shapes %s \t * %s central/2btag/$CHANNEL/hKinAdd1CSV_$CHANNEL_2btag $SYSTEMATIC/2btag/$CHANNEL/hKinAdd1CSV_$CHANNEL_2btag_$SYSTEMATIC \n", 
+	fprintf(file,"shapes %s \t * %s central/2btag/$CHANNEL/%s_$CHANNEL_2btag $SYSTEMATIC/2btag/$CHANNEL/%s_$CHANNEL_2btag_$SYSTEMATIC \n", 
 		(samEntry.SamComName).Data(), 
-		namefile.Data());      
+		namefile.Data(),
+		HistoName.Data(),
+		HistoName.Data());      
     }
     else if(samEntry.InDataCard == "DC"){
       TString namefile = HeadFile + "_" + samEntry.SamComName + ".root" ;
-	fprintf(file,"shapes %s \t * %s central/2btag/$CHANNEL/hKinAdd1CSV_$CHANNEL_2btag \n", 
+	fprintf(file,"shapes %s \t * %s central/2btag/$CHANNEL/%s_$CHANNEL_2btag \n", 
 		(samEntry.SamComName).Data(), 
-		namefile.Data());      
+		namefile.Data(),
+		HistoName.Data());      
     }
   } // for(ns)
   
@@ -424,12 +434,15 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
     Yields samEntry = Samples.at(ns);
     if(samEntry.SamComName.Contains("Data")){ 
       TString namefile = HeadFile + "_" + samEntry.SamComName + ".root"; 
-	fprintf(file,"shapes data_obs \t * %s central/2btag/$CHANNEL/hKinAdd1CSV_$CHANNEL_2btag \n", 
-		namefile.Data());      
+	fprintf(file,"shapes data_obs \t * %s central/2btag/$CHANNEL/%s_$CHANNEL_2btag \n", 
+		namefile.Data(),
+		HistoName.Data());      
       fprintf(file,"----------------------------------------------------------\n");
       fprintf(file,"bin \t %s \n", ljchannel.Data());
-      fprintf(file,"observation \t %.1f  \n",
-	      samEntry.Evt[ich]);
+      if (HistoName.Contains("hKinAdd12CSV") ) fprintf(file,"observation \t %.1f  \n",
+						       (2.0*samEntry.Evt[ich]));
+      else fprintf(file,"observation \t %.1f  \n",
+		   samEntry.Evt[ich]);
     } // if(Data)
   } // for(ns)
   
@@ -462,7 +475,8 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   for(int ns = 0; ns < Samples.size(); ns++){
     Yields samEntry = Samples.at(ns);
     if((samEntry.InDataCard).Contains("DC")){
-      fprintf(file,"\t %.1f ", samEntry.Evt[ich]);      
+      if (HistoName.Contains("hKinAdd12CSV") ) fprintf(file,"\t %.1f ", (2.0*samEntry.Evt[ich]));      
+      else fprintf(file,"\t %.1f ", samEntry.Evt[ich]);      
     } // if(InDataCard)
   } // for(ns)
   fprintf(file,"\n");

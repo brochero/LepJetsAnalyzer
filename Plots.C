@@ -91,12 +91,14 @@ void Plots(TString plots="2btag", bool LogScale=false) {
   *******************/ 
   std::vector<histos> ttbar_1;
   // ttbar_1 = loadhistograms(plots, files + "_ttbar_aMCatNLOPythia");
-  ttbar_1 = loadhistograms(plots, files + "_ttbar_PowhegPythiaEvt");
+  // ttbar_1 = loadhistograms(plots, files + "_ttbar_PowhegPythiaEvt");
+  ttbar_1 = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiattbb");
   setuphistograms(ttbar_1, kRed+2);
 
   std::vector<histos> ttbar_2;
   // ttbar_2 = loadhistograms(plots, files + "_ttbar_MadgraphPythia");
-  ttbar_2 = loadhistograms(plots, files + "_ttbar_PowhegHerwig");
+  //ttbar_2 = loadhistograms(plots, files + "_ttbar_PowhegHerwig");
+  ttbar_2 = loadhistograms(plots, files + "_ttbar_LepJetsPowhegPythiattbb");
   setuphistograms(ttbar_2, kRed+3);
 
   /****************
@@ -290,8 +292,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       
       //-------------------------------------------------------
       // Band error
-      TGraphErrors *thegraph = new TGraphErrors(MC_syst[h].hist[ch]);  // Full set of Syst. Unc.
-      //TGraphErrors *thegraph = new TGraphErrors(Stack[h].hist[ch]); // Just Statistical Unc. 
+      //TGraphErrors *thegraph = new TGraphErrors(MC_syst[h].hist[ch]);  // Full set of Syst. Unc.
+      TGraphErrors *thegraph = new TGraphErrors(Stack[h].hist[ch]); // Just Statistical Unc. 
       thegraph->SetName("thegraph");
       thegraph->SetFillStyle(1001);
       thegraph->SetFillColor(chatch);
@@ -303,12 +305,12 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       ttbar_1[h].hist[ch]->SetLineColor(6);
       ttbar_1[h].hist[ch]->SetLineStyle(2);
       ttbar_1[h].hist[ch]->SetFillColor(0);
-      ttbar_1[h].hist[ch]->Draw("histSAME");
+      //ttbar_1[h].hist[ch]->Draw("histSAME");
 
       ttbar_2[h].hist[ch]->SetLineColor(8);
       ttbar_2[h].hist[ch]->SetLineStyle(4);
       ttbar_2[h].hist[ch]->SetFillColor(0);
-      ttbar_2[h].hist[ch]->Draw("histSAME");
+      //ttbar_2[h].hist[ch]->Draw("histSAME");
       //-------------------------------------------------------
       // Data Histogram
       Data[h].hist[ch]->SetMarkerStyle(20);
@@ -347,9 +349,9 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       leg->AddEntry(ttbar_0_ttbb[h].hist[ch],"t#bar{t}+bb","F");
       leg->AddEntry("thegraph",              "Total Unc.","F");
       leg->AddEntry((TObject*)0,"","");
-      leg->AddEntry(ttbar_1[h].hist[ch],     "P+Pevtgen","L");
+      //leg->AddEntry(ttbar_1[h].hist[ch],     "P+Pevtgen","L");
       leg->AddEntry((TObject*)0,"","");
-      leg->AddEntry(ttbar_2[h].hist[ch],     "P+Herwig","L");
+      //leg->AddEntry(ttbar_2[h].hist[ch],     "P+Herwig","L");
       leg->Draw("SAME");
       //-------------------------------------------------------
       // CMS Legends
@@ -404,11 +406,10 @@ void Plots(TString plots="2btag", bool LogScale=false) {
 
       TH1D *RatioSyst;
       RatioSyst = (TH1D*)Data[h].hist[ch]->Clone();
-      // RatioSyst->Divide(MC_syst[h].hist[ch]);  // Should be the histogram with the Total Syst. Unc.
+      //RatioSyst->Divide(MC_syst[h].hist[ch]);  // Should be the histogram with the Total Syst. Unc.
       RatioSyst->Divide(Stack[h].hist[ch]); // Histogram with the total uncertainty from the STACK
       std::vector<double> ratioContent;
       for(unsigned int b_r = 1; b_r <= RatioSyst->GetNbinsX(); b_r++) RatioSyst->SetBinContent(b_r,1.0);
-
       Ratio->SetMarkerStyle(20);
       Ratio->SetMarkerSize(0.5);
       Ratio->SetMarkerColor(1);
@@ -461,8 +462,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
 
       thegraphRatioSyst->Draw("e2");
       Ratio->Draw("histpSAME");
-      Ratio_1->Draw("histSAME");
-      Ratio_2->Draw("histSAME");
+      //Ratio_1->Draw("histSAME");
+      //Ratio_2->Draw("histSAME");
             
       /***********************
             Save Histos
@@ -586,8 +587,9 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
   histoname.push_back("hCSV_Jet-3");
   histoname.push_back("hCSV_Jet-4");
   histoname.push_back("hCSV_Jet-5");
-  histoname.push_back("hKinAdd1CSV");
-  histoname.push_back("hKinAdd2CSV");
+  histoname.push_back("hKinAdd1CSV_30");
+  histoname.push_back("hKinAdd2CSV_30");
+  histoname.push_back("hKinAdd12CSV_30");
   histoname.push_back("hInvMassjj");
   histoname.push_back("hmT");
   histoname.push_back("hKinTagAddMass");

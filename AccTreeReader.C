@@ -35,9 +35,9 @@
   
 #ifndef __CINT__
 
-enum ncat{ttjj,ttbb};
+enum ncat{ttjj,ttbb,ttbj,ttcc,ttLF};
 enum nch {mujets,ejets,lepjets};
-TString namecat[2] = {"ttjj","ttbb"};
+TString namecat[5] = {"ttjj","ttbb","ttbj","ttcc","ttLF"};
 TString namech[3]  = {"mujets","ejets","lepjets"};
 
 void display_usage()
@@ -244,11 +244,11 @@ int main(int argc, const char* argv[]){
 
   // Number de events for acceptance
   //          [ttcat][Channel]
-  float NEvt_full[2][3];
-  float NEvt_vis [2][3];
+  float NEvt_full[5][3];
+  float NEvt_vis [5][3];
 
   for(unsigned int ibinx=0; ibinx<3; ibinx++){
-    for(unsigned int ibiny=0; ibiny<2; ibiny++){
+    for(unsigned int ibiny=0; ibiny<5; ibiny++){
       NEvt_full[ibiny][ibinx] = 0.0;
       NEvt_vis [ibiny][ibinx] = 0.0;
     }
@@ -262,12 +262,12 @@ int main(int argc, const char* argv[]){
     ******************/
 
     int scaleSysPar;
-    if     (_syst && syst_varname.Contains("ScaleRnF_Up"))   scaleSysPar = 0; // muR=Nom,  muF=Up
-    else if(_syst && syst_varname.Contains("ScaleRnF_Down")) scaleSysPar = 1; // muR=Nom,  muF=Down
-    else if(_syst && syst_varname.Contains("ScaleRuF_Nom"))  scaleSysPar = 2; // muR=Up,   muF=Nom
-    else if(_syst && syst_varname.Contains("ScaleRuF_Up"))   scaleSysPar = 3; // muR=Up,   muF=Up
-    else if(_syst && syst_varname.Contains("ScaleRdF_Nom"))  scaleSysPar = 4; // muR=Down, muF=Nom
-    else if(_syst && syst_varname.Contains("ScaleRdF_Down")) scaleSysPar = 5; // muR=Down, muF=Down
+    if     (_syst && syst_varname.Contains("ScaleRnFUp"))   scaleSysPar = 0; // muR=Nom,  muF=Up
+    else if(_syst && syst_varname.Contains("ScaleRnFDown")) scaleSysPar = 1; // muR=Nom,  muF=Down
+    else if(_syst && syst_varname.Contains("ScaleRuFNom"))  scaleSysPar = 2; // muR=Up,   muF=Nom
+    else if(_syst && syst_varname.Contains("ScaleRuFUp"))   scaleSysPar = 3; // muR=Up,   muF=Up
+    else if(_syst && syst_varname.Contains("ScaleRdFNom"))  scaleSysPar = 4; // muR=Down, muF=Nom
+    else if(_syst && syst_varname.Contains("ScaleRdFDown")) scaleSysPar = 5; // muR=Down, muF=Down
 
   /********************************
              Event Loop
@@ -310,22 +310,33 @@ int main(int argc, const char* argv[]){
     // pT(jet) > 20GeV && |eta(Jet)| < 2.5
     int cone_NaddJets  = (*GenConeCat)[5];
     int cone_NaddbJets = (*GenConeCat)[6];
+    int cone_NaddcJets = (*GenConeCat)[7];
     
     /******************
         Acceptace
     ******************/
     
     // Full Phase Space 
-    if(cone_NaddJets  > 1)                       NEvt_full[ttjj][Channel] += EvtStep;
-    if(cone_NaddJets  > 1 && cone_NaddbJets > 1) NEvt_full[ttbb][Channel] += EvtStep;
+    if(cone_NaddJets  > 1)                            NEvt_full[ttjj][Channel] += EvtStep;
+
+    if     (cone_NaddJets  > 1 && cone_NaddbJets > 1) NEvt_full[ttbb][Channel] += EvtStep;
+    else if(cone_NaddJets  > 1 && cone_NaddbJets > 0) NEvt_full[ttbj][Channel] += EvtStep;
+    else if(cone_NaddJets  > 1 && cone_NaddcJets > 1) NEvt_full[ttcc][Channel] += EvtStep;
+    else if(cone_NaddJets  > 1)                       NEvt_full[ttLF][Channel] += EvtStep;
     
+
     float Lep_pT_CUT = 30; // Muon
     if (Channel==1) Lep_pT_CUT = 35; // Electron
     
     if(Lep_pT > Lep_pT_CUT && abs(Lep_eta) < 2.1){
       // Visible Phase Space 
-      if(cone_NbJets > 1 && cone_NJets > 5) NEvt_vis[ttjj][Channel] += EvtStep;
-      if(cone_NbJets > 3 && cone_NJets > 5) NEvt_vis[ttbb][Channel] += EvtStep;    
+      if(cone_NbJets > 1 && cone_NJets > 5)                         NEvt_vis[ttjj][Channel] += EvtStep;
+
+      if     (cone_NbJets > 3 && cone_NJets > 5)                    NEvt_vis[ttbb][Channel] += EvtStep;    
+      else if(cone_NbJets > 2 && cone_NJets > 5)                    NEvt_vis[ttbj][Channel] += EvtStep;    
+      else if(cone_NbJets > 1 && cone_NcJets > 1 && cone_NJets > 5) NEvt_vis[ttcc][Channel] += EvtStep;    
+      else if(cone_NbJets > 1 && cone_NJets > 5)                    NEvt_vis[ttLF][Channel] += EvtStep;    
+
     }
 
     // std::cout << Channel << " - " << EvtStep << std::endl;
@@ -351,15 +362,21 @@ int main(int argc, const char* argv[]){
   
   NEvt_vis[ttjj][2] = NEvt_vis[ttjj][0] + NEvt_vis[ttjj][1];
   NEvt_vis[ttbb][2] = NEvt_vis[ttbb][0] + NEvt_vis[ttbb][1];
+  NEvt_vis[ttbb][2] = NEvt_vis[ttbj][0] + NEvt_vis[ttbj][1];
+  NEvt_vis[ttbb][2] = NEvt_vis[ttcc][0] + NEvt_vis[ttcc][1];
+  NEvt_vis[ttbb][2] = NEvt_vis[ttLF][0] + NEvt_vis[ttLF][1];
 
   NEvt_full[ttjj][2] = NEvt_full[ttjj][0] + NEvt_full[ttjj][1];
   NEvt_full[ttbb][2] = NEvt_full[ttbb][0] + NEvt_full[ttbb][1];
+  NEvt_full[ttbj][2] = NEvt_full[ttbj][0] + NEvt_full[ttbj][1];
+  NEvt_full[ttcc][2] = NEvt_full[ttcc][0] + NEvt_full[ttcc][1];
+  NEvt_full[ttLF][2] = NEvt_full[ttLF][0] + NEvt_full[ttLF][1];
     
 
   //Acceptance-Efficiency
   TH2D *Yields_full, *Yields_vis;
-  Yields_full = new TH2D("Yields_FullPh-Sp", "Yields in the Full Ph-Sp",   3,0,3,2,0,2);
-  Yields_vis  = new TH2D("Yields_VisPh-Sp",  "Yields in the Visible Ph-Sp",3,0,3,2,0,2);
+  Yields_full = new TH2D("Yields_FullPh-Sp", "Yields in the Full Ph-Sp",   3,0,3,5,0,5);
+  Yields_vis  = new TH2D("Yields_VisPh-Sp",  "Yields in the Visible Ph-Sp",3,0,3,5,0,5);
   Yields_full->SetOption("COLTEXT");
   Yields_vis ->SetOption("COLTEXT");
 
@@ -367,13 +384,13 @@ int main(int argc, const char* argv[]){
     Yields_full->GetXaxis()->SetBinLabel(ibinx+1, namech[ibinx]);
     Yields_vis ->GetXaxis()->SetBinLabel(ibinx+1, namech[ibinx]);
   }
-  for(unsigned int ibiny=0; ibiny<2; ibiny++){
+  for(unsigned int ibiny=0; ibiny<5; ibiny++){
     Yields_full->GetYaxis()->SetBinLabel(ibiny+1, namecat[ibiny]);
     Yields_vis ->GetYaxis()->SetBinLabel(ibiny+1, namecat[ibiny]);
   }
 
   for(unsigned int ibinx=0; ibinx<3; ibinx++){
-    for(unsigned int ibiny=0; ibiny<2; ibiny++){
+    for(unsigned int ibiny=0; ibiny<5; ibiny++){
 
       Yields_full->SetBinContent(ibinx+1,ibiny+1,NEvt_full[ibiny][ibinx]);
       Yields_vis ->SetBinContent(ibinx+1,ibiny+1,NEvt_vis [ibiny][ibinx]);
@@ -397,6 +414,9 @@ int main(int argc, const char* argv[]){
     std::cout << "ttbb/ttjj Full Ph-Sp: " << NEvt_full[ttbb][ich]/NEvt_full[ttjj][ich] << std::endl;
     std::cout << "ttbb/ttjj Visible Ph-Sp: " << NEvt_vis[ttbb][ich]/NEvt_vis[ttjj][ich] << std::endl;
     std::cout << "ttbb Acceptance: " << NEvt_vis[ttbb][ich]/NEvt_full[ttbb][ich] << std::endl;
+    std::cout << "ttbj Acceptance: " << NEvt_vis[ttbj][ich]/NEvt_full[ttbj][ich] << std::endl;
+    std::cout << "ttcc Acceptance: " << NEvt_vis[ttcc][ich]/NEvt_full[ttcc][ich] << std::endl;
+    std::cout << "ttLF Acceptance: " << NEvt_vis[ttLF][ich]/NEvt_full[ttLF][ich] << std::endl;
     std::cout << "ttjj Acceptance: " << NEvt_vis[ttjj][ich]/NEvt_full[ttjj][ich] << std::endl;
     std::cout << "-----------------------------" << std::endl;
     std::cout << "-----------------------------" << std::endl;

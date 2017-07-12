@@ -35,9 +35,9 @@
   
 #ifndef __CINT__
 
-enum ncat{ttjj,ttbb,ttbj,ttcc,ttLF};
+enum ncat{ttjj,ttbb,ttbj,ttcc,ttLF,tt};
 enum nch {mujets,ejets,lepjets};
-TString namecat[5] = {"ttjj","ttbb","ttbj","ttcc","ttLF"};
+TString namecat[5] = {"ttjj","ttbb","ttbj","ttcc","ttLF","tt"};
 TString namech[3]  = {"mujets","ejets","lepjets"};
 
 void display_usage()
@@ -244,11 +244,11 @@ int main(int argc, const char* argv[]){
 
   // Number de events for acceptance
   //          [ttcat][Channel]
-  float NEvt_full[5][3];
-  float NEvt_vis [5][3];
+  float NEvt_full[6][3];
+  float NEvt_vis [6][3];
 
   for(unsigned int ibinx=0; ibinx<3; ibinx++){
-    for(unsigned int ibiny=0; ibiny<5; ibiny++){
+    for(unsigned int ibiny=0; ibiny<6; ibiny++){
       NEvt_full[ibiny][ibinx] = 0.0;
       NEvt_vis [ibiny][ibinx] = 0.0;
     }
@@ -317,7 +317,8 @@ int main(int argc, const char* argv[]){
     ******************/
     
     // Full Phase Space 
-    if(cone_NaddJets  > 1)                            NEvt_full[ttjj][Channel] += EvtStep;
+    if(cone_NaddJets  > 1)  NEvt_full[ttjj][Channel] += EvtStep;
+    else                    NEvt_full[tt][Channel]   += EvtStep;
 
     if     (cone_NaddJets  > 1 && cone_NaddbJets > 1) NEvt_full[ttbb][Channel] += EvtStep;
     else if(cone_NaddJets  > 1 && cone_NaddbJets > 0) NEvt_full[ttbj][Channel] += EvtStep;
@@ -330,7 +331,8 @@ int main(int argc, const char* argv[]){
     
     if(Lep_pT > Lep_pT_CUT && abs(Lep_eta) < 2.1){
       // Visible Phase Space 
-      if(cone_NbJets > 1 && cone_NJets > 5)                         NEvt_vis[ttjj][Channel] += EvtStep;
+      if(cone_NbJets > 1 && cone_NJets > 5) NEvt_vis[ttjj][Channel] += EvtStep;
+      else                                  NEvt_vis[tt][Channel]   += EvtStep;
 
       if     (cone_NbJets > 3 && cone_NJets > 5)                    NEvt_vis[ttbb][Channel] += EvtStep;    
       else if(cone_NbJets > 2 && cone_NJets > 5)                    NEvt_vis[ttbj][Channel] += EvtStep;    
@@ -362,21 +364,23 @@ int main(int argc, const char* argv[]){
   
   NEvt_vis[ttjj][2] = NEvt_vis[ttjj][0] + NEvt_vis[ttjj][1];
   NEvt_vis[ttbb][2] = NEvt_vis[ttbb][0] + NEvt_vis[ttbb][1];
-  NEvt_vis[ttbb][2] = NEvt_vis[ttbj][0] + NEvt_vis[ttbj][1];
-  NEvt_vis[ttbb][2] = NEvt_vis[ttcc][0] + NEvt_vis[ttcc][1];
-  NEvt_vis[ttbb][2] = NEvt_vis[ttLF][0] + NEvt_vis[ttLF][1];
+  NEvt_vis[ttbj][2] = NEvt_vis[ttbj][0] + NEvt_vis[ttbj][1];
+  NEvt_vis[ttcc][2] = NEvt_vis[ttcc][0] + NEvt_vis[ttcc][1];
+  NEvt_vis[ttLF][2] = NEvt_vis[ttLF][0] + NEvt_vis[ttLF][1];
+  NEvt_vis[tt][2]   = NEvt_vis[tt][0]   + NEvt_vis[tt][1];
 
   NEvt_full[ttjj][2] = NEvt_full[ttjj][0] + NEvt_full[ttjj][1];
   NEvt_full[ttbb][2] = NEvt_full[ttbb][0] + NEvt_full[ttbb][1];
   NEvt_full[ttbj][2] = NEvt_full[ttbj][0] + NEvt_full[ttbj][1];
   NEvt_full[ttcc][2] = NEvt_full[ttcc][0] + NEvt_full[ttcc][1];
   NEvt_full[ttLF][2] = NEvt_full[ttLF][0] + NEvt_full[ttLF][1];
+  NEvt_full[tt][2]   = NEvt_full[tt][0]   + NEvt_full[tt][1];
     
 
   //Acceptance-Efficiency
   TH2D *Yields_full, *Yields_vis;
-  Yields_full = new TH2D("Yields_FullPh-Sp", "Yields in the Full Ph-Sp",   3,0,3,5,0,5);
-  Yields_vis  = new TH2D("Yields_VisPh-Sp",  "Yields in the Visible Ph-Sp",3,0,3,5,0,5);
+  Yields_full = new TH2D("Yields_FullPh-Sp", "Yields in the Full Ph-Sp",   3,0,3,6,0,6);
+  Yields_vis  = new TH2D("Yields_VisPh-Sp",  "Yields in the Visible Ph-Sp",3,0,3,6,0,6);
   Yields_full->SetOption("COLTEXT");
   Yields_vis ->SetOption("COLTEXT");
 
@@ -384,13 +388,13 @@ int main(int argc, const char* argv[]){
     Yields_full->GetXaxis()->SetBinLabel(ibinx+1, namech[ibinx]);
     Yields_vis ->GetXaxis()->SetBinLabel(ibinx+1, namech[ibinx]);
   }
-  for(unsigned int ibiny=0; ibiny<5; ibiny++){
+  for(unsigned int ibiny=0; ibiny<6; ibiny++){
     Yields_full->GetYaxis()->SetBinLabel(ibiny+1, namecat[ibiny]);
     Yields_vis ->GetYaxis()->SetBinLabel(ibiny+1, namecat[ibiny]);
   }
 
   for(unsigned int ibinx=0; ibinx<3; ibinx++){
-    for(unsigned int ibiny=0; ibiny<5; ibiny++){
+    for(unsigned int ibiny=0; ibiny<6; ibiny++){
 
       Yields_full->SetBinContent(ibinx+1,ibiny+1,NEvt_full[ibiny][ibinx]);
       Yields_vis ->SetBinContent(ibinx+1,ibiny+1,NEvt_vis [ibiny][ibinx]);

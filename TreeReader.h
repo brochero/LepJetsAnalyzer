@@ -65,6 +65,7 @@ void print_progress(int TreeEntries, Long64_t ievt);
 const TString currentDateTime();
 float DiJetMassCorrection(std::vector<ComJet> &Jets, bool ReArrange);
 bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id);
+void UnRoll2D(TH2D *h2D, TH1D *h1D);
 
 // Luminosity per channel (due to trigger PreScale)
 float LuminNorm_Mu = 35870; //[pb-1]
@@ -125,10 +126,10 @@ Histos    hKinWhMass, hKinWhpT, hKinthMass, hKinthpT;
 Histos    hKinWMass, hKinWpT, hKinTagWMass, hKinTagAddMass, hKinTagAddDR;
 Eff       effKinGenIndex, purKinGenIndex, effKinGenIndexVsChi2;
 HistosJet hKinJetPt, hGENJetPt;
-Histos    hKinAdd1CSV, hKinAdd2CSV, hKinAdd12CSV;
-Histos    hKinAdd1CSV_30, hKinAdd2CSV_30, hKinAdd12CSV_30;
-Histos    hKinAdd1CSV_40, hKinAdd2CSV_40, hKinAdd12CSV_40;
-Histos2D  h2DKinAddCSV;
+Histos    hKinAdd1CSV, hKinAdd2CSV, hKinAdd12CSV, hKinAddCSVUnroll;
+Histos    hKinAdd1CSV_30, hKinAdd2CSV_30, hKinAdd12CSV_30, hKinAddCSVUnroll_30;
+Histos    hKinAdd1CSV_40, hKinAdd2CSV_40, hKinAdd12CSV_40, hKinAddCSVUnroll_40;
+Histos2D  h2DKinAddCSV, h2DKinAddCSV_30, h2DKinAddCSV_40;
 // GenCone
 Histos   hTJetPosition, hWJetPosition, hOJetPosition;
 Histos   hGenTagWMass, hGenTagAddMass, hGenTagAddDR, hGenTagAdd1CSV, hGenTagAdd2CSV, hGenTagAdd12CSV;

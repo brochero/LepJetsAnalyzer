@@ -375,16 +375,23 @@ int main(int argc, const char* argv[]){
       hKinAdd1CSV[j][i]   = new TH1D("hKinAdd1CSV_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",20,0.,1.);
       hKinAdd2CSV[j][i]   = new TH1D("hKinAdd2CSV_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",20,0.,1.);
       hKinAdd12CSV[j][i]  = new TH1D("hKinAdd12CSV_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit "  + titlenamech[i] + ";CSVv2",40,0.,2.);
+      hKinAddCSVUnroll[j][i]  = new TH1D("hKinAddCSVUnroll_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit (Unrolled) "  + titlenamech[i] + ";CSV Bin",400,0.,400);
 
       hKinAdd1CSV_30[j][i]   = new TH1D("hKinAdd1CSV_30_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",30,0.,1.);
       hKinAdd2CSV_30[j][i]   = new TH1D("hKinAdd2CSV_30_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",30,0.,1.);
       hKinAdd12CSV_30[j][i]  = new TH1D("hKinAdd12CSV_30_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit "  + titlenamech[i] + ";CSVv2",60,0.,2.);
+      hKinAddCSVUnroll_30[j][i]  = new TH1D("hKinAddCSVUnroll_30_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit (Unrolled) "  + titlenamech[i] + ";CSV Bin",900,0.,900);
 
       hKinAdd1CSV_40[j][i]   = new TH1D("hKinAdd1CSV_40_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",40,0.,1.);
       hKinAdd2CSV_40[j][i]   = new TH1D("hKinAdd2CSV_40_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",40,0.,1.);
       hKinAdd12CSV_40[j][i]  = new TH1D("hKinAdd12CSV_40_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit "  + titlenamech[i] + ";CSVv2",80,0.,2.);
+      hKinAddCSVUnroll_40[j][i]  = new TH1D("hKinAddCSVUnroll_40_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit (Unrolled) "  + titlenamech[i] + ";CSV Bin",1600,0.,1600);
 
       h2DKinAddCSV[j][i]  = new TH2D("h2DKinAddCSV_" + namech[i] + "_" + namecut[j]+syst_varname, "CSVv2 Discriminant for the Add (kin) Jets " + titlenamech[i], 20,0.,1.,20,0.,1.);
+
+      h2DKinAddCSV_30[j][i]  = new TH2D("h2DKinAddCSV_30_" + namech[i] + "_" + namecut[j]+syst_varname, "CSVv2 Discriminant for the Add (kin) Jets " + titlenamech[i], 30,0.,1.,30,0.,1.);
+
+      h2DKinAddCSV_40[j][i]  = new TH2D("h2DKinAddCSV_40_" + namech[i] + "_" + namecut[j]+syst_varname, "CSVv2 Discriminant for the Add (kin) Jets " + titlenamech[i], 40,0.,1.,40,0.,1.);
       
       pSFCSVVsCSVAdd[j][i]  = new TProfile("pSFCSVVsCSVAdd_"+namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag} Add. Jets " + titlenamech[i] + ";CSV;SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
       pSFCSVUpVsCSVAdd[j][i]= new TProfile("pSFCSVUpVsCSVAdd_"+namech[i]+"_"+namecut[j]+syst_varname, "#Delta_{Up} SF_{b-tag} Add. Jets " + titlenamech[i] + ";CSV;#Delta SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
@@ -620,6 +627,12 @@ int main(int argc, const char* argv[]){
     for(int ijet=0; ijet < Jet_pT->size(); ijet++){
 
       float JetSystVar = 1.0;
+      if (!fname.Contains("Data")){
+	// Measurements show that the jet energy resolution (JER) in data is worse than in the simulation and the jets in MC need to be smeared to describe the data.
+	// https://twiki.cern.ch/twiki/bin/vie
+	JetSystVar = (*Jet_JER_Nom)[ijet];	
+      }
+      
       if(_syst){
 	if(syst_varname.Contains("JESUp")){
 	  JetSystVar = (*Jet_JES_Up)[ijet];
@@ -639,10 +652,13 @@ int main(int argc, const char* argv[]){
       }
       
       ComJet jet;
-      jet.SetPtEtaPhiE(JetSystVar * (*Jet_pT)[ijet], // Syst. Var affects only pT
+      jet.SetPtEtaPhiE((*Jet_pT)[ijet], 
 		       (*Jet_eta)[ijet],
 		       (*Jet_phi)[ijet],
 		       (*Jet_E)[ijet]);
+      // For MC: Jet mearing applyed.
+      jet *= JetSystVar;
+
       jet.Flavour = (*Jet_partonFlavour)[ijet];
       jet.CSV     = (*Jet_CSV)[ijet];
       if      (jet.CSV < 0.0)  jet.CSV = 0.0000;
@@ -651,7 +667,7 @@ int main(int argc, const char* argv[]){
       jet.CvsB    = (*Jet_CvsB)[ijet];
       jet.Mom     = -1;
       jet.KinMom  = -1;
-      
+
       // Jet Mother
       if((fname.Contains("ttbar")  && !fname.Contains("Bkg"))) jet.Mom = (*Jet_Mom)[ijet];
       // Kin Mother
@@ -879,7 +895,6 @@ int main(int argc, const char* argv[]){
 	    hKinAdd2CSV   [icut][Channel]->Fill(jet_.CSV,     PUWeight);
 	    hKinAdd12CSV  [icut][Channel]->Fill(jet.CSV,      PUWeight);
 	    hKinAdd12CSV  [icut][Channel]->Fill((1.0 + jet_.CSV),  PUWeight);
-	    h2DKinAddCSV  [icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
 
 	    hKinAdd1CSV_30   [icut][Channel]->Fill(jet.CSV,      PUWeight);
 	    hKinAdd2CSV_30   [icut][Channel]->Fill(jet_.CSV,     PUWeight);
@@ -890,6 +905,10 @@ int main(int argc, const char* argv[]){
 	    hKinAdd2CSV_40   [icut][Channel]->Fill(jet_.CSV,     PUWeight);
 	    hKinAdd12CSV_40  [icut][Channel]->Fill(jet.CSV,      PUWeight);
 	    hKinAdd12CSV_40  [icut][Channel]->Fill((1.0 + jet_.CSV),  PUWeight);
+
+	    h2DKinAddCSV    [icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
+	    h2DKinAddCSV_30 [icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
+	    h2DKinAddCSV_40 [icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
 
 	    pSFCSVVsCSVAdd  [icut][Channel]->Fill(jet.CSV,  (*Jet_SF_CSV)[btagUnc::CENTRAL],                   PUWeight);
 	    pSFCSVUpVsCSVAdd[icut][Channel]->Fill(jet.CSV,  (*Jet_SF_CSV)[btagUnc::CENTRAL]+btagUnc_TotalUp,   PUWeight);
@@ -1049,6 +1068,14 @@ int main(int argc, const char* argv[]){
       std::cout << "-- Acceptace  " << namecut[nc] << " " << namech[nch] << ": " << AccEvent[nc][nch] << std::endl;
       std::cout << "-- Efficiency " << namecut[nc] << " " << namech[nch] << ": " << EffEvent[nc][nch] << " +/- " << EffError << std::endl;
       std::cout << std::endl;
+
+      // Unroll TH2F in 1D histogram
+      if (nch < 2){
+	UnRoll2D(h2DKinAddCSV [nc][nch], hKinAddCSVUnroll[nc][nch]);
+	UnRoll2D(h2DKinAddCSV_30 [nc][nch], hKinAddCSVUnroll_30[nc][nch]);
+	UnRoll2D(h2DKinAddCSV_40 [nc][nch], hKinAddCSVUnroll_40[nc][nch]);
+      } // if(nch)
+
     }
     std::cout << "-----------------------------" << std::endl;
   }
@@ -1158,7 +1185,6 @@ int main(int argc, const char* argv[]){
       hKinAdd1CSV    [j][i]->Write();
       hKinAdd2CSV    [j][i]->Write();
       hKinAdd12CSV   [j][i]->Write();
-      h2DKinAddCSV   [j][i]->Write();
 
       hKinAdd1CSV_30    [j][i]->Write();
       hKinAdd2CSV_30    [j][i]->Write();
@@ -1167,6 +1193,14 @@ int main(int argc, const char* argv[]){
       hKinAdd1CSV_40    [j][i]->Write();
       hKinAdd2CSV_40    [j][i]->Write();
       hKinAdd12CSV_40   [j][i]->Write();
+
+      h2DKinAddCSV    [j][i]->Write();
+      h2DKinAddCSV_30 [j][i]->Write();
+      h2DKinAddCSV_40 [j][i]->Write();
+
+      hKinAddCSVUnroll[j][i]->Write();
+      hKinAddCSVUnroll_30[j][i]->Write();
+      hKinAddCSVUnroll_40[j][i]->Write();
 
       pSFCSVVsCSVAdd    [j][i]->Write();
       pSFCSVUpVsCSVAdd  [j][i]->Write();
@@ -1340,6 +1374,18 @@ bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id){
   if(ttbar_id == "tt"   && !Istt)   IsttbarCat = false;
   
   return IsttbarCat;
+}
+
+void UnRoll2D(TH2D *h2D, TH1D *h1D){
+  int UnRollbin = 1;
+  for (int ibinx = 1; ibinx<=h2D->GetXaxis()->GetNbins(); ibinx++){ 
+    for (int ibiny = 1; ibiny<=h2D->GetYaxis()->GetNbins(); ibiny++){      
+      double bc = h2D->GetBinContent(ibinx,ibiny);
+      h1D->SetBinContent(UnRollbin, bc);
+      UnRollbin ++;
+    } // for(ibinx) 
+  } // for(ibinx)     
+
 }
 
 #endif

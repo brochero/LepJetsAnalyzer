@@ -37,7 +37,7 @@
 
 enum ncat{ttjj,ttbb,ttbj,ttcc,ttLF,tt};
 enum nch {mujets,ejets,lepjets};
-TString namecat[5] = {"ttjj","ttbb","ttbj","ttcc","ttLF","tt"};
+TString namecat[6] = {"ttjj","ttbb","ttbj","ttcc","ttLF","tt"};
 TString namech[3]  = {"mujets","ejets","lepjets"};
 
 void display_usage()

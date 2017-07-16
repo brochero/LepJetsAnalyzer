@@ -420,6 +420,8 @@ int main(int argc, const char* argv[]){
     std::cout << "ttbb Acceptance: " << NEvt_vis[ttbb][ich]/NEvt_full[ttbb][ich] << std::endl;
     std::cout << "ttbj Acceptance: " << NEvt_vis[ttbj][ich]/NEvt_full[ttbj][ich] << std::endl;
     std::cout << "ttcc Acceptance: " << NEvt_vis[ttcc][ich]/NEvt_full[ttcc][ich] << std::endl;
+    std::cout << "ttcc Full: " << NEvt_full[ttcc][ich] << std::endl;
+    std::cout << "ttcc Vis : " << NEvt_vis[ttcc][ich] << std::endl;
     std::cout << "ttLF Acceptance: " << NEvt_vis[ttLF][ich]/NEvt_full[ttLF][ich] << std::endl;
     std::cout << "ttjj Acceptance: " << NEvt_vis[ttjj][ich]/NEvt_full[ttjj][ich] << std::endl;
     std::cout << "tt Acceptance: "   << NEvt_vis[tt][ich]/NEvt_full[tt][ich] << std::endl;

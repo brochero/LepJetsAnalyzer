@@ -32,12 +32,14 @@ struct Yields{
   TString              Name;
   TString              SamComName;
   TString              InDataCard;
+  std::vector<float>   RatioComb[2];
 };
 
-Yields loadhistoYields(int SelCut, TString TName, TString HeadFile, TString SampleFile, TString AddToDC = "");
+Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString SampleFile, TString AddToDC = "");
 void   EntryPrinter   (FILE *file, Yields Sample);
 void   AddhistoYields (Yields *s1, Yields *s2);
-void   CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel, TString HeadFile,  TString HistoName);
+void   CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel, TString HeadFile,  TString HistoName, bool DCNorm = false);
+void   RemoveNegativeBins(TH1D *histo);
 
 void display_usage()
 {
@@ -63,7 +65,7 @@ int main (int argc, char *argv[]){
   const char * _input    = 0;
   const char * _dir      = "TopResults/";
   const char * _cut      = 0;
-  const char * _histoDC = "hKinAdd12CSV";  
+  const char * _histoDC = "hKinAddCSVUnroll";  
   
   bool _createDC = false;
 
@@ -129,81 +131,68 @@ int main (int argc, char *argv[]){
   TCanvas *mydummycanvas=new TCanvas();// 
   ///////////////////////////////////////
 
-  int cut;
-  if      (cutname=="lepton")    cut = 0;
-  else if (cutname=="6Jets")     cut = 1;
-  else if (cutname=="2btag")     cut = 2;
-  else if (cutname=="3btag")     cut = 3;
-  else if (cutname=="4Jets")     cut = 4;
-  else if (cutname=="4Jets2btag")cut = 5;
-  else if (cutname=="Only2btag") cut = 6;
-  else{
-    std::cerr << "Invalid cut name!!!" << std::endl;
-    std::exit(0); 
-  }
-
   std::vector<Yields> Samples;
 
   // Yields ttbar_1;
-  // ttbar_1 = loadhistoYields(cut, "ttbar Herwig", fdir + fname, "ttbar_PowhegHerwig");
+  // ttbar_1 = loadhistoYields(cutname, "ttbar Herwig", fdir + fname, "ttbar_PowhegHerwig");
   // Samples.push_back(ttbar_1);
   // Yields ttbar_2;
-  // ttbar_2 = loadhistoYields(cut, "ttbar Evt", fdir + fname, "ttbar_PowhegPythiaEvt");
+  // ttbar_2 = loadhistoYields(cutname, "ttbar Evt", fdir + fname, "ttbar_PowhegPythiaEvt");
   // Samples.push_back(ttbar_2);
   // Yields ttbar;
-  // ttbar = loadhistoYields(cut, "\\ttbar", fdir + fname, "ttbar_LepJetsPowhegPythia");
+  // ttbar = loadhistoYields(cutname, "\\ttbar", fdir + fname, "ttbar_LepJetsPowhegPythia");
   // Samples.push_back(ttbar);
     
   Yields ttbb;
-  ttbb = loadhistoYields(cut, "\\ttbar\\bbbar", fdir + fname, "ttbar_LepJetsPowhegPythiattbb", "DCSys");
+  ttbb = loadhistoYields(cutname, "\\ttbar\\bbbar", fdir + fname, "ttbar_LepJetsPowhegPythiattbb", "DCSysThe");
   Samples.push_back(ttbb);
   Yields ttb;
-  ttb = loadhistoYields(cut, "\\ttbar\\qb", fdir + fname, "ttbar_LepJetsPowhegPythiattbj", "DCSys");
+  ttb = loadhistoYields(cutname, "\\ttbar\\qb", fdir + fname, "ttbar_LepJetsPowhegPythiattbj", "DCSysThe");
   Samples.push_back(ttb);
   Yields ttcc;
-  ttcc = loadhistoYields(cut, "\\ttbar\\ccbar", fdir + fname, "ttbar_LepJetsPowhegPythiattcc", "DCSys");
+  ttcc = loadhistoYields(cutname, "\\ttbar\\ccbar", fdir + fname, "ttbar_LepJetsPowhegPythiattcc", "DCSysThe");
   Samples.push_back(ttcc);
   Yields ttLF;
-  ttLF = loadhistoYields(cut, "\\ttbar LF", fdir + fname, "ttbar_LepJetsPowhegPythiattLF", "DCSys");
+  ttLF = loadhistoYields(cutname, "\\ttbar LF", fdir + fname, "ttbar_LepJetsPowhegPythiattLF", "DCSysThe");
   Samples.push_back(ttLF);
   Yields ttjj;
-  ttjj = loadhistoYields(cut, "\\ttbar\\jj", fdir + fname, "ttbar_LepJetsPowhegPythiattjj");
+  ttjj = loadhistoYields(cutname, "\\ttbar\\jj", fdir + fname, "ttbar_LepJetsPowhegPythiattjj");
   Samples.push_back(ttjj);
 
   Yields ttOther;
-  ttOther = loadhistoYields(cut, "\\ttbar\\ Other", fdir + fname, "ttbar_PowhegPythiaBkgtt", "DCSys");
+  ttOther = loadhistoYields(cutname, "\\ttbar\\ Other", fdir + fname, "ttbar_PowhegPythiaBkgtt", "DCSysThe");
   Samples.push_back(ttOther);
 
   Yields tW;
-  tW = loadhistoYields(cut, "Single Top", fdir + fname, "SingleTop", "DCSys");
+  tW = loadhistoYields(cutname, "Single Top", fdir + fname, "SingleTop", "DCSys");
   Samples.push_back(tW);
 
   Yields WJets;
-  WJets = loadhistoYields(cut, "W+Jets", fdir + fname, "WJets_aMCatNLO", "DC");
+  WJets = loadhistoYields(cutname, "W+Jets", fdir + fname, "WJets_aMCatNLO", "DC");
   Samples.push_back(WJets);
 
   Yields ZJets;
-  ZJets = loadhistoYields(cut, "Z+Jets", fdir + fname, "ZJets_aMCatNLO", "DC");
+  ZJets = loadhistoYields(cutname, "Z+Jets", fdir + fname, "ZJets_aMCatNLO", "DC");
   Samples.push_back(ZJets);
 
   Yields VV;
-  VV = loadhistoYields(cut, "VV", fdir + fname, "VV", "DCSys");
+  VV = loadhistoYields(cutname, "VV", fdir + fname, "VV", "DCSys");
   Samples.push_back(VV);
 
   Yields QCD;
-  QCD = loadhistoYields(cut, "QCD", fdir + fname, "QCD", "DC");
+  QCD = loadhistoYields(cutname, "QCD", fdir + fname, "QCD", "DC");
   Samples.push_back(QCD);
 
   Yields ttH;
-  ttH = loadhistoYields(cut, "\\ttbar H", fdir + fname, "ttHbb_PowhegPythia", "DC");
+  ttH = loadhistoYields(cutname, "\\ttbar H", fdir + fname, "ttHbb_PowhegPythia", "DC");
   Samples.push_back(ttH);
 
   Yields ttV;
-  ttV = loadhistoYields(cut, "\\ttbar V", fdir + fname, "ttV_Madgraph", "DC");
+  ttV = loadhistoYields(cutname, "\\ttbar V", fdir + fname, "ttV_Madgraph", "DC");
   Samples.push_back(ttV);
 
   Yields BkgMC;
-  BkgMC = loadhistoYields(cut, "Total Bkg MC", fdir + fname, "ttbar_PowhegPythiaBkgtt");
+  BkgMC = loadhistoYields(cutname, "Total Bkg MC", fdir + fname, "ttbar_PowhegPythiaBkgtt");
   AddhistoYields(&BkgMC,&tW);
   AddhistoYields(&BkgMC,&WJets);
   AddhistoYields(&BkgMC,&ZJets);
@@ -215,7 +204,7 @@ int main (int argc, char *argv[]){
   Samples.push_back(BkgMC);
 
   Yields TotalMC;
-  TotalMC = loadhistoYields(cut, "Total MC", fdir + fname, "ttbar_LepJetsPowhegPythiattjj");
+  TotalMC = loadhistoYields(cutname, "Total MC", fdir + fname, "ttbar_LepJetsPowhegPythiattjj");
   AddhistoYields(&TotalMC,&ttOther);
   AddhistoYields(&TotalMC,&tW);
   AddhistoYields(&TotalMC,&WJets);
@@ -228,7 +217,7 @@ int main (int argc, char *argv[]){
   Samples.push_back(TotalMC);
 
   Yields Data;
-  Data = loadhistoYields(cut, "Data", fdir + fname, "DataSingleLep");
+  Data = loadhistoYields(cutname, "Data", fdir + fname, "DataSingleLep");
   Samples.push_back(Data);
   
   // LaTeX table
@@ -259,6 +248,14 @@ int main (int argc, char *argv[]){
   std::cout << "Table with yields has been done...................." << std::endl;
   std::cout <<  YieldsTeXfile << " has been created. " << std::endl;
 
+  std::cout << "\nFor the Combine Model:\n" << std::endl;
+
+  std::cout << "Par_MCRatios=\"--PO RMC_ttbbttjj=" <<  ttbb.Evt[2]/ttjj.Evt[2] ;
+  std::cout << " --PO RMC_ttbjttjj=" <<  ttb.Evt[2]/ttjj.Evt[2] ;
+  std::cout << " --PO RMC_ttccLFttjj=" <<  (ttcc.Evt[2]+ttLF.Evt[2])/ttjj.Evt[2] ;
+  std::cout << " --PO RMC_ttbjttbb=" <<  ttb.Evt[2]/ttbb.Evt[2] << "\"" << std::endl ;
+
+
   //--------------------------------------------
   // DataCard
   //--------------------------------------------
@@ -273,14 +270,26 @@ int main (int argc, char *argv[]){
     TString CombineDCfile_mu  = dirCombinename +  outDataCard + "_mujets_" + fname + "_" + cutname + ".txt";
     FILE*   DataCard_mu       = fopen(CombineDCfile_mu, "w");
   
-    CreateDataCard(DataCard_mu, Samples, "mujets", fdir + fname, hisComname);
+    CreateDataCard(DataCard_mu, Samples, "mujets", fdir + fname, hisComname, false);
     fclose(DataCard_mu);
 
     TString CombineDCfile_e  = dirCombinename + outDataCard + "_ejets_" + fname + "_" + cutname + ".txt";
     FILE*   DataCard_e       = fopen(CombineDCfile_e, "w");
   
-    CreateDataCard(DataCard_e, Samples, "ejets", fdir + fname, hisComname);
+    CreateDataCard(DataCard_e, Samples, "ejets", fdir + fname, hisComname, false);
     fclose(DataCard_e);
+
+    TString CombineDCfileNorm_mu  = dirCombinename +  outDataCard + "_Norm_mujets_" + fname + "_" + cutname + ".txt";
+    FILE*   DataCardNorm_mu       = fopen(CombineDCfileNorm_mu, "w");
+  
+    CreateDataCard(DataCardNorm_mu, Samples, "mujets", fdir + fname, hisComname, true);
+    fclose(DataCardNorm_mu);
+
+    TString CombineDCfileNorm_e  = dirCombinename + outDataCard + "_Norm_ejets_" + fname + "_" + cutname + ".txt";
+    FILE*   DataCardNorm_e       = fopen(CombineDCfileNorm_e, "w");
+  
+    CreateDataCard(DataCardNorm_e, Samples, "ejets", fdir + fname, hisComname, true);
+    fclose(DataCardNorm_e);
 
   }
 
@@ -299,21 +308,69 @@ void AddhistoYields(Yields *s1, Yields *s2){
 
 }
 
-Yields loadhistoYields(int SelCut, TString TName, TString HeadFile, TString SampleFile, TString AddToDC){
+Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString SampleFile, TString AddToDC){
+
+  int iSelCut;
+  if      (SelCut=="lepton")    iSelCut = 0;
+  else if (SelCut=="6Jets")     iSelCut = 1;
+  else if (SelCut=="2btag")     iSelCut = 2;
+  else if (SelCut=="3btag")     iSelCut = 3;
+  else if (SelCut=="4Jets")     iSelCut = 4;
+  else if (SelCut=="4Jets2btag")iSelCut = 5;
+  else if (SelCut=="Only2btag") iSelCut = 6;
+  else{
+    std::cerr << "Invalid cut name!!!" << std::endl;
+    std::exit(0); 
+  }
+
+  TString ChNameTable[3];
+  ChNameTable[0] = "mu+Jets ";
+  ChNameTable[1] = "e+Jets  ";
+  ChNameTable[2] = "Lep+Jets";
+  TString ChName[3];
+  ChName[0] = "mujets";
+  ChName[1] = "ejets";
+  ChName[2] = "lepjets";
+
+  // All Systematics to be included 
+  std::vector<TString> SysName;
+  SysName.push_back("JER");
+  SysName.push_back("JES");
+  SysName.push_back("PileUp");
+  //SysName.push_back("btagjes");
+  SysName.push_back("btaglf");
+  SysName.push_back("btaghf");
+  SysName.push_back("btaghfsI");
+  SysName.push_back("btaghfsII");
+  SysName.push_back("btaglfsI");
+  SysName.push_back("btaglfsII");
+  SysName.push_back("btagcfI");
+  SysName.push_back("btagcfII");
+  SysName.push_back("ScaleRdF");
+  SysName.push_back("ISR");
+  SysName.push_back("FSR");
+  SysName.push_back("UE");
+
+  TString SysNameVar[2] = {"Up","Down"};
 
   TString namefile = HeadFile + "_" + SampleFile;
 
-  std::cout << "Loading " << namefile + ".root" << " sample..." << std::endl;
-
   TFile *file=NULL; // new TFile(namefile);
-  file = TFile::Open(namefile + ".root");
+  if(AddToDC.Contains("DCSys")){
+    std::cout << "Loading " << namefile + "_SYS.root" << " sample..." << std::endl;
+    file = TFile::Open(namefile + "_SYS.root");
+  }
+  else{
+    std::cout << "Loading " << namefile + ".root" << " sample..." << std::endl;
+    file = TFile::Open(namefile + ".root");
+  }
 
   if(!file){
     std::cerr << "ERROR: Could not open " <<  namefile  << " files!!!"  << std::endl;
     std::exit(0);
   }
 
-  if(SelCut > 6 || SelCut < 0) {
+  if(iSelCut > 6 || iSelCut < 0) {
     std::cerr << "ERROR: Incorrect selection cut name!!! "  << std::endl;
     std::exit(0);
   }
@@ -338,25 +395,96 @@ Yields loadhistoYields(int SelCut, TString TName, TString HeadFile, TString Samp
       nbin++;      
     }
   }  
-
+  // Table LaTeX Name
   output.Name = TName;
+  // Name to use in DC
   output.SamComName = SampleFile;
+  // Save in dataCard? Include Shape Syst?
   output.InDataCard = AddToDC;
 
   std::cout << output.Name << std::endl;
 
-  TString chname[3];
-  chname[0] = "mu+Jets ";
-  chname[1] = "e+Jets  ";
-  chname[2] = "Lep+Jets";
-
+  // Print Terminal Yields
   for(int nch = 0; nch < 3; nch++){
-    output.Evt  .push_back(aYields[SelCut][nch]);
-    output.Error.push_back(aError [SelCut][nch]);
+    output.Evt  .push_back(aYields[iSelCut][nch]);
+    output.Error.push_back(aError [iSelCut][nch]);
 
-    std::cout << chname[nch] << ": " << output.Evt[nch] << " +/- "  << output.Error[nch] << std::endl;
+    std::cout << ChNameTable[nch] << ": " << output.Evt[nch] << " +/- "  << output.Error[nch] << std::endl;
   }
 
+  // Histogram For Combine (Normalized to the number of events of the nominal)
+  if(AddToDC.Contains("DCSys")){
+    TString HistoCombName = "hKinAddCSVUnroll"; // To Fix
+    // --- Write histograms
+    TString outfile;
+    outfile = namefile + "_SYSNorm.root";
+  
+    TFile *target  = new TFile(outfile,"RECREATE" );  
+    target->cd();
+
+    for(int nch = 0; nch < 2; nch++){
+      TString hpath = SelCut + "/" + ChName[nch] + "/" + HistoCombName + "_" + ChName[nch] + "_" + SelCut;
+
+      TH1D *hiCentral = (TH1D*) file->Get("central/" + hpath);
+
+      RemoveNegativeBins(hiCentral);
+
+      target->mkdir("central/" + SelCut + "/" + ChName[nch]);
+      target->cd   ("central/" + SelCut + "/" + ChName[nch]);
+      hiCentral->Write();
+      target->cd();
+
+      int maxSys = SysName.size();
+      if (AddToDC == "DCSys") maxSys = SysName.size() - 4; // Remove theoretical uncertainties  
+
+      // FAKE Uncertainty      
+      // for (int nsys = 0; nsys < maxSys; nsys++){
+      // 	for (int nsysvar = 0; nsysvar < 2; nsysvar++){
+      // 	  // Fake Shape Uncertainty
+      // 	  TString HistoNameC = hiCentral->GetName();
+      // 	  TH1D *hiSyst   = (TH1D *)hiCentral->Clone( (TString)hiCentral->GetName() + "_" + SysName.at(nsys) + SysNameVar[nsysvar]); 
+	  
+      // 	  // 5% of YIELD Variations
+      // 	  if (SysNameVar[nsysvar]=="Up") {
+      // 	    //hiSyst ->Scale(1.05);
+      // 	    output.RatioComb[nch].push_back(1.05);
+      // 	  }
+      // 	  if (SysNameVar[nsysvar]=="Down"){
+      // 	    //hiSyst ->Scale(0.95);
+      // 	    output.RatioComb[nch].push_back(0.95);
+      // 	  }	  
+
+      
+      // 	  target->mkdir(SysName.at(nsys) + SysNameVar[nsysvar] + "/" + SelCut + "/" + ChName[nch]);
+      // 	  target->cd   (SysName.at(nsys) + SysNameVar[nsysvar] + "/" + SelCut + "/" + ChName[nch]);
+      // 	  hiSyst->Write();
+      // 	  target->cd();
+      // 	}
+      // }
+
+      for (int nsys = 0; nsys < maxSys; nsys++){
+      	for (int nsysvar = 0; nsysvar < 2; nsysvar++){
+	  
+      	  TH1D *hiSyst = (TH1D*) file->Get(SysName.at(nsys) + SysNameVar[nsysvar] + "/" + hpath + "_" + SysName.at(nsys) + SysNameVar[nsysvar]);
+      	  RemoveNegativeBins(hiSyst);
+      	  double nEvt = hiSyst->Integral();
+      	  float Ratio = nEvt/output.Evt.at(nch);
+      	  hiSyst->Scale(1.0/Ratio);
+      	  output.RatioComb[nch].push_back(Ratio);
+      	  // output.RatioComb[nch].push_back(1.0/Ratio);
+      	  target->mkdir(SysName.at(nsys) + SysNameVar[nsysvar] + "/" + SelCut + "/" + ChName[nch]);
+      	  target->cd   (SysName.at(nsys) + SysNameVar[nsysvar] + "/" + SelCut + "/" + ChName[nch]);
+      	  hiSyst->Write();
+      	  target->cd();
+	  
+      	}// for(nsysvar)
+      } // for(nsys)
+    }// for(nch)
+    
+    target->Close();
+    
+  } // if(DCSys)
+  
   std::cout << "All Yields from " << namefile << ".root have been loaded successfully!!!"  << std::endl;
   return output;
 }
@@ -370,18 +498,14 @@ void  EntryPrinter(FILE *file, Yields Sample){
 	  Sample.Evt[2], Sample.Error[2]);
 }
 
-void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel, TString HeadFile,  TString HistoName){
+void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel, TString HeadFile,  TString HistoName, bool DCNorm){
 
-  int ich;
-  if (ljchannel == "mujets") ich = 0;
-  else if (ljchannel == "ejets") ich = 1;
-  else {std::cerr << "Wrong channel name creating DATACARD" << std::endl;std::exit(0);}
-
+  // All Systematics to be included 
   std::vector<TString> SysName;
   SysName.push_back("JER");
   SysName.push_back("JES");
   SysName.push_back("PileUp");
-  SysName.push_back("btagjes");
+  //SysName.push_back("btagjes");
   SysName.push_back("btaglf");
   SysName.push_back("btaghf");
   SysName.push_back("btaghfsI");
@@ -390,6 +514,15 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   SysName.push_back("btaglfsII");
   SysName.push_back("btagcfI");
   SysName.push_back("btagcfII");
+  SysName.push_back("ScaleRdF");
+  SysName.push_back("ISR");
+  SysName.push_back("FSR");
+  SysName.push_back("UE");
+
+  int ich;
+  if (ljchannel == "mujets") ich = 0;
+  else if (ljchannel == "ejets") ich = 1;
+  else {std::cerr << "Wrong channel name!!!" << std::endl;std::exit(0);}
 
   HeadFile = "/afs/cern.ch/user/b/brochero/brochero_WorkArea/LepJetsAnalyzer/" + HeadFile;    
   int nDCSam = 0;
@@ -402,7 +535,8 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   fprintf(file,"----------------------------------------------------------\n"); 
   fprintf(file,"imax \t 1 # Number of channels\n"); 
   fprintf(file,"jmax \t %i # Number of contribution - 1 \n", (nDCSam-1)); 
-  fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", SysName.size()); 
+  if(DCNorm) fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", 2*SysName.size()); 
+  else fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", SysName.size()); 
   fprintf(file,"----------------------------------------------------------\n"); 
   fprintf(file,"----------------------------------------------------------\n"); 
   fprintf(file,"# $CHANNEL means the bin \n"); 
@@ -413,20 +547,22 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   // -- Data Entry
   for(int ns = 0; ns < Samples.size(); ns++){
     Yields samEntry = Samples.at(ns);
-    if(samEntry.InDataCard == "DCSys"){
-      TString namefile = HeadFile + "_" + samEntry.SamComName + "_SYS.root" ;
-	fprintf(file,"shapes %s \t * %s central/2btag/$CHANNEL/%s_$CHANNEL_2btag $SYSTEMATIC/2btag/$CHANNEL/%s_$CHANNEL_2btag_$SYSTEMATIC \n", 
-		(samEntry.SamComName).Data(), 
-		namefile.Data(),
-		HistoName.Data(),
-		HistoName.Data());      
+    if(samEntry.InDataCard.Contains("DCSys")){
+      TString namefile = HeadFile + "_" + samEntry.SamComName;
+      if(DCNorm)  namefile += "_SYSNorm.root" ;
+      else  namefile += "_SYS.root" ;
+      fprintf(file,"shapes %s \t * %s central/2btag/$CHANNEL/%s_$CHANNEL_2btag $SYSTEMATIC/2btag/$CHANNEL/%s_$CHANNEL_2btag_$SYSTEMATIC \n", 
+	      (samEntry.SamComName).Data(), 
+	      namefile.Data(),
+	      HistoName.Data(),
+	      HistoName.Data());      
     }
     else if(samEntry.InDataCard == "DC"){
       TString namefile = HeadFile + "_" + samEntry.SamComName + ".root" ;
-	fprintf(file,"shapes %s \t * %s central/2btag/$CHANNEL/%s_$CHANNEL_2btag \n", 
-		(samEntry.SamComName).Data(), 
-		namefile.Data(),
-		HistoName.Data());      
+      fprintf(file,"shapes %s \t * %s central/2btag/$CHANNEL/%s_$CHANNEL_2btag \n", 
+	      (samEntry.SamComName).Data(), 
+	      namefile.Data(),
+	      HistoName.Data());      
     }
   } // for(ns)
   
@@ -439,15 +575,13 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
 		HistoName.Data());      
       fprintf(file,"----------------------------------------------------------\n");
       fprintf(file,"bin \t %s \n", ljchannel.Data());
-      if (HistoName.Contains("hKinAdd12CSV") ) fprintf(file,"observation \t %.1f  \n",
-						       (2.0*samEntry.Evt[ich]));
-      else fprintf(file,"observation \t %.1f  \n",
-		   samEntry.Evt[ich]);
+      fprintf(file,"observation \t %.1f  \n",
+	      samEntry.Evt[ich]);
     } // if(Data)
   } // for(ns)
   
   fprintf(file,"----------------------------------------------------------\n");
-
+  
   fprintf(file,"bin ");
   for(int ns = 0; ns < nDCSam; ns++) fprintf(file,"\t %s ", ljchannel.Data());
   fprintf(file," \n");
@@ -462,7 +596,7 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
     } // if(InDataCard)
   } // for(ns)
   fprintf(file,"\n");
-
+  
   // -- MC Number
   fprintf(file,"process");
   for(int ns = 0; ns < nDCSam; ns++){
@@ -475,8 +609,7 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   for(int ns = 0; ns < Samples.size(); ns++){
     Yields samEntry = Samples.at(ns);
     if((samEntry.InDataCard).Contains("DC")){
-      if (HistoName.Contains("hKinAdd12CSV") ) fprintf(file,"\t %.1f ", (2.0*samEntry.Evt[ich]));      
-      else fprintf(file,"\t %.1f ", samEntry.Evt[ich]);      
+      fprintf(file,"\t %.1f ", samEntry.Evt[ich]);      
     } // if(InDataCard)
   } // for(ns)
   fprintf(file,"\n");
@@ -485,14 +618,78 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
 
   // Systematics Uncertainties
   for (int nsys = 0; nsys < SysName.size(); nsys++){
-    fprintf(file,"%s \t shapeN2 ", SysName.at(nsys).Data());
+    if (DCNorm) fprintf(file,"%s \t shape ", SysName.at(nsys).Data());
+    else fprintf(file,"%s \t shapeN2 ", SysName.at(nsys).Data());
     for(int ns = 0; ns < Samples.size(); ns++){
       Yields samEntry = Samples.at(ns);
-      if(samEntry.InDataCard == "DCSys") fprintf(file,"\t 1 ");      
+      if(samEntry.InDataCard == "DCSysThe"){ 
+	if( SysName.at(nsys)=="FSR") fprintf(file,"\t 0.78 ");
+	else fprintf(file,"\t 1.0 ");
+      }
+      else if(samEntry.InDataCard == "DCSys"){ 
+	if(nsys<(SysName.size()-4)){
+	  fprintf(file,"\t 1.0 ");      
+	}
+	else fprintf(file,"\t - ");
+      }
       else if(samEntry.InDataCard == "DC") fprintf(file,"\t - ");      
     } // for(ns)
     fprintf(file,"\n");
   } // for(nsys)
+
+  if(DCNorm){
+    // Systematics Uncertainties YIELDS
+    for (int nsys = 0; nsys < SysName.size(); nsys++){
+      fprintf(file,"%s_Rate \t lnN ", SysName.at(nsys).Data());
+      for(int ns = 0; ns < Samples.size(); ns++){
+	Yields samEntry = Samples.at(ns);
+	if(samEntry.InDataCard == "DCSysThe"){ 
+	  int sysidup   = 2*nsys;
+	  int sysiddown = sysidup + 1;
+	  float FSRfactor = 0.78;
+	  if( SysName.at(nsys)=="FSR") fprintf(file,"\t %.3f/%.3f ",FSRfactor*samEntry.RatioComb[ich].at(sysiddown),FSRfactor*samEntry.RatioComb[ich].at(sysidup));
+	  else fprintf(file,"\t %.3f/%.3f ",samEntry.RatioComb[ich].at(sysiddown),samEntry.RatioComb[ich].at(sysidup));
+	}
+	else if(samEntry.InDataCard == "DCSys") {
+	  if(nsys<(SysName.size()-4)){
+	    int sysidup   = 2*nsys;
+	    int sysiddown = sysidup + 1;
+	    fprintf(file,"\t %.3f/%.3f ",samEntry.RatioComb[ich].at(sysiddown),samEntry.RatioComb[ich].at(sysidup));
+	  }
+	  else fprintf(file,"\t - ");
+	}
+	else if(samEntry.InDataCard == "DC") fprintf(file,"\t - ");      
+      } // for(ns)
+      fprintf(file,"\n");
+    } // for(nsys)
+  } // if(DCNorm)
+  
+  // Luminosity
+  fprintf(file,"# Lumin \t lnN ");
+  for(int ns = 0; ns < Samples.size(); ns++){ 
+    if(Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t 1.026 ");      
+  } 
+ fprintf(file,"\n");
+  
   fprintf(file,"----------------------------------------------------------\n");
 
+  fprintf(file,"theory group = ScaleRdF ISR FSR UE \n");
+  fprintf(file,"btag_Shape group = btaghf btaghfsI btaghfsII btaglfsI btaglfsII btagcfII btagcfI btaglf \n");
+  fprintf(file,"Jet_Shape group = JES JER \n");
+  fprintf(file,"Other_Shape group = PileUp \n");
+  if(DCNorm){
+    fprintf(file,"Jet_Rate  group = JES_Rate JER_Rate \n");
+    fprintf(file,"btag_Rate  group = btaghf_Rate btaghfsI_Rate btaghfsII_Rate btaglfsI_Rate btaglfsII_Rate btagcfII_Rate btagcfI_Rate btaglf_Rate \n");
+    fprintf(file,"Other_Rate  group = PileUp_Rate \n");
+  }
+}
+
+void RemoveNegativeBins(TH1D *histo){
+  for(int ibin=1; ibin<=histo->GetNbinsX(); ibin ++){
+    float bcont = histo->GetBinContent(ibin);
+    if (bcont < 0.0) {
+      std::cout << "Warning!!! Negative bin entry! Setting it to 0.0" << std::endl;
+      histo->SetBinContent(ibin,0.0);
+    }
+  }
 }

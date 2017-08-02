@@ -316,33 +316,43 @@ int main(int argc, const char* argv[]){
         Acceptace
     ******************/
     
-    // Full Phase Space 
-    if(cone_NaddJets  > 1)  NEvt_full[ttjj][Channel] += EvtStep;
-    else                    NEvt_full[tt][Channel]   += EvtStep;
+    // Full Phase Space Categorization
+    bool IsCat[6]={false,false,false,false,false,false};
 
-    if     (cone_NaddJets  > 1 && cone_NaddbJets > 1) NEvt_full[ttbb][Channel] += EvtStep;
-    else if(cone_NaddJets  > 1 && cone_NaddbJets > 0) NEvt_full[ttbj][Channel] += EvtStep;
-    else if(cone_NaddJets  > 1 && cone_NaddcJets > 1) NEvt_full[ttcc][Channel] += EvtStep;
-    else if(cone_NaddJets  > 1)                       NEvt_full[ttLF][Channel] += EvtStep;
-    
+    if(cone_NaddJets  > 1)  IsCat[ttjj] = true;
+    else                    IsCat[tt]   = true;
+
+    if     (IsCat[ttjj] && cone_NaddbJets > 1) IsCat[ttbb] = true;
+    else if(IsCat[ttjj] && cone_NaddbJets > 0) IsCat[ttbj] = true;
+    else if(IsCat[ttjj] && cone_NaddcJets > 1) IsCat[ttcc] = true;
+    else if(IsCat[ttjj])                       IsCat[ttLF] = true;
+
+    for (int icat=ttjj; icat<=tt; icat++){
+      if(IsCat[icat]) NEvt_full[icat][Channel] += EvtStep;
+    }
+
 
     float Lep_pT_CUT = 30; // Muon
     if (Channel==1) Lep_pT_CUT = 35; // Electron
     
     if(Lep_pT > Lep_pT_CUT && abs(Lep_eta) < 2.1){
       // Visible Phase Space 
-      if(cone_NbJets > 1 && cone_NJets > 5) NEvt_vis[ttjj][Channel] += EvtStep;
-      else                                  NEvt_vis[tt][Channel]   += EvtStep;
+      bool IsVis[6]={false,false,false,false,false,false};
 
-      if     (cone_NbJets > 3 && cone_NJets > 5)                    NEvt_vis[ttbb][Channel] += EvtStep;    
-      else if(cone_NbJets > 2 && cone_NJets > 5)                    NEvt_vis[ttbj][Channel] += EvtStep;    
-      else if(cone_NbJets > 1 && cone_NcJets > 1 && cone_NJets > 5) NEvt_vis[ttcc][Channel] += EvtStep;    
-      else if(cone_NbJets > 1 && cone_NJets > 5)                    NEvt_vis[ttLF][Channel] += EvtStep;    
+      if      (IsCat[ttjj] && cone_NbJets > 1 && cone_NJets > 5) IsVis[ttjj]=true;
+      else if (IsCat[tt]   && cone_NbJets > 1 && cone_NJets > 5) IsVis[tt]  =true;
 
+      if     (IsCat[ttbb] && cone_NbJets > 3 && cone_NJets > 5)                    IsVis[ttbb]=true;
+      else if(IsCat[ttbj] && cone_NbJets > 2 && cone_NJets > 5)                    IsVis[ttbj]=true;
+      else if(IsCat[ttcc] && cone_NbJets > 1 && cone_NcJets > 1 && cone_NJets > 5) IsVis[ttcc]=true;
+      else if(IsCat[ttLF] && cone_NbJets > 1 && cone_NJets > 5)                    IsVis[ttLF]=true;
+
+      for (int icat=ttjj; icat<=tt; icat++){
+	if(IsVis[icat]) NEvt_vis[icat][Channel] += EvtStep;
+      }
+      
     }
 
-    // std::cout << Channel << " - " << EvtStep << std::endl;
-    
     // Jets 
     int NJets = 0;    
     
@@ -361,47 +371,37 @@ int main(int argc, const char* argv[]){
     hNJets[Channel]->Fill(NJets,EvtStep);
     
   }//for(events)
-  
-  NEvt_vis[ttjj][2] = NEvt_vis[ttjj][0] + NEvt_vis[ttjj][1];
-  NEvt_vis[ttbb][2] = NEvt_vis[ttbb][0] + NEvt_vis[ttbb][1];
-  NEvt_vis[ttbj][2] = NEvt_vis[ttbj][0] + NEvt_vis[ttbj][1];
-  NEvt_vis[ttcc][2] = NEvt_vis[ttcc][0] + NEvt_vis[ttcc][1];
-  NEvt_vis[ttLF][2] = NEvt_vis[ttLF][0] + NEvt_vis[ttLF][1];
-  NEvt_vis[tt][2]   = NEvt_vis[tt][0]   + NEvt_vis[tt][1];
 
-  NEvt_full[ttjj][2] = NEvt_full[ttjj][0] + NEvt_full[ttjj][1];
-  NEvt_full[ttbb][2] = NEvt_full[ttbb][0] + NEvt_full[ttbb][1];
-  NEvt_full[ttbj][2] = NEvt_full[ttbj][0] + NEvt_full[ttbj][1];
-  NEvt_full[ttcc][2] = NEvt_full[ttcc][0] + NEvt_full[ttcc][1];
-  NEvt_full[ttLF][2] = NEvt_full[ttLF][0] + NEvt_full[ttLF][1];
-  NEvt_full[tt][2]   = NEvt_full[tt][0]   + NEvt_full[tt][1];
+  // Add mu+Jets and e+Jets
+  for (int icat=ttjj; icat<=tt; icat++){
+    NEvt_full[icat][2] = NEvt_full[icat][0] + NEvt_full[icat][1];
+    NEvt_vis [icat][2] = NEvt_vis [icat][0] + NEvt_vis [icat][1];  
+  }
     
 
   //Acceptance-Efficiency
-  TH2D *Yields_full, *Yields_vis;
-  Yields_full = new TH2D("Yields_FullPh-Sp", "Yields in the Full Ph-Sp",   3,0,3,6,0,6);
-  Yields_vis  = new TH2D("Yields_VisPh-Sp",  "Yields in the Visible Ph-Sp",3,0,3,6,0,6);
-  Yields_full->SetOption("COLTEXT");
-  Yields_vis ->SetOption("COLTEXT");
+  TH2D *Yields_full[6], *Yields_vis[6];
 
-  for(unsigned int ibinx=0; ibinx<3; ibinx++){
-    Yields_full->GetXaxis()->SetBinLabel(ibinx+1, namech[ibinx]);
-    Yields_vis ->GetXaxis()->SetBinLabel(ibinx+1, namech[ibinx]);
-  }
-  for(unsigned int ibiny=0; ibiny<6; ibiny++){
-    Yields_full->GetYaxis()->SetBinLabel(ibiny+1, namecat[ibiny]);
-    Yields_vis ->GetYaxis()->SetBinLabel(ibiny+1, namecat[ibiny]);
-  }
-
-  for(unsigned int ibinx=0; ibinx<3; ibinx++){
-    for(unsigned int ibiny=0; ibiny<6; ibiny++){
-
-      Yields_full->SetBinContent(ibinx+1,ibiny+1,NEvt_full[ibiny][ibinx]);
-      Yields_vis ->SetBinContent(ibinx+1,ibiny+1,NEvt_vis [ibiny][ibinx]);
-  
+  for (int icat=ttjj; icat<=tt; icat++){
+    Yields_full[icat] = new TH2D("Yields_FullPh-Sp_" + namecat[icat], "Yields in the Full Ph-Sp "    + namecat[icat],3,0,3,1,0,1);
+    Yields_vis [icat] = new TH2D("Yields_VisPh-Sp_"  + namecat[icat], "Yields in the Visible Ph-Sp " + namecat[icat],3,0,3,1,0,1);
+    Yields_full[icat]->SetOption("COLTEXT");
+    Yields_vis [icat]->SetOption("COLTEXT");
+    
+    for(unsigned int ibinx=0; ibinx<3; ibinx++){
+      Yields_full[icat]->GetXaxis()->SetBinLabel(ibinx+1, namech[ibinx]);
+      Yields_vis [icat]->GetXaxis()->SetBinLabel(ibinx+1, namech[ibinx]);
     }
-  }
+
+    Yields_full[icat]->GetYaxis()->SetBinLabel(1, namecat[icat]);
+    Yields_vis [icat]->GetYaxis()->SetBinLabel(1, namecat[icat]);
+    
+    for(unsigned int ibinx=0; ibinx<3; ibinx++){
+      Yields_full[icat]->SetBinContent(ibinx+1,1,NEvt_full[icat][ibinx]);
+      Yields_vis [icat]->SetBinContent(ibinx+1,1,NEvt_vis [icat][ibinx]);  
+    }
   
+  } // for(icat)
 
   // Get elapsed time
   sw.Stop();
@@ -420,8 +420,6 @@ int main(int argc, const char* argv[]){
     std::cout << "ttbb Acceptance: " << NEvt_vis[ttbb][ich]/NEvt_full[ttbb][ich] << std::endl;
     std::cout << "ttbj Acceptance: " << NEvt_vis[ttbj][ich]/NEvt_full[ttbj][ich] << std::endl;
     std::cout << "ttcc Acceptance: " << NEvt_vis[ttcc][ich]/NEvt_full[ttcc][ich] << std::endl;
-    std::cout << "ttcc Full: " << NEvt_full[ttcc][ich] << std::endl;
-    std::cout << "ttcc Vis : " << NEvt_vis[ttcc][ich] << std::endl;
     std::cout << "ttLF Acceptance: " << NEvt_vis[ttLF][ich]/NEvt_full[ttLF][ich] << std::endl;
     std::cout << "ttjj Acceptance: " << NEvt_vis[ttjj][ich]/NEvt_full[ttjj][ich] << std::endl;
     std::cout << "tt Acceptance: "   << NEvt_vis[tt][ich]/NEvt_full[tt][ich] << std::endl;
@@ -440,9 +438,10 @@ int main(int argc, const char* argv[]){
   //TString outfname=dirname + "/hAcc-" + hname + "_" + fname + ttbar_id + ".root";
   TFile *target  = new TFile(outfname,"RECREATE" );  
   
-  Yields_vis ->Write();
-  Yields_full->Write();
-
+  for (int icat=ttjj; icat<=tt; icat++){
+    Yields_vis [icat]->Write();
+    Yields_full[icat]->Write();
+  }
   for(int i=0; i<2; i++){    
 
     hNJets[i]->Write();

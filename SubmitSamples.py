@@ -10,10 +10,12 @@ CondorArg      = "'$(filehead)$(filesample) $(outputref)'"
 # Systematic Variations
 SysCom = {"PileUp","JES","JER","btagjes","btaglf","btaghf","btaghfsI","btaghfsII","btaglfsI","btaglfsII","btagcfI","btagcfII"}
 SysVar = {"Up", "Down"}
-SysThe = {"ScaleRnF_Up","ScaleRnF_Down","ScaleRuF_Nom","ScaleRuF_Up","ScaleRdF_Nom","ScaleRdF_Down"}
+SysThe = {"ScaleRnF Up","ScaleRnF Down","ScaleRuF Nom","ScaleRuF Up","ScaleRdF Up","ScaleRdF Down"}
+SysDedicated = {"UE","ISR","FSR"}
 
 RunSys = False
 RunThe = False
+RunDed = False
 if(len(sys.argv)>2):
     insys = sys.argv[2]
     if (insys == "sys"):
@@ -22,8 +24,12 @@ if(len(sys.argv)>2):
         RunFileName += "Syst"
     elif (insys == "scale"):
         RunThe = True
-        print "Scale Variations variations will be processed....."
+        print "Scale variations will be processed....."
         RunFileName += "Scale"
+    elif (insys == "dedicated"):
+        RunDed = True
+        print "Scale Variations in DEDICATED samples will be processed....."
+        RunFileName += "Dedicated"
     
 print "Reading database for Lepton+Jets in " + InputDB
 
@@ -101,6 +107,15 @@ requirements            = OpSysMajorVer == 6
                 print>>fout, "filesample=" + isam
                 print>>fout, """arguments  = " '$(filehead)$(filesample)' '$(outputref)""" + scale + """ '" """
                 print>>fout, "queue 1"
+
+    elif(RunDed):
+        for isam in SamNam:
+            for ided in SysDedicated:
+                for ivar in SysVar:
+                    dedicate = " -s " + ided + " " + ivar
+                    print>>fout, "filesample=" + isam + "_SYS_" + ided+ivar
+                    print>>fout, """arguments  = " '$(filehead)$(filesample)' '$(outputref)""" + dedicate + """ '" """
+                    print>>fout, "queue 1"
                 
     # Without Systematic Variations
     else:

@@ -1,6 +1,6 @@
 #include "Plots.h"
  
-void Plots(TString plots="2btag", bool LogScale=false) {
+void Plots(TString plots="2btag", bool LogScale=false, bool InclSys=false) {
   
   /****************
         Style
@@ -180,9 +180,10 @@ void Plots(TString plots="2btag", bool LogScale=false) {
     All Syst Unc
   ****************/ 
   std::vector<histos> MC_syst;
-  MC_syst = loadhistograms(plots, files + "_MCAllSyst");
-  setuphistograms(MC_syst, col_tt);
-
+  if (InclSys){
+    MC_syst = loadhistograms(plots, files + "_MCAllSyst");
+    setuphistograms(MC_syst, col_tt);
+  }
 
   /****************
        Stacks
@@ -292,13 +293,16 @@ void Plots(TString plots="2btag", bool LogScale=false) {
       
       //-------------------------------------------------------
       // Band error
-      //TGraphErrors *thegraph = new TGraphErrors(MC_syst[h].hist[ch]);  // Full set of Syst. Unc.
-      TGraphErrors *thegraph = new TGraphErrors(Stack[h].hist[ch]); // Just Statistical Unc. 
+      TGraphErrors *thegraph;
+      if (InclSys) thegraph = new TGraphErrors(MC_syst[h].hist[ch]);  // Full set of Syst. Unc.
+      else thegraph = new TGraphErrors(Stack[h].hist[ch]);            // Just Statistical Unc. 
+
       thegraph->SetName("thegraph");
       thegraph->SetFillStyle(1001);
       thegraph->SetFillColor(chatch);
       thegraph->SetLineColor(chatch);
       thegraph->Draw("e2SAME");
+      
 
       //-------------------------------------------------------
       // Other ttbar generators
@@ -406,8 +410,8 @@ void Plots(TString plots="2btag", bool LogScale=false) {
 
       TH1D *RatioSyst;
       RatioSyst = (TH1D*)Data[h].hist[ch]->Clone();
-      //RatioSyst->Divide(MC_syst[h].hist[ch]);  // Should be the histogram with the Total Syst. Unc.
-      RatioSyst->Divide(Stack[h].hist[ch]); // Histogram with the total uncertainty from the STACK
+      if(InclSys) RatioSyst->Divide(MC_syst[h].hist[ch]);  // Should be the histogram with the Total Syst. Unc.
+      else RatioSyst->Divide(Stack[h].hist[ch]);            // Histogram with the total uncertainty from the STACK
       std::vector<double> ratioContent;
       for(unsigned int b_r = 1; b_r <= RatioSyst->GetNbinsX(); b_r++) RatioSyst->SetBinContent(b_r,1.0);
       Ratio->SetMarkerStyle(20);
@@ -590,6 +594,8 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
   histoname.push_back("hKinAdd1CSV_30");
   histoname.push_back("hKinAdd2CSV_30");
   histoname.push_back("hKinAdd12CSV_30");
+  histoname.push_back("hKinAddCSVUnroll_30");
+  histoname.push_back("hKinAddCSVUnroll");
   histoname.push_back("hInvMassjj");
   histoname.push_back("hmT");
   histoname.push_back("hKinTagAddMass");

@@ -465,7 +465,10 @@ int main(int argc, const char* argv[]){
 		  &heIDISOSF, &heTriggerSF);
 
   // Jet uncertainties (btag, JES and JER)
-  if(_syst) fname += "_SYS" + syst_varname;
+  if(_syst && 
+     syst_name!="UE"  && 
+     syst_name!="ISR" &&
+     syst_name!="FSR") fname += "_SYS" + syst_varname;
 
   /***************************
      ttbar Categorization
@@ -504,7 +507,9 @@ int main(int argc, const char* argv[]){
   else if(_syst && syst_varname.Contains("ScaleRnFDown")) scaleSysPar = 1; // muR=Nom,  muF=Down
   else if(_syst && syst_varname.Contains("ScaleRuFNom"))  scaleSysPar = 2; // muR=Up,   muF=Nom
   else if(_syst && syst_varname.Contains("ScaleRuFUp"))   scaleSysPar = 3; // muR=Up,   muF=Up
-  else if(_syst && syst_varname.Contains("ScaleRdFNom"))  scaleSysPar = 4; // muR=Down, muF=Nom
+  // else if(_syst && syst_varname.Contains("ScaleRdFNom"))  scaleSysPar = 4; // muR=Down, muF=Nom
+  // Name modified to fix with Combine Structure
+  else if(_syst && syst_varname.Contains("ScaleRdFUp"))   scaleSysPar = 4; // muR=Down, muF=Nom
   else if(_syst && syst_varname.Contains("ScaleRdFDown")) scaleSysPar = 5; // muR=Down, muF=Down
   // Normalization for Scale Weights:
   if (_syst && syst_varname.Contains("Scale")){

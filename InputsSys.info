@@ -2,25 +2,25 @@
 v8-0-6
 
 # Header
-Tree_LepJets_Final_v8-0-6_Spring16-80X_36814pb-1
+Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1
 
 # Output Reference
-Combine-v1
+FinalAN-v0
 
 ##########################
 # Samples to be processed
 ##########################
 # ttbar Categories
-ttbar_LepJetsPowhegPythiatt
-ttbar_LepJetsPowhegPythiattjj
 ttbar_LepJetsPowhegPythiattbb
 ttbar_LepJetsPowhegPythiattbj
 ttbar_LepJetsPowhegPythiattcc
 ttbar_LepJetsPowhegPythiattLF
+ttbar_LepJetsPowhegPythiatt
+ttbar_LepJetsPowhegPythiattjj
 
-# ----------
+# -----------------------
 # MonteCarlo Background
-# ----------
+# -----------------------
 
 # ttbar Background
 ttbar_PowhegPythiaBkg

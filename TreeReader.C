@@ -1386,7 +1386,9 @@ void UnRoll2D(TH2D *h2D, TH1D *h1D){
   for (int ibinx = 1; ibinx<=h2D->GetXaxis()->GetNbins(); ibinx++){ 
     for (int ibiny = 1; ibiny<=h2D->GetYaxis()->GetNbins(); ibiny++){      
       double bc = h2D->GetBinContent(ibinx,ibiny);
+      double be = h2D->GetBinError  (ibinx,ibiny);
       h1D->SetBinContent(UnRollbin, bc);
+      h1D->SetBinError  (UnRollbin, be);
       UnRollbin ++;
     } // for(ibinx) 
   } // for(ibinx)     

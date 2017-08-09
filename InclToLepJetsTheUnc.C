@@ -3,7 +3,9 @@ void RemoveNegativeBins(TH1D *histo);
 
 enum thsys{central=0,ISR,FSR,UE};
 
-void InclToLepJetsTheUnc(TString HeadFile = "hSF-FinalAN-v0_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1"){
+std::map<TString, float> m_EffCorrFactor;
+
+void InclToLepJetsTheUnc(TString HeadFile = "hSF-FinalAN-v1_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1"){
 
   TString fdir = "TopResults/"+HeadFile;
 
@@ -29,6 +31,32 @@ void Createhisto(TString SelCut, TString HeadFile, TString CatFile){
   SysName.push_back("UE");
 
   TString SysNameVar[2] = {"Up","Down"};
+
+  // values from systematic tables (better way to do it?)
+  m_EffCorrFactor["ttbbISR"] = 0.0422;
+  m_EffCorrFactor["ttbbFSR"] = 0.0894;
+  m_EffCorrFactor["ttbbUE"]  = 0.0268;
+
+  m_EffCorrFactor["ttbjISR"] = 0.0200;
+  m_EffCorrFactor["ttbjFSR"] = 0.1100;
+  m_EffCorrFactor["ttbjUE"]  = 0.0294;
+
+  m_EffCorrFactor["ttccISR"] = 0.0036;
+  m_EffCorrFactor["ttccFSR"] = 0.1491;
+  m_EffCorrFactor["ttccUE"]  = 0.0174;
+
+  m_EffCorrFactor["ttLFISR"] = 0.0137;
+  m_EffCorrFactor["ttLFFSR"] = 0.1678;
+  m_EffCorrFactor["ttLFUE"]  = 0.0083;
+
+  m_EffCorrFactor["ttjjISR"] = 0.0120;
+  m_EffCorrFactor["ttjjFSR"] = 0.1335;
+  m_EffCorrFactor["ttjjUE"]  = 0.0046;
+
+  m_EffCorrFactor["ttISR"] = 0.0291;
+  m_EffCorrFactor["ttFSR"] = 0.1811;
+  m_EffCorrFactor["ttUE"]  = 0.0312;
+
 
   // Lep+Jets Sample
   std::vector<TString> namefile;
@@ -78,12 +106,12 @@ void Createhisto(TString SelCut, TString HeadFile, TString CatFile){
   	RemoveNegativeBins(hiSyst);
 	
 	TH1D *hiljSyst = (TH1D*) hiljCentral->Clone((TString)hiljCentral->GetName() + "_" + SysName.at(isys) + SysNameVar[isysvar]);
-	
+
 	// Coparison Bin/Bin
 	for(int ibin=1; ibin<=hiinCentral->GetNbinsX(); ibin++){
-
+	  
 	  float FracVar = (hiinCentral->GetBinContent(ibin) - hiSyst->GetBinContent(ibin)); 
-	  float oldbin = hiljSyst->GetBinContent(ibin);
+	  
 	  if(hiinCentral->GetBinContent(ibin) < 0.5)
 	    // Keep the full variation if the central bin value is too low
 	    hiljSyst->SetBinContent(ibin, hiSyst->GetBinContent(ibin));  
@@ -91,8 +119,20 @@ void Createhisto(TString SelCut, TString HeadFile, TString CatFile){
 	    FracVar = FracVar/hiinCentral->GetBinContent(ibin);
 	    hiljSyst->SetBinContent(ibin, ((1.0-FracVar)*hiljSyst->GetBinContent(ibin)));
 	  }
-
+	  // Debug
+	  // if (hiSyst->GetBinError(ibin) != 0.0) cout << "Yields Error for " << SysName.at(isys) + SysNameVar[isysvar] << " = " << hiljSyst->GetBinError(ibin)  << " Original = " << hiSyst->GetBinError(ibin) << endl;
 	} // for(ibin)
+
+	// Include the change of the efficiency in the yields 
+	float effvar = 1.0;
+	if(SysNameVar[isysvar] == "Down") effvar = (1.0 - m_EffCorrFactor[CatFile + SysName.at(isys)]);
+	if(SysNameVar[isysvar] == "Up")   effvar = (1.0 + m_EffCorrFactor[CatFile + SysName.at(isys)]);
+	
+	if( hiljSyst->Integral() != 0.0 ) 
+	  hiljSyst->Scale(effvar*hiljCentral->Integral()/hiljSyst->Integral());
+	
+	
+	cout << "Yields Ratio for [" << CatFile << "," << ChName[nch] <<  "] " << SysName.at(isys) + SysNameVar[isysvar] << " in \% = " << 100.0*(hiljCentral->Integral()-hiljSyst->Integral())/hiljCentral->Integral() << endl;
 	
   	target->mkdir(SysName.at(isys) + SysNameVar[isysvar] + "/" + SelCut + "/" + ChName[nch]);
   	target->cd   (SysName.at(isys) + SysNameVar[isysvar] + "/" + SelCut + "/" + ChName[nch]);

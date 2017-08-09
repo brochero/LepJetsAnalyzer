@@ -1,10 +1,22 @@
 #!/usr/bin/env python
-import os, time, socket, sys
+import os, time, socket, sys, argparse
+
+parser = argparse.ArgumentParser(description="ttbb/ttjj Analysis Histograms (RECO and GEN level)")
+parser.add_argument('--input', type=str,
+                    help='File .info')
+parser.add_argument('--option', type=str, default="", choices=["","sys","scale","dedicated"],
+                    help='select option to run')
+parser.add_argument('--gen', action="store_true",
+                    help='Run generation level histos')
+args = parser.parse_args()
+
 
 OutputLocation = "/cms/scratch/brochero/LepJetsAnalyzer/TopResults/"
 InputLocation  = "/xrootd/store/user/brochero/"
 RunFileName    = "SubmitCondor"
-InputDB        = str(sys.argv[1])
+if args.gen:
+    RunFileName += "Gen"
+InputDB        = args.input
 CondorArg      = "'$(filehead)$(filesample) $(outputref)'"
 
 # Systematic Variations
@@ -16,20 +28,20 @@ SysDedicated = {"UE","ISR","FSR"}
 RunSys = False
 RunThe = False
 RunDed = False
-if(len(sys.argv)>2):
-    insys = sys.argv[2]
-    if (insys == "sys"):
-        RunSys = True
-        print "Systematic variations will be processed....."
-        RunFileName += "Syst"
-    elif (insys == "scale"):
-        RunThe = True
-        print "Scale variations will be processed....."
-        RunFileName += "Scale"
-    elif (insys == "dedicated"):
-        RunDed = True
-        print "Scale Variations in DEDICATED samples will be processed....."
-        RunFileName += "Dedicated"
+
+insys = args.option
+if (insys == "sys"):
+    RunSys = True
+    print "Systematic variations will be processed....."
+    RunFileName += "Syst"
+elif (insys == "scale"):
+    RunThe = True
+    print "Scale variations will be processed....."
+    RunFileName += "Scale"
+elif (insys == "dedicated"):
+    RunDed = True
+    print "Scale Variations in DEDICATED samples will be processed....."
+    RunFileName += "Dedicated"
     
 print "Reading database for Lepton+Jets in " + InputDB
 
@@ -78,8 +90,12 @@ if len(SamNam) is not 0:
     print>>fout, "filesample="
     print>>fout, "sysvar=Central"
     print>>fout, "################################"
-    print>>fout, """executable = CondorJob.sh
-universe   = vanilla
+    if args.gen:
+        print>>fout, "executable = CondorGENJob.sh"
+    else:
+        print>>fout, "executable = CondorJob.sh"
+
+    print>>fout, """universe   = vanilla
 
 initial_dir= """ + LogCondorDir
     print>>fout, """

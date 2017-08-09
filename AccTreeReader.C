@@ -104,8 +104,9 @@ int main(int argc, const char* argv[]){
   const char * _input    = 0;
   // TopTrees directory
   const char * _dir      = "/xrootd/store/user/brochero/v8-0-6/";
+  const char * _syst_name = 0;
   const char * _syst_var = 0;
-  const char * _ttbar_id = "";
+  const char * _ttbar_id = 0;
 
   // Arguments used
   //std::set<int> usedargs;
@@ -140,7 +141,9 @@ int main(int argc, const char* argv[]){
 	}
 	if( strcmp(argv[i],"-s") == 0 ){
 	  _syst= true;
-	  _syst_var = argv[i+1];
+	  _syst_name = argv[i+1];
+	  _syst_var  = argv[i+2];
+	  i+=2;
 	}
 	if( strcmp(argv[i],"-h") == 0 ||
 	    strcmp(argv[i],"--help") == 0 ){
@@ -161,8 +164,17 @@ int main(int argc, const char* argv[]){
   TString hname(_output);
   TString fdir(_dir);
   TString ttbar_id(_ttbar_id);
-  TString syst_varname(_syst_var);
+  TString syst_name = "";
+  TString syst_var = "";
+  TString syst_varname = "";
   
+  if (_syst){
+    syst_name = _syst_name;
+    syst_var  = _syst_var;
+    syst_varname = "_" + syst_name + syst_var;
+  }
+
+
   if(_eos) fdir = "root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/brochero/v8-0-6/";
 
   TChain theTree("ttbbLepJets/gentree"); 
@@ -255,7 +267,10 @@ int main(int argc, const char* argv[]){
   }
 
   // Uncertainties file name
-  if(_syst) fname += "_SYS_" + syst_varname;
+  if(_syst && 
+     !syst_varname.Contains("ISR") &&
+     !syst_varname.Contains("FSR") &&
+     !syst_varname.Contains("UE") ) fname += "_SYS" + syst_varname;
 
     /******************
       Scale Weights
@@ -266,7 +281,8 @@ int main(int argc, const char* argv[]){
     else if(_syst && syst_varname.Contains("ScaleRnFDown")) scaleSysPar = 1; // muR=Nom,  muF=Down
     else if(_syst && syst_varname.Contains("ScaleRuFNom"))  scaleSysPar = 2; // muR=Up,   muF=Nom
     else if(_syst && syst_varname.Contains("ScaleRuFUp"))   scaleSysPar = 3; // muR=Up,   muF=Up
-    else if(_syst && syst_varname.Contains("ScaleRdFNom"))  scaleSysPar = 4; // muR=Down, muF=Nom
+    // Name modified to fix with Combine Structure
+    else if(_syst && syst_varname.Contains("ScaleRdFUp"))  scaleSysPar = 4; // muR=Down, muF=Nom
     else if(_syst && syst_varname.Contains("ScaleRdFDown")) scaleSysPar = 5; // muR=Down, muF=Down
 
   /********************************

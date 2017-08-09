@@ -276,7 +276,7 @@ void CreateComTable (std::map<TString, TString>  tLine[6], int tch, int tcat, TS
 }
 
 
-void EffAccEstimation(TString fbasename = "Final-v0_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1", TString ttbarname = "ttbar_PowhegPythia"){
+void EffAccEstimation(TString fbasename = "FinalAN-v1_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1", TString ttbarname = "ttbar_PowhegPythia"){
 
   
   std::map<TString, TString>  fTables[6]; // [systematics]
@@ -295,6 +295,8 @@ void EffAccEstimation(TString fbasename = "Final-v0_Tree_LepJets_Summer_v8-0-6_S
 			      "Down",
 			      "Up",
 			      fbasename + "_" + ttbarname);
+
+  ttbarname = "ttbar_LepJetsPowhegPythia";
   
   fTables[ScaleRnF] = EffAccCreator("ScaleRnF",
 				    "Down",
@@ -307,7 +309,7 @@ void EffAccEstimation(TString fbasename = "Final-v0_Tree_LepJets_Summer_v8-0-6_S
 				    fbasename + "_" + ttbarname);
   
   fTables[ScaleRdF] = EffAccCreator("ScaleRdF",
-				    "Nom",
+				    "Up",
 				    "Down",
 				    fbasename + "_" + ttbarname);
   

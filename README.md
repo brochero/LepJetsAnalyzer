@@ -14,19 +14,19 @@
 
    b- Histograms are produced running in **Condor**. To run central values:
    
-   `python SubmitSamples.py Inputs.info`
+   `python SubmitSamples.py --input Inputs.info`
 
    c- To run systematic variations affecting the shape of the profiles:
 
-   `python SubmitSamples.py InputsSys.info sys`
+   `python SubmitSamples.py --input InputsSys.info --option sys`
 
    d- To run scale variations (ME):
    
-   `python SubmitSamples.py InputsScale.info scale`
+   `python SubmitSamples.py --inpit InputsScale.info --option scale`
 
    e- To run over **ttbar INCLUSIVE** samples with theoretical variations (Scale at PS, UE).
    
-   `python SubmitSamples.py InputsDedicated.info dedicated`
+   `python SubmitSamples.py --input InputsDedicated.info --option dedicated`
 
 
 2. Setup all the outputs. All the samples **(central + syst(shape))** must be ready in TopResults directory.

@@ -156,19 +156,21 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "jet_E",     &Jet_E );
   theTree.SetBranchAddress( "jet_index", &Jet_pTIndex );
 
-  theTree.SetBranchAddress( "jet_CSV",           &Jet_CSV );
-  theTree.SetBranchAddress( "jet_SF_CSV_30",     &Jet_SF_CSV );
-  theTree.SetBranchAddress( "jet_SF_CSV",        &Jet_SF_CSVg );
   theTree.SetBranchAddress( "jet_partonFlavour", &Jet_partonFlavour );
+  theTree.SetBranchAddress( "jet_CSV",           &Jet_CSV );
   theTree.SetBranchAddress( "jet_CvsB",          &Jet_CvsB );
   theTree.SetBranchAddress( "jet_CvsL",          &Jet_CvsL );
 
+  theTree.SetBranchAddress( "jet_SF_CSV",        &Jet_SF_CSVg );
+
   if(!fname.Contains("Data")){
-    theTree.SetBranchAddress( "jet_JES_Up",  &Jet_JES_Up );
-    theTree.SetBranchAddress( "jet_JES_Down",&Jet_JES_Down );  
-    theTree.SetBranchAddress( "jet_JER_Up",  &Jet_JER_Up );
-    theTree.SetBranchAddress( "jet_JER_Nom", &Jet_JER_Nom );
-    theTree.SetBranchAddress( "jet_JER_Down",&Jet_JER_Down );
+    theTree.SetBranchAddress( "jet_JES_Up",     &Jet_JES_Up );
+    theTree.SetBranchAddress( "jet_JES_Down",   &Jet_JES_Down );  
+    theTree.SetBranchAddress( "jet_JESCom_Up",  &Jet_JESCom_Up );  
+    theTree.SetBranchAddress( "jet_JESCom_Down",&Jet_JESCom_Down );  
+    theTree.SetBranchAddress( "jet_JER_Up",     &Jet_JER_Up );
+    theTree.SetBranchAddress( "jet_JER_Nom",    &Jet_JER_Nom );
+    theTree.SetBranchAddress( "jet_JER_Down",   &Jet_JER_Down );
   }
   
   if(fname.Contains("ttbar") && !fname.Contains("Bkg")){

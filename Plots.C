@@ -591,9 +591,9 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
   histoname.push_back("hCSV_Jet-3");
   histoname.push_back("hCSV_Jet-4");
   histoname.push_back("hCSV_Jet-5");
-  histoname.push_back("hKinAdd1CSV_30");
-  histoname.push_back("hKinAdd2CSV_30");
-  histoname.push_back("hKinAdd12CSV_30");
+  histoname.push_back("hKinAdd1CSV");
+  histoname.push_back("hKinAdd2CSV");
+  histoname.push_back("hKinAdd12CSV");
   histoname.push_back("hKinAddCSVUnroll_30");
   histoname.push_back("hKinAddCSVUnroll");
   histoname.push_back("hInvMassjj");

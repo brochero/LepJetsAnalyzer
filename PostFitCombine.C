@@ -1,8 +1,8 @@
 #include "tdrstyle.C"
 
-void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCardSysUncFullPhSp_hSF-FinalAN-v0_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1_2btag"){
+void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCard_FinalAN-v1VisPhSp_hSF-FinalAN-v1_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1_2btag"){
 
-  TString inputfile = "CombineResults/" + InpDir + "/OBSERVED/mlfitobsMLF.root";
+  TString inputfile = "CombineResults/StableResult-v1/" + InpDir + "/OBSERVED/mlfitobsMLF.root";
   
  
   setTDRStyle();
@@ -245,11 +245,11 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
     title->Draw("SAME");
     chtitle->Draw("SAME");
 
-    TString dirfigname_pdf = "CombineResults/Figures_"+InpDir+Plots+"20bins/";
+    TString dirfigname_pdf = "CombineResults/Figures_" + InpDir + Plots + "/";
     // make a dir if it does not exist!!
     gSystem->mkdir(dirfigname_pdf, kTRUE);
 
-    cPlots->SaveAs(dirfigname_pdf + "FullHisto_"+dirname[ich]+"_NormLog.pdf");
+    cPlots->SaveAs(dirfigname_pdf + "FullHisto_" + dirname[ich] + "_NormLog.pdf");
     
 
     // Plots by Regions
@@ -296,7 +296,7 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
 	ireg++;
       } // for(ireg) 
 
-      cPlots_reg->SaveAs(dirfigname_pdf + "RegionHisto_"+CanNum+"_"+dirname[ich]+"_NormLog.pdf");
+      cPlots_reg->SaveAs(dirfigname_pdf + "RegionHisto_" + CanNum + "_" + dirname[ich] + "_NormLog.pdf");
     } // for(ican) 
 
   }// for(ich)

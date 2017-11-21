@@ -61,6 +61,35 @@ struct btagUnc{
       CFERR2_UP,   CFERR2_DN};
 };
 
+struct JESUnc{
+  enum:unsigned int{AbsoluteStat=0, AbsoluteScale, AbsoluteMPFBias,
+      Fragmentation, 
+      SinglePionECAL, SinglePionHCAL, 
+      FlavorQCD,
+      TimePtEta, 
+      RelativeJEREC1, RelativeJEREC2, RelativeJERHF,
+      RelativePtBB, RelativePtEC1, RelativePtEC2, RelativePtHF,
+      RelativeBal,
+      RelativeFSR,
+      RelativeStatFSR, RelativeStatEC, RelativeStatHF,
+      PileUpDataMC,
+      PileUpPtRef, PileUpPtBB, PileUpPtEC1, PileUpPtHF};
+};
+
+TString JESName[25] = {"AbsoluteStat", "AbsoluteScale", "AbsoluteMPFBias",
+		       "Fragmentation", 
+		       "SinglePionECAL", "SinglePionHCAL", 
+		       "FlavorQCD",
+		       "TimePtEta", 
+		       "RelativeJEREC1", "RelativeJEREC2", "RelativeJERHF",
+		       "RelativePtBB", "RelativePtEC1", "RelativePtEC2", "RelativePtHF",
+		       "RelativeBal",
+		       "RelativeFSR",
+		       "RelativeStatFSR", "RelativeStatEC", "RelativeStatHF",
+		       "PileUpDataMC",
+		       "PileUpPtRef", "PileUpPtBB", "PileUpPtEC1", "PileUpPtHF"};
+
+
 void print_progress(int TreeEntries, Long64_t ievt);
 const TString currentDateTime();
 float DiJetMassCorrection(std::vector<ComJet> &Jets, bool ReArrange);
@@ -118,6 +147,8 @@ Histos2D h2DSFbtag_Global;
 Histos   hSFbtag_Global, hSFbtag_Global_var;
 Histos2D h2DSFbtag_b, h2DSFbtag_c, h2DSFbtag_l, h2DSFbtag_btag_b, h2DSFbtag_btag_c, h2DSFbtag_btag_l;
 Prof     pSFCSVVsCSVAll, pSFCSVErrorVsCSVAll;
+// PDF Weights
+Histos hWPDF, hWPDFAlphaUp, hWPDFAlphaDown;
 // Kinematic Fitter
 Histos    hKinChi2;
 Histos2D  h2DKinChi2_JetMatch;
@@ -144,11 +175,12 @@ TH2D *h2DTJetPosition, *h2DWJetPosition, *h2DttbarNGenJets;
 int Event,Run,Channel, GoodPV;
 float PUWeight, GENWeight;
 std::vector<float> *PUWeight_sys=0;
+// PDF
+std::vector<float> *PDFWeight=0;
 // MET
 float MET,MET_Phi;
 // Leptons
 float Lep_pT, Lep_eta, Lep_phi, Lep_E;
-std::vector<float> *Lep_SF=0;
 float Lep_LES=0;
 // Jets
 std::vector<float> *Jet_pT=0, *Jet_eta=0, *Jet_phi=0, *Jet_E=0;
@@ -162,6 +194,8 @@ std::vector<float> *Jet_SF_CSVg=0;
 std::vector<float> *Jet_CvsB=0, *Jet_CvsL=0;
 std::vector<float> *Jet_JER_Up=0, *Jet_JER_Nom=0, *Jet_JER_Down=0;
 std::vector<float> *Jet_JES_Up=0, *Jet_JES_Down=0;
+std::vector< std::vector<float> > *Jet_JESCom_Up=0, *Jet_JESCom_Down=0;
+
 // ttH Categorization
 int  GenttHCat;
 // GenCone Info

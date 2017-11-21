@@ -14,7 +14,8 @@ void display_usage()
   std::cout << "    -eos input files located in eos lxplus" << std::endl;
   std::cout << "    -o name in the output file \"h_\"" << std::endl;
   std::cout << "    -n number of events" << std::endl;
-  std::cout << "    -s create a file with the systematic uncertainty yields: \"name variation\"" << std::endl;
+  std::cout << "    -s create a file with the systematic uncertainty yields: \"variation name\"" << std::endl;
+  // std::cout << "    -JES create a file with the JEX systematic uncertainty yields: \"variation name\"" << std::endl;
   std::cout << "    -cat ttbar categorization" << std::endl;
   std::cout << "    -d Input file directory. Default directory: InputTrees" << std::endl;
   std::cout << "    -h                 displays this help message and exits " << std::endl;
@@ -147,7 +148,6 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "lepton_eta", &Lep_eta );
   theTree.SetBranchAddress( "lepton_phi", &Lep_phi );
   theTree.SetBranchAddress( "lepton_E",   &Lep_E );
-  theTree.SetBranchAddress( "lepton_SF",  &Lep_SF );
   theTree.SetBranchAddress( "lepton_LES", &Lep_LES );
 
   theTree.SetBranchAddress( "jet_pT",    &Jet_pT );
@@ -161,13 +161,14 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "jet_CvsB",          &Jet_CvsB );
   theTree.SetBranchAddress( "jet_CvsL",          &Jet_CvsL );
 
-  theTree.SetBranchAddress( "jet_SF_CSV",        &Jet_SF_CSVg );
+  theTree.SetBranchAddress( "jet_SF_CSV",        &Jet_SF_CSV );
 
   if(!fname.Contains("Data")){
     theTree.SetBranchAddress( "jet_JES_Up",     &Jet_JES_Up );
     theTree.SetBranchAddress( "jet_JES_Down",   &Jet_JES_Down );  
     theTree.SetBranchAddress( "jet_JESCom_Up",  &Jet_JESCom_Up );  
     theTree.SetBranchAddress( "jet_JESCom_Down",&Jet_JESCom_Down );  
+
     theTree.SetBranchAddress( "jet_JER_Up",     &Jet_JER_Up );
     theTree.SetBranchAddress( "jet_JER_Nom",    &Jet_JER_Nom );
     theTree.SetBranchAddress( "jet_JER_Down",   &Jet_JER_Down );
@@ -187,7 +188,7 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress("gencone_gjet_E",    &GenCone_E);
     theTree.SetBranchAddress("gencone_gjetIndex", &GenCone_gjetMom);
     theTree.SetBranchAddress("gencone_NgjetsW",   &GenCone_NgjetsW);
-    theTree.SetBranchAddress("draddjets",             &DRAddJets);
+    theTree.SetBranchAddress("draddjets",         &DRAddJets);
 
     theTree.SetBranchAddress("genlepton_pT",          &GenLep_pT);
     theTree.SetBranchAddress("jet_MatchedGenJetIndex",&Jet_GENmatched);
@@ -200,6 +201,9 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress("gennu_eta",             &GenNu_eta);
     theTree.SetBranchAddress("gennu_phi",             &GenNu_phi);
     theTree.SetBranchAddress("gennu_E",               &GenNu_E);
+    // PDF Uncertainty
+    theTree.SetBranchAddress("pdfweight",             &PDFWeight);
+
   }
   // Kinematic Reconstruction Variables
   theTree.SetBranchAddress("kin_chi2",  &Kin_Chi2);
@@ -293,6 +297,12 @@ int main(int argc, const char* argv[]){
       hSFIDISOError[j][i]    = new TH1D("hSFIDISOError_"+namech[i]+"_"+namecut[j]+syst_varname,"#Delta SF_{ID,ISO} " + titlenamech[i],400,0,0.1); 
       hSFTrigger[j][i]       = new TH1D("hSFTrigger_"+namech[i]+"_"+namecut[j]+syst_varname,"SF^{Trigger} " + titlenamech[i],400,0.8,1.2);    
       hSFTriggerError[j][i]  = new TH1D("hSFTriggerError_"+namech[i]+"_"+namecut[j]+syst_varname,"#Delta SF^{Trigger} " + titlenamech[i],400,0,0.1);
+      /***************************
+           PDF (and Alpha_s)
+      ***************************/
+      hWPDF[j][i]          = new TH1D("hWPDF_"+namech[i]+"_"+namecut[j]+syst_varname,"W_{PDF} the 100 weights/Evt " + titlenamech[i],160,0.6,1.4);    
+      hWPDFAlphaUp[j][i]   = new TH1D("hWPDFAlphaUp_"+namech[i]+"_"+namecut[j]+syst_varname,"W_{#alpha_{s}^{Up}} per Evt " + titlenamech[i],160,0.6,1.4);    
+      hWPDFAlphaDown[j][i] = new TH1D("hWPDFAlphaDown_"+namech[i]+"_"+namecut[j]+syst_varname,"W_{#alpha_{s}^{Down}} per Evt " + titlenamech[i],160,0.6,1.4);    
 
       /***************************
               SF(b-tag)
@@ -525,7 +535,18 @@ int main(int argc, const char* argv[]){
       std::cerr << "No entry for Scale normalization! Check HISTO!"  << std::endl;
       std::exit(0);
     }
+
   }
+
+  int JESVarIndex = -999;
+
+  if(_syst && syst_varname.Contains("JES")){
+    // JES Components
+    for(unsigned ijes=JESUnc::AbsoluteStat; ijes<=JESUnc::PileUpPtHF; ijes++){
+      if(syst_name.Contains(JESName[ijes])) JESVarIndex = ijes;	
+    }
+  } // if(JES)
+
   // PileUp Uncertainty  
   int pileupSysPar;
   if     (_syst && syst_varname.Contains("PileUpUp"))   pileupSysPar = 1; // Up
@@ -641,21 +662,15 @@ int main(int argc, const char* argv[]){
       }
       
       if(_syst){
-	if(syst_varname.Contains("JESUp")){
-	  JetSystVar = (*Jet_JES_Up)[ijet];
+	// JES
+	if (JESVarIndex > -1){
+	  if(syst_varname.Contains("Up"))	 JetSystVar = 1.0 + (*Jet_JESCom_Up)  [JESVarIndex][ijet];
+	  else if(syst_varname.Contains("Down")) JetSystVar = 1.0 - (*Jet_JESCom_Down)[JESVarIndex][ijet];
 	}
-	else if(syst_varname.Contains("JESDown")){
-	  JetSystVar = (*Jet_JES_Down)[ijet];
-	}
-	else if(syst_varname.Contains("JERUp")){
-	  JetSystVar = (*Jet_JER_Up)[ijet];
-	}
-	else if(syst_varname.Contains("JERNom")){
-	  JetSystVar = (*Jet_JER_Nom)[ijet];
-	}
-	else if(syst_varname.Contains("JERDown")){
-	  JetSystVar = (*Jet_JER_Down)[ijet];
-	}
+	// JER
+	if(syst_varname.Contains("JERUp"))        JetSystVar = (*Jet_JER_Up)[ijet];
+	else if(syst_varname.Contains("JERNom"))  JetSystVar = (*Jet_JER_Nom)[ijet];
+	else if(syst_varname.Contains("JERDown")) JetSystVar = (*Jet_JER_Down)[ijet];
       }
       
       ComJet jet;
@@ -737,10 +752,7 @@ int main(int argc, const char* argv[]){
     }
     
     else {
-      // From CATTuple
-      // SF_ID_ISO_Tr = (*Lep_SF);
-      
-      // Second Method: Taking SF from root file
+      // First Method: Taking SF from root file
       SFIDISOTrigger(SF_ID_ISO_Tr,
       		     Lep, Channel, GoodPV,
       		     hmuIDISOSF, hmuTriggerSF, hmuTrackerSF,
@@ -810,6 +822,15 @@ int main(int argc, const char* argv[]){
       ******************/
       AccEvent[icut][Channel]++;
       EffEvent[icut][Channel]+=  PUWeight;
+
+      /******************
+         PDF Weights 
+      ******************/
+      if(_syst && syst_varname.Contains("PDF")){
+	for(unsigned int ipdf=0; ipdf<=99; ipdf++) hWPDF [icut][Channel]->Fill((*PDFWeight)[ipdf], PUWeight);
+	hWPDFAlphaUp   [icut][Channel]->Fill((*PDFWeight)[101], PUWeight);
+	hWPDFAlphaDown [icut][Channel]->Fill((*PDFWeight)[100], PUWeight);
+      }
 
       /******************
         Kinematic Var.
@@ -1121,6 +1142,9 @@ int main(int argc, const char* argv[]){
       hMET_Phi[j][i]->Write();
       hmT[j][i]     ->Write();
 
+      hWPDF         [j][i]->Write();
+      hWPDFAlphaUp  [j][i]->Write();
+      hWPDFAlphaDown[j][i]->Write();
       
       hLepPt[j][i]->Write();
       hLepEta[j][i]->Write();

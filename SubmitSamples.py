@@ -4,7 +4,7 @@ import os, time, socket, sys, argparse
 parser = argparse.ArgumentParser(description="ttbb/ttjj Analysis Histograms (RECO and GEN level)")
 parser.add_argument('--input', type=str,
                     help='File .info')
-parser.add_argument('--option', type=str, default="", choices=["","sys","scale","dedicated"],
+parser.add_argument('--option', type=str, default="", choices=["","sys","jes","scale","dedicated"],
                     help='select option to run')
 parser.add_argument('--gen', action="store_true",
                     help='Run generation level histos')
@@ -20,12 +20,14 @@ InputDB        = args.input
 CondorArg      = "'$(filehead)$(filesample) $(outputref)'"
 
 # Systematic Variations
-SysCom = {"PileUp","JES","JER","btagjes","btaglf","btaghf","btaghfsI","btaghfsII","btaglfsI","btaglfsII","btagcfI","btagcfII"}
+SysCom = {"PileUp","JER","btagjes","btaglf","btaghf","btaghfsI","btaghfsII","btaglfsI","btaglfsII","btagcfI","btagcfII"}
+SysJES = {"AbsoluteStat","AbsoluteScale","AbsoluteMPFBias","Fragmentation","SinglePionECAL","SinglePionHCAL","FlavorQCD","TimePtEta","RelativeJEREC1", "RelativeJEREC2", "RelativeJERHF","RelativePtBB","RelativePtEC1","RelativePtEC2","RelativePtHF","RelativeBal","RelativeFSR","RelativeStatFSR","RelativeStatEC","RelativeStatHF","PileUpDataMC","PileUpPtRef","PileUpPtBB","PileUpPtEC1","PileUpPtHF"}
 SysVar = {"Up", "Down"}
 SysThe = {"ScaleRnF Up","ScaleRnF Down","ScaleRuF Nom","ScaleRuF Up","ScaleRdF Up","ScaleRdF Down"}
 SysDedicated = {"UE","ISR","FSR"}
 
 RunSys = False
+RunJES = False
 RunThe = False
 RunDed = False
 
@@ -34,6 +36,10 @@ if (insys == "sys"):
     RunSys = True
     print "Systematic variations will be processed....."
     RunFileName += "Syst"
+if (insys == "jes"):
+    RunJES = True
+    print "JES variations will be processed....."
+    RunFileName += "JES"
 elif (insys == "scale"):
     RunThe = True
     print "Scale variations will be processed....."
@@ -113,6 +119,14 @@ requirements            = OpSysMajorVer == 6
             for isys in SysCom:
                 for ivar in SysVar:
                     systematic = " -s " + isys + " " + ivar
+                    print>>fout, "filesample=" + isam
+                    print>>fout, """arguments  = " '$(filehead)$(filesample)' '$(outputref)""" + systematic + """ '" """
+                    print>>fout, "queue 1"
+    if(RunJES):
+        for isam in SamNam:
+            for ijes in SysJES:
+                for ivar in SysVar:
+                    systematic = " -s JES" + ijes + " " + ivar
                     print>>fout, "filesample=" + isam
                     print>>fout, """arguments  = " '$(filehead)$(filesample)' '$(outputref)""" + systematic + """ '" """
                     print>>fout, "queue 1"

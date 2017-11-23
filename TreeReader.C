@@ -118,6 +118,7 @@ int main(int argc, const char* argv[]){
   if(_eos) fdir = "root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/brochero/v8-0-6/";
   //make a dir if output does not exist!!
   struct stat st;
+  dirname += "/" + hname;
   if(stat(dirname,&st) != 0) system("mkdir " + dirname);
 
   TChain theTree("ttbbLepJets/tree"); 
@@ -524,7 +525,7 @@ int main(int argc, const char* argv[]){
   else if(_syst && syst_varname.Contains("ScaleRdFUp"))   scaleSysPar = 4; // muR=Down, muF=Nom
   else if(_syst && syst_varname.Contains("ScaleRdFDown")) scaleSysPar = 5; // muR=Down, muF=Down
   // Normalization for Scale Weights:
-  if (_syst && syst_varname.Contains("Scale")){
+  if (_syst && syst_varname.Contains("ScaleR")){
     if(scaleSysPar < 6){
       std::cout << "Scale normalization: Weighted events = " << NTotal_ScalemuRF_Weight[scaleSysPar] << std::endl;
       nNorm_Event = NTotal_ScalemuRF_Weight[scaleSysPar];
@@ -664,8 +665,8 @@ int main(int argc, const char* argv[]){
       if(_syst){
 	// JES
 	if (JESVarIndex > -1){
-	  if(syst_varname.Contains("Up"))	 JetSystVar = 1.0 + (*Jet_JESCom_Up)  [JESVarIndex][ijet];
-	  else if(syst_varname.Contains("Down")) JetSystVar = 1.0 - (*Jet_JESCom_Down)[JESVarIndex][ijet];
+	  if(syst_varname.Contains("Up"))	 JetSystVar = 1.0 + (*Jet_JESCom_Up)  [ijet][JESVarIndex];
+	  else if(syst_varname.Contains("Down")) JetSystVar = 1.0 - (*Jet_JESCom_Down)[ijet][JESVarIndex];
 	}
 	// JER
 	if(syst_varname.Contains("JERUp"))        JetSystVar = (*Jet_JER_Up)[ijet];

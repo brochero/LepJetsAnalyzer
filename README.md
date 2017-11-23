@@ -16,9 +16,13 @@
    
    `python SubmitSamples.py --input Inputs.info`
 
-   c- To run systematic variations affecting the shape of the profiles:
+   c(1)- To run systematic variations affecting the shape of the profiles:
 
    `python SubmitSamples.py --input InputsSys.info --option sys`
+
+   c(2)- To run the 25 JES variations affecting the shape of the profiles:
+
+   `python SubmitSamples.py --input InputsSys.info --option jes`
 
    d- To run scale variations (ME):
    

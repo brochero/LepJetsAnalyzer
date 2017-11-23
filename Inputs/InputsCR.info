@@ -1,0 +1,50 @@
+# First, CATTuples version
+v8-0-6
+
+# Header
+Tree_LepJets_FallSkim_v8-0-6_Spring16-80X_36814pb-1
+
+# Output Reference
+JESCom-v0
+
+##########################
+# Samples to be processed
+##########################
+# ----------
+# MonteCarlo Signal
+# ----------
+
+# ttbar EDR
+ttbar_PowhegPythiattbb_SYS_EDR
+ttbar_PowhegPythiattbj_SYS_EDR
+ttbar_PowhegPythiattcc_SYS_EDR
+ttbar_PowhegPythiattLF_SYS_EDR
+ttbar_PowhegPythiatt_SYS_EDR
+ttbar_PowhegPythiattjj_SYS_EDR
+
+# ttbar gCR
+ttbar_PowhegPythiattbb_SYS_gCR
+ttbar_PowhegPythiattbj_SYS_gCR
+ttbar_PowhegPythiattcc_SYS_gCR
+ttbar_PowhegPythiattLF_SYS_gCR
+ttbar_PowhegPythiatt_SYS_gCR
+ttbar_PowhegPythiattjj_SYS_gCR
+
+# ttbar gCR+EDR
+ttbar_PowhegPythiattbb_SYS_gCREDR
+ttbar_PowhegPythiattbj_SYS_gCREDR
+ttbar_PowhegPythiattcc_SYS_gCREDR
+ttbar_PowhegPythiattLF_SYS_gCREDR
+ttbar_PowhegPythiatt_SYS_gCREDR
+ttbar_PowhegPythiattjj_SYS_gCREDR
+
+# ttbar QCDCR+EDR
+ttbar_PowhegPythiattbb_SYS_QCDCREDR
+ttbar_PowhegPythiattbj_SYS_QCDCREDR
+ttbar_PowhegPythiattcc_SYS_QCDCREDR
+ttbar_PowhegPythiattLF_SYS_QCDCREDR
+ttbar_PowhegPythiatt_SYS_QCDCREDR
+ttbar_PowhegPythiattjj_SYS_QCDCREDR
+
+
+

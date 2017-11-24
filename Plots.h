@@ -46,5 +46,5 @@ void overwritehistograms (std::vector<histos> newhistos, TString plots, TString 
 /***********************
  Files and Directories
 ************************/
-TString dirnameIn= "TopResults/";
-TString fl  = "hSF-FinalAN-v1_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1";
+TString dirnameIn= "TopResults/JESCom-v0/";
+TString fl  = "hSF-JESCom-v0_Tree_LepJets_FallSkim_v8-0-6_Spring16-80X_36814pb-1";

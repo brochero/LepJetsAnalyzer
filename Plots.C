@@ -477,8 +477,8 @@ void Plots(TString plots="2btag", bool LogScale=false, bool InclSys=false) {
       else dirfigname_log = "";
       TString dirfigname_pdf;
       TString dirfigname_png;
-      dirfigname_pdf = dirnameIn + "figures_" + fl + "/ttbb/pdf" + dirfigname_log + "/";
-      // dirfigname_png = dirnameIn + "figures_" + fl + "/ttbb/png" + dirfigname_log + "/";
+      dirfigname_pdf = "TopResults/figures_" + fl + "/pdf" + dirfigname_log + "/";
+      // dirfigname_png = "TopResults/figures_" + fl + "/png" + dirfigname_log + "/";
       // make a dir if it does not exist!!
       gSystem->mkdir(dirfigname_pdf,       kTRUE);
       histocanvas->SaveAs(dirfigname_pdf + WJets[h].hist[ch]->GetName() + ".pdf");

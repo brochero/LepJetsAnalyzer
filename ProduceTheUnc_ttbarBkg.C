@@ -1,5 +1,8 @@
 
-void ProduceTheUnc_ttbarBkg(TString HeadFile = "hSF-FinalAN-v0_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1"){
+void ProduceTheUnc_ttbarBkg(TString FileVersion = "JESCom-v0"){
+  
+  TString HeadFile = "hSF-" + FileVersion + "_Tree_LepJets_FallSkim_v8-0-6_Spring16-80X_36814pb-1";
+  TString InOutDir = "TopResults/" + FileVersion + "/";
 
   TString ChName[2];
   ChName[0] = "mujets";
@@ -8,13 +11,13 @@ void ProduceTheUnc_ttbarBkg(TString HeadFile = "hSF-FinalAN-v0_Tree_LepJets_Summ
   TString  HistoCombName = "hKinAddCSVUnroll";
   
   TFile *Infile=NULL;
-  Infile = TFile::Open("TopResults/" + HeadFile + "_ttbar_PowhegPythiaBkg.root");
+  Infile = TFile::Open(InOutDir + HeadFile + "_ttbar_PowhegPythiaBkg.root");
   if(!Infile){
     std::cerr << "ERROR: Could not open the input file!!!"  << std::endl;
     std::exit(0);
   }
 
-  TFile *target = new TFile("TopResults/" + HeadFile + "_ttbar_PowhegPythiaBkg_SYS_AllTheory.root","recreate");
+  TFile *target = new TFile(InOutDir + HeadFile + "_ttbar_PowhegPythiaBkg_SYS_AllTheory.root","recreate");
 
   std::vector<TString> SysName;
   SysName.push_back("ISR");
@@ -42,6 +45,6 @@ void ProduceTheUnc_ttbarBkg(TString HeadFile = "hSF-FinalAN-v0_Tree_LepJets_Summ
   }
 
   target->Close();
-
+  cout << "Files for ttbar background with sytematic variation (ScaleRdF, ISR/FSR and UE) have been produced." << endl;
 }
  

@@ -219,6 +219,8 @@ int main (int argc, char *argv[]){
   Yields Data;
   Data = loadhistoYields(cutname, "Data", fdir + fname, "DataSingleLep");
   Samples.push_back(Data);
+
+  std::cout << "All samples loaded!" << std::endl;
   
   // LaTeX table
   TString dirTeXname;
@@ -335,7 +337,32 @@ Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString 
   // All Systematics to be included 
   std::vector<TString> SysName;
   SysName.push_back("JER");
-  SysName.push_back("JES");
+  // SysName.push_back("JES");
+  SysName.push_back("JESAbsoluteStat");
+  SysName.push_back("JESAbsoluteScale");
+  SysName.push_back("JESAbsoluteMPFBias");
+  SysName.push_back("JESFragmentation");
+  SysName.push_back("JESSinglePionECAL");
+  SysName.push_back("JESSinglePionHCAL");
+  SysName.push_back("JESFlavorQCD");
+  SysName.push_back("JESTimePtEta");
+  SysName.push_back("JESRelativeJEREC1");
+  SysName.push_back("JESRelativeJEREC2");
+  SysName.push_back("JESRelativeJERHF");
+  SysName.push_back("JESRelativePtBB");
+  SysName.push_back("JESRelativePtEC1");
+  SysName.push_back("JESRelativePtEC2");
+  SysName.push_back("JESRelativePtHF");
+  SysName.push_back("JESRelativeBal");
+  SysName.push_back("JESRelativeFSR");
+  SysName.push_back("JESRelativeStatFSR");
+  SysName.push_back("JESRelativeStatEC");
+  SysName.push_back("JESRelativeStatHF");
+  SysName.push_back("JESPileUpDataMC");
+  SysName.push_back("JESPileUpPtRef");
+  SysName.push_back("JESPileUpPtBB");
+  SysName.push_back("JESPileUpPtEC1");
+  SysName.push_back("JESPileUpPtHF");
   SysName.push_back("PileUp");
   //SysName.push_back("btagjes");
   SysName.push_back("btaglf");
@@ -418,7 +445,6 @@ Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString 
     // --- Write histograms
     TString outfile;
     outfile = namefile + "_SYSNorm.root";
-  
     TFile *target  = new TFile(outfile,"RECREATE" );  
     target->cd();
 
@@ -503,7 +529,32 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   // All Systematics to be included 
   std::vector<TString> SysName;
   SysName.push_back("JER");
-  SysName.push_back("JES");
+  //SysName.push_back("JES");
+  SysName.push_back("JESAbsoluteStat");
+  SysName.push_back("JESAbsoluteScale");
+  SysName.push_back("JESAbsoluteMPFBias");
+  SysName.push_back("JESFragmentation");
+  SysName.push_back("JESSinglePionECAL");
+  SysName.push_back("JESSinglePionHCAL");
+  SysName.push_back("JESFlavorQCD");
+  SysName.push_back("JESTimePtEta");
+  SysName.push_back("JESRelativeJEREC1");
+  SysName.push_back("JESRelativeJEREC2");
+  SysName.push_back("JESRelativeJERHF");
+  SysName.push_back("JESRelativePtBB");
+  SysName.push_back("JESRelativePtEC1");
+  SysName.push_back("JESRelativePtEC2");
+  SysName.push_back("JESRelativePtHF");
+  SysName.push_back("JESRelativeBal");
+  SysName.push_back("JESRelativeFSR");
+  SysName.push_back("JESRelativeStatFSR");
+  SysName.push_back("JESRelativeStatEC");
+  SysName.push_back("JESRelativeStatHF");
+  SysName.push_back("JESPileUpDataMC");
+  SysName.push_back("JESPileUpPtRef");
+  SysName.push_back("JESPileUpPtBB");
+  SysName.push_back("JESPileUpPtEC1");
+  SysName.push_back("JESPileUpPtHF");
   SysName.push_back("PileUp");
   //SysName.push_back("btagjes");
   SysName.push_back("btaglf");
@@ -609,7 +660,7 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   for(int ns = 0; ns < Samples.size(); ns++){
     Yields samEntry = Samples.at(ns);
     if((samEntry.InDataCard).Contains("DC")){
-      fprintf(file,"\t %.1f ", samEntry.Evt[ich]);      
+      fprintf(file,"\t %.3f ", samEntry.Evt[ich]);      
     } // if(InDataCard)
   } // for(ns)
   fprintf(file,"\n");
@@ -675,10 +726,13 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
 
   fprintf(file,"theory group = ScaleRdF ISR FSR UE \n");
   fprintf(file,"btag_Shape group = btaghf btaghfsI btaghfsII btaglfsI btaglfsII btagcfII btagcfI btaglf \n");
-  fprintf(file,"Jet_Shape group = JES JER \n");
+  fprintf(file,"Jet_Shape group = JER \n");
+  fprintf(file,"JetScale_Shape group = JESAbsoluteStat JESAbsoluteScale JESAbsoluteMPFBias JESFragmentation JESSinglePionECAL JESSinglePionHCAL JESFlavorQCD JESTimePtEta JESRelativeJEREC1 JESRelativeJEREC2 JESRelativeJERHF JESRelativePtBB JESRelativePtEC1 JESRelativePtEC2 JESRelativePtHF JESRelativeBal JESRelativeFSR JESRelativeStatFSR JESRelativeStatEC JESRelativeStatHF JESPileUpDataMC JESPileUpPtRef JESPileUpPtBB JESPileUpPtEC1 JESPileUpPtHF \n");
+
   fprintf(file,"Other_Shape group = PileUp \n");
   if(DCNorm){
-    fprintf(file,"Jet_Rate  group = JES_Rate JER_Rate \n");
+    fprintf(file,"Jet_Rate  group = JER_Rate \n");
+    fprintf(file,"JetScale_Rate  group = JESAbsoluteStat_Rate JESAbsoluteScale_Rate JESAbsoluteMPFBias_Rate JESFragmentation_Rate JESSinglePionECAL_Rate JESSinglePionHCAL_Rate JESFlavorQCD_Rate JESTimePtEta_Rate JESRelativeJEREC1_Rate JESRelativeJEREC2_Rate JESRelativeJERHF_Rate JESRelativePtBB_Rate JESRelativePtEC1_Rate JESRelativePtEC2_Rate JESRelativePtHF_Rate JESRelativeBal_Rate JESRelativeFSR_Rate JESRelativeStatFSR_Rate JESRelativeStatEC_Rate JESRelativeStatHF_Rate JESPileUpDataMC_Rate JESPileUpPtRef_Rate JESPileUpPtBB_Rate JESPileUpPtEC1_Rate JESPileUpPtHF_Rate \n");
     fprintf(file,"btag_Rate  group = btaghf_Rate btaghfsI_Rate btaghfsII_Rate btaglfsI_Rate btaglfsII_Rate btagcfII_Rate btagcfI_Rate btaglf_Rate \n");
     fprintf(file,"Other_Rate  group = PileUp_Rate \n");
   }

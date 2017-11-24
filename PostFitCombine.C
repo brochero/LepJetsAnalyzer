@@ -1,5 +1,76 @@
 #include "tdrstyle.C"
 
+#include "TH1.h"
+#include "TH2.h"
+#include "TH3.h"
+#include "THStack.h"
+#include "TCanvas.h"
+#include "TFile.h"
+#include "TDirectory.h"
+#include "TStyle.h"
+#include "TSystem.h"
+#include "TString.h"
+#include "TDirectory.h"
+#include "TROOT.h"
+#include "TObject.h"
+#include "TStopwatch.h"
+#include "TLegend.h"
+#include <vector>
+#include <string>
+#include <fstream>
+#include <vector>
+#include <sys/stat.h>
+#include <iostream>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <cmath>
+#include <set>
+
+Int_t chatch = 1756;
+TColor *color = new TColor(chatch, 0.3, 0.5, 0.5, "", 0.45); // alpha = 0.5
+
+
+TH1D *HistoRatio (TH1D *hisNum, TH1D *hisDen){
+
+  //Graph Ratio Clone
+  TH1D *Ratio;
+  Ratio = (TH1D*)hisNum->Clone();
+  Ratio->Divide(hisDen);
+
+  for(int ibin=1;ibin<=Ratio->GetNbinsX();ibin++) {
+    if (Ratio->GetBinContent(ibin) == 0.0 ) {
+      Ratio->SetBinContent(ibin, 1.0);
+      Ratio->SetBinError(ibin, 0.0);
+    }
+  }
+
+  Ratio->SetFillColor(0);
+  Ratio->SetLineColor(kGray+2);
+  // Ratio->SetLineColor(kMagenta-5);
+  Ratio->SetLineWidth(1);
+  Ratio->SetTitle("");
+  
+  Ratio->GetYaxis()->SetTitle("Obs/Exp");
+  Ratio->GetYaxis()->CenterTitle();
+  Ratio->GetYaxis()->SetTitleOffset(0.15);
+  Ratio->GetYaxis()->SetTitleSize(0.16);
+  Ratio->GetYaxis()->SetLabelSize(0.15);
+  Ratio->GetYaxis()->SetNdivisions(402);
+  Ratio->GetXaxis()->SetTitle("CSV bin"); 
+  Ratio->GetXaxis()->SetNdivisions(509); //(402)
+  Ratio->GetXaxis()->SetTitleOffset(1.1);
+  Ratio->GetXaxis()->SetLabelSize(0.20);
+  Ratio->GetXaxis()->SetTitleSize(0.16);
+  
+  Ratio->SetMinimum(0.4);
+  Ratio->SetMaximum(1.6);
+
+  return Ratio;  
+
+}
+
+
 void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCard_FinalAN-v1VisPhSp_hSF-FinalAN-v1_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1_2btag"){
 
   TString inputfile = "CombineResults/StableResult-v1/" + InpDir + "/OBSERVED/mlfitobsMLF.root";
@@ -98,11 +169,24 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
       hInput[ich].push_back(htemp);
       if(ih==0) AllMC[ich]->SetHistogram((TH1D*)htemp->Clone("FirstStack"));
       if (!hNamefile.at(ih).Contains("total")) AllMC[ich] -> Add(htemp);
+      // Data
+      // Clone Histo Structure only once
+      if(ih==0){
+	hData[ich] = (TH1D *) htemp->Clone("data_"+dirname[ich]);
+	hData[ich]->Reset();
+      }
     } // for(ih)
 
-    // Data
-    hData[ich] = (TH1D *) hfile->Get("shapes_"+Plots+"/"+dirname[ich]+"/data")->Clone("data_"+dirname[ich]);
-
+    // Data TGraph
+    TGraphAsymmErrors *DataFull = (TGraphAsymmErrors *) hfile->Get("shapes_"+Plots+"/"+dirname[ich]+"/data")->Clone("data_"+dirname[ich]);
+    for(int ibin=1;ibin<=hData[ich]->GetNbinsX();ibin++){ 
+      double igb, EvtBinData, EvtErrBinData;
+      DataFull->GetPoint((ibin-1),igb,EvtBinData); 
+      hData[ich]->SetBinContent(ibin,EvtBinData);
+      EvtErrBinData = DataFull->GetErrorY((ibin-1));
+      hData[ich]->SetBinError(ibin,EvtErrBinData);
+    }
+    
     // Histograms for each region
     for(int ih=0;ih<hNamefile.size();ih++){
 
@@ -125,12 +209,14 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
       RegNum.Form("%i",ireg);
       hData_reg[ich][ireg] = new TH1D ("hData_"+chname[ich]+RegNum,"Data Histogram "+titlechname[ich]+" for "+RegNum,20,0,20);       
 
-      // Data TGraph
-      TGraphAsymmErrors *DataTemp = (TGraphAsymmErrors *) hfile->Get("shapes_"+Plots+"/"+dirname[ich]+"/data")->Clone("data_"+dirname[ich]);
+      // Data
       for(int ibin=1;ibin<=20;ibin++){ 
-	double igb, EvtBinData;
-	DataTemp->GetPoint(((ibin-1)+(20*ireg)),igb,EvtBinData); 
+	double igb, EvtBinData, EvtErrBinData;
+	DataFull->GetPoint(((ibin-1)+(20*ireg)),igb,EvtBinData); 
 	hData_reg[ich][ireg]->SetBinContent(ibin,EvtBinData);	  
+	EvtErrBinData = DataFull->GetErrorY((ibin-1));
+	hData_reg[ich][ireg]->SetBinError(ibin,EvtErrBinData);
+
 	hData_reg[ich][ireg]->SetMarkerStyle(20);
 	hData_reg[ich][ireg]->SetMarkerSize(0.5);
       } // for(ibin)
@@ -142,35 +228,84 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
     // -----------
 
     TH1D *hstyle = new TH1D ("","",
-			     hInput[0].at(0)->GetNbinsX(),
-			     hInput[0].at(0)->GetBinLowEdge (1),
-			     hInput[0].at(0)->GetBinLowEdge (hInput[0].at(0)->GetNbinsX()+1));
+			     hData[ich]->GetNbinsX(),
+			     hData[ich]->GetBinLowEdge (1),
+			     hData[ich]->GetBinLowEdge (hData[ich]->GetNbinsX()+1));
     
     hstyle -> SetMaximum(1.1*hInput[ich].at(12)->GetMaximum());
+    hstyle -> GetYaxis()->SetTitleOffset(0.6);
+    hstyle -> GetYaxis()->SetTitleSize(0.05);
+    hstyle -> GetYaxis()->SetLabelSize(0.05);
     hstyle -> GetYaxis()->SetTitle("Events"); 
-    hstyle -> GetXaxis()->SetTitle("CSV bin"); 
     
     
     hData[ich] -> SetMarkerStyle(20); 
-    hData[ich] -> SetMarkerSize(0.7); 
+    hData[ich] -> SetMarkerSize(0.4); 
     hData[ich] -> SetLineWidth(1); 
     hData[ich] -> SetTitle(""); 
-
     
     
     TCanvas *cPlots;//histos
-    cPlots = new TCanvas("cPlots" ,"Plots");
+    cPlots = new TCanvas("cPlots"+dirname[ich] ,"Plots");
     cPlots->Divide(1,2);
+    TPad    *pad[4], *glpad[2];
+    // Global Pad
+    glpad[0] = (TPad*)cPlots->GetPad(1);
+    glpad[0]->Divide(1,2);
+    glpad[1] = (TPad*)cPlots->GetPad(2);
+    glpad[1]->Divide(1,2);
+
+    //Plot Pad
+    pad[0] = (TPad*)glpad[0]->GetPad(1);
+    pad[0]->SetPad(0.01, 0.23, 0.99, 0.99);
+    pad[0]->SetTopMargin(0.1);
+    pad[0]->SetRightMargin(0.04);
     
-    cPlots->cd(1);
+    //Ratio Pad
+    pad[1] = (TPad*)glpad[0]->GetPad(2);
+    pad[1]->SetPad(0.01, 0.02, 0.99, 0.3);
+    gStyle->SetGridWidth(1);
+    gStyle->SetGridColor(14);
+    pad[1]->SetGridx();
+    pad[1]->SetGridy();
+    pad[1]->SetTopMargin(0.05);
+    pad[1]->SetBottomMargin(0.4);
+    pad[1]->SetRightMargin(0.04);
+
+    //Plot Pad
+    pad[2] = (TPad*)glpad[1]->GetPad(1);
+    pad[2]->SetPad(0.01, 0.23, 0.99, 0.99);
+    pad[2]->SetTopMargin(0.1);
+    pad[2]->SetRightMargin(0.04);
+    
+    //Ratio Pad
+    pad[3] = (TPad*)glpad[1]->GetPad(2);
+    pad[3]->SetPad(0.01, 0.02, 0.99, 0.3);
+    gStyle->SetGridWidth(1);
+    gStyle->SetGridColor(14);
+    pad[3]->SetGridx();
+    pad[3]->SetGridy();
+    pad[3]->SetTopMargin(0.05);
+    pad[3]->SetBottomMargin(0.4);
+    pad[3]->SetRightMargin(0.04);
+    
+    pad[0]->cd();
+
     hstyle->Draw();
     AllMC[ich] -> Draw("HISTSAME"); 
     hData[ich] -> Draw("PSAME"); 
     
+    TH1D *RatioFull = HistoRatio (hData[ich] , (TH1D*) AllMC[ich]->GetStack()->Last());
+    TGraphErrors *gRatioFull = new TGraphErrors(RatioFull);
+    gRatioFull->SetFillStyle(1001);
+    gRatioFull->SetFillColor(chatch);
+    gRatioFull->SetName("gRatioFull");
+
+
     TLegend *leg;
     float legPos[4] = {0.70,  // x_o
-		       0.64,  // y_o
-		       0.89,  // x_f
+		       0.40,  // y_o
+		       0.94,  // x_f
 		       0.87}; // y_f
     
     leg = new TLegend(legPos[0],legPos[1],legPos[2],legPos[3]);
@@ -181,19 +316,21 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
     leg->SetTextSize(0.03);
     leg->SetNColumns(2);
   
-    leg->AddEntry(hData[ich],      "Data","PL");
-    leg->AddEntry(hInput[ich].at(11),       "Z+Jets","F");
-    leg->AddEntry(hInput[ich].at(10),          "VV","F");
+    leg->AddEntry(hData[ich],         "Data","PL");
+    leg->AddEntry(hInput[ich].at(11), "Z+Jets","F");
+    leg->AddEntry(hInput[ich].at(10), "VV","F");
     leg->AddEntry(hInput[ich].at(9),  "Single t","F");
-    leg->AddEntry(hInput[ich].at(8),         "QCD","F");
-    leg->AddEntry(hInput[ich].at(7),       "W+Jets","F");
-    leg->AddEntry(hInput[ich].at(6),      "t#bar{t}+V","F");
-    leg->AddEntry(hInput[ich].at(5),      "t#bar{t}+H","F");
-    leg->AddEntry(hInput[ich].at(4),     "t#bar{t}+other","F");
-    leg->AddEntry(hInput[ich].at(3),"t#bar{t}+LF","F");
-    leg->AddEntry(hInput[ich].at(2),"t#bar{t}+cc","F");
-    leg->AddEntry(hInput[ich].at(1), "t#bar{t}+bj","F");
-    leg->AddEntry(hInput[ich].at(0),"t#bar{t}+bb","F");
+    leg->AddEntry(hInput[ich].at(8),  "QCD","F");
+    leg->AddEntry(hInput[ich].at(7),  "W+Jets","F");
+    leg->AddEntry(hInput[ich].at(6),  "t#bar{t}+V","F");
+    leg->AddEntry(hInput[ich].at(5),  "t#bar{t}+H","F");
+    leg->AddEntry(hInput[ich].at(4),  "t#bar{t}+other","F");
+    leg->AddEntry(hInput[ich].at(3),  "t#bar{t}+LF","F");
+    leg->AddEntry(hInput[ich].at(2),  "t#bar{t}+cc","F");
+    leg->AddEntry(hInput[ich].at(1),  "t#bar{t}+bj","F");
+    leg->AddEntry(hInput[ich].at(0),  "t#bar{t}+bb","F");
+    leg->AddEntry(gRatioFull,         "Stat. Unc.","F");
+
     leg->Draw("SAME");
     
     TLatex *titlePr;      
@@ -230,9 +367,8 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
     chtitle->SetTextSizePixels(24);
     chtitle->Draw("SAME");
 
-
-    cPlots->cd(2);
-    cPlots->cd(2)->SetLogy();
+    pad[2]->cd();
+    pad[2]->cd()->SetLogy();
     
     TH1D *hstyleLog = (TH1D *)hstyle->Clone();
     hstyleLog -> SetMaximum(5.0*hInput[ich].at(12)->GetMaximum());
@@ -245,53 +381,90 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
     title->Draw("SAME");
     chtitle->Draw("SAME");
 
+    pad[1]->cd();
+    RatioFull ->Draw("HIST");
+    gRatioFull->Draw("e2");
+    RatioFull ->Draw("HISTSAME");
+
+    pad[3]->cd();
+    RatioFull ->Draw("HIST");
+    gRatioFull->Draw("e2");
+    RatioFull ->Draw("HISTSAME");
+
     TString dirfigname_pdf = "CombineResults/Figures_" + InpDir + Plots + "/";
     // make a dir if it does not exist!!
     gSystem->mkdir(dirfigname_pdf, kTRUE);
 
     cPlots->SaveAs(dirfigname_pdf + "FullHisto_" + dirname[ich] + "_NormLog.pdf");
     
-
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
     // Plots by Regions
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
     int ireg = 0;
-    for(int ican=0;ican<4;ican++){
+    for(int ican=0;ican<5;ican++){
 
       TString CanNum;
       CanNum.Form("%i",ican); 
       TCanvas *cPlots_reg;//histos
-      cPlots_reg = new TCanvas("cPlots_reg" ,"Plots By regions");
-      cPlots_reg->Divide(2,5);
+      cPlots_reg = new TCanvas("cPlots_reg" + CanNum + dirname[ich] ,"Plots By regions");
+      cPlots_reg->Divide(2,2);
       
-      for(int icr=1;icr<=10;icr+=2){
-             
+      for(int icr=1;icr<=4;icr++){
+
+        //cPlots_reg->cd(icr);
+
+	TPad *glpad_reg = (TPad*)cPlots_reg->cd(icr);
+	glpad_reg->Divide(2,1);
+	TPad *pad_reg[2];
+	//Plot Pad
+	pad_reg[0] = (TPad*)glpad_reg->GetPad(1);
+	pad_reg[0]->SetPad(0.01, 0.23, 0.99, 0.99);
+	pad_reg[0]->SetTopMargin(0.1);
+	pad_reg[0]->SetRightMargin(0.04);	
+	//Ratio Pad
+	pad_reg[1] = (TPad*)glpad_reg->GetPad(2);
+	pad_reg[1]->SetPad(0.01, 0.02, 0.99, 0.3);
+	gStyle->SetGridWidth(1);
+	gStyle->SetGridColor(14);
+	pad_reg[1]->SetGridx();
+	pad_reg[1]->SetGridy();
+	pad_reg[1]->SetTopMargin(0.05);
+	pad_reg[1]->SetBottomMargin(0.4);
+	pad_reg[1]->SetRightMargin(0.04);
+
+	pad_reg[0]->cd();
+	pad_reg[0]->SetLogy();
 	TH1D *hstyle_reg = (TH1D*)AllMC_reg[ich][ireg]->GetHistogram(); 
 	hstyle_reg -> Reset();
-	hstyle_reg -> SetMaximum(1.6*hData_reg[ich][ireg]->GetMaximum());
+	hstyle_reg -> SetMaximum(5.0*hData_reg[ich][ireg]->GetMaximum());
+	hstyle_reg -> GetYaxis()->SetTitleOffset(0.8);
+	hstyle_reg -> GetYaxis()->SetTitleSize(0.05);
+	hstyle_reg -> GetYaxis()->SetLabelSize(0.05);
+	hstyle_reg -> GetYaxis()->SetTitle("Events"); 
 
-	cPlots_reg->cd(icr);
+	pad_reg[0]->cd();
 	hstyle_reg->Draw();
 	AllMC_reg[ich][ireg] -> Draw("HISTSAME"); 
 	hData_reg[ich][ireg] -> Draw("E1SAME"); 
 	titlePr->Draw("SAME");
 	title->Draw("SAME");
-	chtitle->Draw("SAME");
+	chtitle->Draw("SAME");	
+
+	TH1D *RatioFull_reg = HistoRatio (hData_reg[ich][ireg] , (TH1D*) AllMC_reg[ich][ireg]->GetStack()->Last());
+	TGraphErrors *gRatioFull_reg = new TGraphErrors(RatioFull_reg);
+	gRatioFull_reg->SetFillStyle(1001);
+	gRatioFull_reg->SetFillColor(chatch);
+	gRatioFull_reg->SetName("gRatioFull");
 	
-	//AllMC_reg[ich][ireg] -> Draw("hist"); 
-
-	TH1D *hstyleLog_reg = (TH1D *)hstyle_reg->Clone();
-      	hstyleLog_reg -> SetMaximum(5.0*hData_reg[ich][ireg]->GetMaximum());
-	hstyleLog_reg -> SetMinimum(1);
-
-	cPlots_reg->cd(icr+1);
-	cPlots_reg->cd(icr+1)->SetLogy();      
-	hstyleLog_reg -> Draw();      
-	AllMC_reg[ich][ireg] -> Draw("HISTSAME"); 
-	hData_reg[ich][ireg] -> Draw("E1SAME"); 
-	titlePr->Draw("SAME");
-	title->Draw("SAME");
-	chtitle->Draw("SAME");
-
-	// AllMC_reg[ich][ireg] -> Draw("hist"); 
+	pad_reg[1]->cd();
+	RatioFull_reg->GetYaxis()->SetTitleOffset(0.25);	
+	RatioFull_reg->Draw("HIST");
+	gRatioFull_reg->Draw("e2");
+	RatioFull_reg->Draw("HISTSAME");
 	
 	ireg++;
       } // for(ireg) 

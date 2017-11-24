@@ -451,7 +451,6 @@ int main(int argc, const char* argv[]){
     
   // --- Write histograms
   TString outfname=dirname + "/hAcc-" + hname + "_" + fname  + ".root";
-  //TString outfname=dirname + "/hAcc-" + hname + "_" + fname + ttbar_id + ".root";
   TFile *target  = new TFile(outfname,"RECREATE" );  
   
   for (int icat=ttjj; icat<=tt; icat++){

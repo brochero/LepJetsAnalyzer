@@ -28,6 +28,7 @@ void TheoSystVar(TString FileVersion, TString ttbarcat = "ttbb", TString SysName
   gStyle->SetPadTickX(1);
 
   int sysvarcolor[3] = {1,2,4};   
+  int sysvarstyle[3] = {1,2,3};   
 
   TString chname[2]      = {"mujets","ejets"};    
   TString titlechname[2] = {"#mu+Jets","e+Jets"}; 
@@ -59,6 +60,7 @@ void TheoSystVar(TString FileVersion, TString ttbarcat = "ttbb", TString SysName
 	for(int ibin=1;ibin<=20;ibin++){
 	  htempreg->SetBinContent(ibin,htemp->GetBinContent(ibin+20*ireg));	  
 	  htempreg->SetLineColor(sysvarcolor[is]);
+	  htempreg->SetLineStyle(sysvarstyle[is]);
 	} // for(ibin)
 	histo[ich][is].push_back(htempreg);
       } // for(ireg)
@@ -69,24 +71,7 @@ void TheoSystVar(TString FileVersion, TString ttbarcat = "ttbb", TString SysName
     // Plotting
     // -----------
         
-    TLegend *leg;
-    float legPos[4] = {0.70,  // x_o
-		       0.64,  // y_o
-		       0.89,  // x_f
-		       0.87}; // y_f
-    
-    leg = new TLegend(legPos[0],legPos[1],legPos[2],legPos[3]);
-    leg->SetFillColor(0);
-    leg->SetLineColor(0);
-    leg->SetLineWidth(0.0);
-    leg->SetTextFont(62);
-    leg->SetTextSize(0.08);
-    
-    leg->SetHeader(SysName + " variation");
-    leg->AddEntry(histo[ich][0].at(0),       "Nominal","L");
-    leg->AddEntry(histo[ich][1].at(0),       "Up",     "L");
-    leg->AddEntry(histo[ich][2].at(0),       "Down",   "L");
-    
+        
     TLatex *titlePr;      
     titlePr  = new TLatex(-20.,50.,"Preliminary");
     titlePr->SetNDC();
@@ -125,20 +110,41 @@ void TheoSystVar(TString FileVersion, TString ttbarcat = "ttbb", TString SysName
 
     // Plots by Regions
     int ireg = 0;
-    for(int ican=0;ican<4;ican++){
-
+    for(int ican=0;ican<5;ican++){
+      
       TString CanNum;
       CanNum.Form("%i",ican); 
       TCanvas *cPlots_reg;//histos
       cPlots_reg = new TCanvas("cPlots_reg" ,"Plots By regions");
-      cPlots_reg->Divide(2,5);
+      cPlots_reg->Divide(2,2);
       
-      for(int icr=1;icr<=10;icr+=2){
-             
+      for(int icr=1;icr<=4;icr++){
+
+	TLegend *leg;
+	float legPos[4] = {0.55,  // x_o
+			   0.60,  // y_o
+			   0.89,  // x_f
+			   0.77}; // y_f
+    
+	leg = new TLegend(legPos[0],legPos[1],legPos[2],legPos[3]);
+	leg->SetFillColor(0);
+	leg->SetLineColor(0);
+	leg->SetLineWidth(0.0);
+	leg->SetTextFont(62);
+	leg->SetTextSize(0.04);
+	TString RegionNumber = "Region " + std::to_string(ireg);
+	leg->SetHeader(SysName + " variation");
+	leg->AddEntry((TObject*)0,RegionNumber,"");
+	leg->AddEntry(histo[ich][0].at(0),       "Nominal","L");
+	leg->AddEntry(histo[ich][1].at(0),       "Up",     "L");
+	leg->AddEntry(histo[ich][2].at(0),       "Down",   "L");
+	
 	TH1D *hstyle_reg = (TH1D*)histo[0][0].at(0)->Clone("style"); 
 	hstyle_reg -> Reset();
 	hstyle_reg -> SetMaximum(1.6*histo[ich][0].at(ireg)->GetMaximum());
-
+	hstyle_reg -> GetYaxis()->SetTitle("Events");
+	hstyle_reg -> GetXaxis()->SetTitle("CSV Bin Number");
+	
 	cPlots_reg->cd(icr);
 	hstyle_reg->Draw();
 	histo[ich][0].at(ireg) -> Draw("SAME"); 
@@ -149,24 +155,11 @@ void TheoSystVar(TString FileVersion, TString ttbarcat = "ttbb", TString SysName
 	chtitle->Draw("SAME");
 	leg->Draw("SAME");
  	
-	TH1D *hstyleLog_reg = (TH1D *)hstyle_reg->Clone();
-      	hstyleLog_reg -> SetMaximum(5.0*histo[ich][0].at(ireg)->GetMaximum());
-	hstyleLog_reg -> SetMinimum(1);
-
-	cPlots_reg->cd(icr+1);
-	cPlots_reg->cd(icr+1)->SetLogy();      
-	hstyleLog_reg -> Draw();      
-	histo[ich][0].at(ireg) -> Draw("SAME"); 
-	histo[ich][1].at(ireg) -> Draw("SAME"); 
-	histo[ich][2].at(ireg) -> Draw("SAME"); 
-	titlePr->Draw("SAME");
-	title->Draw("SAME");
-	chtitle->Draw("SAME");
-
 	ireg++;
       } // for(ireg) 
 
-      cPlots_reg->SaveAs(dirfigname_pdf + "RegionHisto_" + CanNum + "_" + chname[ich] + "_NormLog.pdf");
+      //cPlots_reg->SaveAs(dirfigname_pdf + "RegionHisto_" + CanNum + "_" + chname[ich] + ".pdf");
+      cPlots_reg->SaveAs(dirfigname_pdf + "RegionHisto_" + CanNum + "_" + chname[ich] + ".png");
     } // for(ican) 
 
   }// for(ich)

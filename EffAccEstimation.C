@@ -24,7 +24,7 @@ TString catname[6] = {"ttjj","ttbb","ttbj","ttcc","ttLF","tt"};
 
 TString tabname[2] = {"tab","systab"};
 
-enum syssource{ScaleRnF=0, ScaleRuF, ScaleRdF, ISR, FSR, UE};
+enum syssource{ScaleRnF=0, ScaleRuF, ScaleRdF, ISR, FSR, UE, EDR, gCR, gCREDR, QCDCREDR};
 
 TString ToString (double number, double precision = 1.){
   ostringstream ostemp;  
@@ -107,28 +107,28 @@ TString SysTableAccEffEntry (Cat prjj, Cat prbb, int ch){
 
 }
 
-std::map<TString, TString> EffAccCreator(TString systname, TString Variation1, TString Variation2, TString basename){
+std::map<TString, TString> EffAccCreator(TString systname, TString Variation1, TString Variation2, TString FileVersion, TString basename){
   
   std::map<TString, TString>  Tables;
   Cat ttcat[6];
 
   for(int icat=ttjj; icat<=tt; icat++){  
 
-    TString namefile = basename + catname[icat];
+    TString namefile = FileVersion + "_" + basename + catname[icat];
 
     cout << namefile  << endl;
 
     TFile *file[2][3] = {NULL, NULL, NULL,
 			 NULL, NULL, NULL};
     // GEN
-    file[GEN][Nom]  = TFile::Open("TopResults/hAcc-" + namefile + ".root");
-    file[GEN][Down] = TFile::Open("TopResults/hAcc-" + namefile +  "_SYS_" + systname + Variation1 + ".root");
-    file[GEN][Up]   = TFile::Open("TopResults/hAcc-" + namefile +  "_SYS_" + systname + Variation2 + ".root");
+    file[GEN][Nom]  = TFile::Open("TopResults/" + FileVersion + "/hAcc-" + namefile + ".root");
+    file[GEN][Down] = TFile::Open("TopResults/" + FileVersion + "/hAcc-" + namefile +  "_SYS_" + systname + Variation1 + ".root");
+    file[GEN][Up]   = TFile::Open("TopResults/" + FileVersion + "/hAcc-" + namefile +  "_SYS_" + systname + Variation2 + ".root");
 
     // RECO
-    file[RECO][Nom]  = TFile::Open("TopResults/hSF-" + namefile + ".root");
-    file[RECO][Down] = TFile::Open("TopResults/hSF-" + namefile +  "_SYS_" + systname + Variation1 + ".root");
-    file[RECO][Up]   = TFile::Open("TopResults/hSF-" + namefile +  "_SYS_" + systname + Variation2 + ".root");
+    file[RECO][Nom]  = TFile::Open("TopResults/" + FileVersion + "/hSF-" + namefile + ".root");
+    file[RECO][Down] = TFile::Open("TopResults/" + FileVersion + "/hSF-" + namefile +  "_SYS_" + systname + Variation1 + ".root");
+    file[RECO][Up]   = TFile::Open("TopResults/" + FileVersion + "/hSF-" + namefile +  "_SYS_" + systname + Variation2 + ".root");
 
 
     TH1D *RECOYi[3]     = {NULL,NULL,NULL};
@@ -139,13 +139,20 @@ std::map<TString, TString> EffAccCreator(TString systname, TString Variation1, T
 
     TString dirname[3];
     dirname[Nom]  = "central";
-    dirname[Down] = systname + Variation1;
-    dirname[Up]   = systname + Variation2;
-
     TString hyieldname[3];
     hyieldname[Nom]  = "";
-    hyieldname[Down] = "_" + systname + Variation1;
-    hyieldname[Up]   = "_" + systname + Variation2;
+    if(systname.Contains("UE") || systname.Contains("SR") || systname.Contains("ScaleR")){
+      dirname[Down] = systname + Variation1;
+      dirname[Up]   = systname + Variation2;
+      hyieldname[Down] = "_" + systname + Variation1;
+      hyieldname[Up]   = "_" + systname + Variation2;
+    }
+    else {
+      dirname[Down] = "central";
+      dirname[Up]   = "central";
+      hyieldname[Down] = "";
+      hyieldname[Up]   = "";
+    }
 
     for (unsigned int ivar=Nom; ivar<=Up; ivar++){
 
@@ -153,7 +160,7 @@ std::map<TString, TString> EffAccCreator(TString systname, TString Variation1, T
 
       RECOYi[ivar]     = (TH1D*)file[RECO][ivar]->Get(dirname[ivar]+"/Yields" + hyieldname[ivar])         ->Clone("RECO"   + dirname[ivar]);  
       RECOYiNoWe[ivar] = (TH1D*)file[RECO][ivar]->Get(dirname[ivar]+"/YieldsNoWeights" + hyieldname[ivar])->Clone("RECONW" + dirname[ivar]);  
-    
+
       GENYiFull[ivar]  = (TH2D*)file[GEN][ivar]->Get("Yields_FullPh-Sp_" + catname[icat])->Clone("GENFull" + dirname[ivar]);  
       GENYiVis [ivar]  = (TH2D*)file[GEN][ivar]->Get("Yields_VisPh-Sp_"  + catname[icat])->Clone("GENVis"  + dirname[ivar]);  
     
@@ -167,7 +174,6 @@ std::map<TString, TString> EffAccCreator(TString systname, TString Variation1, T
     
       // Last bin has the normalization factor (NormW)
       ttcat[icat].NormW[ivar] =  RECOYi[ivar]->GetBinContent(RECOYi[ivar]->GetNbinsX());
-    
       for (unsigned int ich=0; ich<=2; ich++){
 	// -----------------------------
 	// -- Full Ph-Sp
@@ -229,7 +235,7 @@ void CreateTable (std::map<TString, TString>  tLine[6], int tch, int tcat, TStri
   fprintf(Yields_Sys,"\\multicolumn{9}{|c|}{Process: %s -- Channel: %s } \\\\ \\hline \n",
 	  catname[tcat].Data(), chname[tch].Data());
 
-  for(int isys=ScaleRnF; isys<=UE; isys++){
+  for(int isys=ScaleRnF; isys<=QCDCREDR; isys++){
     fprintf(Yields_Sys,"%s \n",
 	    tLine[isys][tabname[0]+catname[tcat]+chname[tch]+varname[Nom]].Data());
     fprintf(Yields_Sys,"%s \n",
@@ -259,7 +265,7 @@ void CreateComTable (std::map<TString, TString>  tLine[6], int tch, int tcat, TS
   fprintf(Comp_Sys,"\\multicolumn{13}{|c|}{Channel: %s } \\\\ \\hline \n",
 	  chname[tch].Data());
 
-  for(int isys=ScaleRnF; isys<=UE; isys++){
+  for(int isys=ScaleRnF; isys<=QCDCREDR; isys++){
 
     fprintf(Comp_Sys,"%s \n",
   	    tLine[isys][tabname[1]+catname[0]+catname[tcat]+chname[tch]].Data() );    
@@ -276,41 +282,71 @@ void CreateComTable (std::map<TString, TString>  tLine[6], int tch, int tcat, TS
 }
 
 
-void EffAccEstimation(TString fbasename = "FinalAN-v1_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1", TString ttbarname = "ttbar_PowhegPythia"){
+void EffAccEstimation(TString FileVersion = "JESCom-v0", TString fbasename = "Tree_LepJets_FallSkim_v8-0-6_Spring16-80X_36814pb-1", TString ttbarname = "ttbar_PowhegPythia"){
 
   
-  std::map<TString, TString>  fTables[6]; // [systematics]
+  std::map<TString, TString>  fTables[10]; // [systematics]
   
   fTables[ISR] = EffAccCreator("ISR",
 			       "Down",
 			       "Up",
+			       FileVersion, 
 			       fbasename + "_" + ttbarname);
   
   fTables[FSR] = EffAccCreator("FSR",
 			       "Down",
 			       "Up",
+			       FileVersion, 
 			       fbasename + "_" + ttbarname);
   
   fTables[UE] = EffAccCreator("UE",
 			      "Down",
 			      "Up",
+			      FileVersion, 
 			      fbasename + "_" + ttbarname);
+
+  fTables[EDR] = EffAccCreator("EDR",
+			      "",
+			      "",
+			      FileVersion, 
+			      fbasename + "_" + ttbarname);
+
+  fTables[gCR] = EffAccCreator("gCR",
+			       "",
+			       "",
+			       FileVersion, 
+			       fbasename + "_" + ttbarname);
+  
+  fTables[gCREDR] = EffAccCreator("gCREDR",
+				  "",
+				  "",
+				  FileVersion, 
+				  fbasename + "_" + ttbarname);
+
+  fTables[QCDCREDR] = EffAccCreator("QCDCREDR",
+				    "",
+				    "",
+				    FileVersion, 
+				    fbasename + "_" + ttbarname);
 
   ttbarname = "ttbar_LepJetsPowhegPythia";
   
   fTables[ScaleRnF] = EffAccCreator("ScaleRnF",
 				    "Down",
 				    "Up",
+				    FileVersion, 
 				    fbasename + "_" + ttbarname);
   
   fTables[ScaleRuF] = EffAccCreator("ScaleRuF",
 				    "Nom",
 				    "Up",
+				    FileVersion, 
 				    fbasename + "_" + ttbarname);
   
   fTables[ScaleRdF] = EffAccCreator("ScaleRdF",
 				    "Up",
 				    "Down",
+				    FileVersion, 
 				    fbasename + "_" + ttbarname);
   
   

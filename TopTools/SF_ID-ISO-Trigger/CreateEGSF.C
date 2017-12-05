@@ -2,12 +2,16 @@
 
 void CreateEGSF(){
 
+  gStyle->SetOptStat(kFALSE);
+
+
   TH1::SetDefaultSumw2(kTRUE);
 
   // Lepton SFs: ID and ISO with stat. + syst. Errors
 
-  TFile *EGSF_RECO  = TFile::Open("EG_RECO_Moriond17.root");
-  TFile *EGSF_ID    = TFile::Open("EG_CutBasedMedium_Moriond17.root");  
+  TFile *EGSF_RECO = TFile::Open("EG_RECO_Moriond17.root");
+  TFile *EGSF_ID   = TFile::Open("EG_CutBasedTight_Moriond17.root");  
+  TFile *EGSF_Tr   = TFile::Open("EG_HLT_Ele32_eta2p1_WPTight_Gsf_FullRunRange.root");  
 
   if( !EGSF_RECO  || !EGSF_ID ){
     std::cerr << "ERROR [SF]: Could not open SF files!!!"  << std::endl;
@@ -16,6 +20,7 @@ void CreateEGSF(){
 
   TH2F *hEG_RECO = (TH2F*) EGSF_RECO->Get("EGamma_SF2D")->Clone("hEG_RECO");
   TH2F *hEG_ID   = (TH2F*) EGSF_ID  ->Get("EGamma_SF2D")->Clone("hEG_ID");
+  TH2F *hEG_Tr   = (TH2F*) EGSF_Tr  ->Get("SF")->Clone("hEG_Tr");
 
 
   if(!hEG_RECO || !hEG_ID){
@@ -59,7 +64,7 @@ void CreateEGSF(){
   std::cout << "Number of X-axis bins (eta) = " << Nbinmueta_RECO << std::endl; 
   std::cout << "Number of Y-axis bins (pT)  = " << NbinmupT_RECO << std::endl; 
   std::cout << "-------------------------------\n " << std::endl; 
-    
+  
   double Vbinmueta_RECO[31]; // muon bin eta values
   double VbinmupT_RECO[2];   // muon bin pT values
 
@@ -73,6 +78,7 @@ void CreateEGSF(){
 
   for(int nbx=0; nbx <= Nbinmueta_RECO; nbx++) cout << Vbinmueta_RECO[nbx] << endl;  
   for(int nby=0; nby <= NbinmupT_RECO;  nby++) cout << VbinmupT_RECO[nby] << endl;  
+
 
   double Vbinmueta[33] = {
     -2.5,
@@ -134,8 +140,6 @@ void CreateEGSF(){
 
 
   TH2F *h2D_EG_ID = new TH2F("h2D_EG_ID","Electron ID",32, Vbinmueta, NbinmupT_ID, VbinmupT_ID);
-  TH2F *h2D_EG_Tr = new TH2F("h2D_EG_Tr","Single Electron Trigger",32, Vbinmueta, NbinmupT_ID, VbinmupT_ID);
-  
   
   for(int nby=1; nby <= NbinmupT_ID; nby++){
     
@@ -147,9 +151,7 @@ void CreateEGSF(){
       
       h2D_EG_ID->SetBinContent(nbx_,nby,hCon);
       h2D_EG_ID->SetBinError(nbx_,nby,hConErr);
-     
-      h2D_EG_Tr->SetBinContent(nbx_,nby,1.);
-      
+           
       float LowB  =  hEG_ID->GetXaxis()->GetBinLowEdge(nbx+1); 
       float LowB_ =  h2D_EG_ID->GetXaxis()->GetBinLowEdge(nbx_+1); 
       
@@ -157,7 +159,6 @@ void CreateEGSF(){
 	nbx_++;
 	h2D_EG_ID->SetBinContent(nbx_,nby,hCon);
 	h2D_EG_ID->SetBinError(nbx_,nby,hConErr);
-	h2D_EG_Tr->SetBinContent(nbx_,nby,1.);
 	LowB_ =  h2D_EG_ID->GetXaxis()->GetBinLowEdge(nbx_+1);
       }
       
@@ -165,6 +166,8 @@ void CreateEGSF(){
     }
     
   }
+  
+  TH2F *h2D_EG_Tr = (TH2F*)hEG_Tr->Clone("h2D_EG_Tr");
   
 
   // --------------------------------------------------------
@@ -174,20 +177,25 @@ void CreateEGSF(){
   h2D_EGSF->Multiply(h2D_EG_RECO);
 
   TCanvas *cEG = new TCanvas("cEG","Electron SF");
-  cEG->Divide(3,2);
+  cEG->Divide(2,2);
 
   cEG->cd(1);
   h2D_EG_RECO->Draw("LEGO2");
   cEG->cd(2);
+  hEG_RECO->SetTitle("Electron RECO");
   hEG_RECO->Draw("LEGO2");
   cEG->cd(3);
   hEG_RECO->Draw("COLTEXT");
   cEG->cd(4);
   h2D_EG_ID->Draw("LEGO2");
   cEG->cd(5);
+  hEG_ID->SetTitle("Electron ID");
   hEG_ID->Draw("LEGO2");
   cEG->cd(6);
   hEG_ID->Draw("COLTEXT");
+
+  cEG->SaveAs("EG_SF_RECO_ID.pdf");
+  
   
   TCanvas *cEGTot = new TCanvas("cEGTot","Electron SF");
   cEGTot->Divide(2,1);
@@ -198,6 +206,8 @@ void CreateEGSF(){
   cEGTot->cd(2);
   h2D_EGSF->Draw("COLTEXT");
 
+  cEGTot->SaveAs("EG_SF_Total.pdf");
+
   TCanvas *cEGTr = new TCanvas("cEGTr","Electron SF");
   cEGTr->Divide(2,1);
 
@@ -206,6 +216,8 @@ void CreateEGSF(){
 
   cEGTr->cd(2);
   h2D_EG_Tr->Draw("COLTEXT");
+
+  cEGTr->SaveAs("EG_SFTr.pdf");
 
 
   TFile *target_EG  = new TFile("ElectronSF_IDISO_Trigger_POGMoriond17.root","RECREATE" );

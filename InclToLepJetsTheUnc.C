@@ -34,6 +34,8 @@ void Createhisto(TString SelCut, TString HeadFile, TString CatFile){
   TString SysNameVar[2] = {"Up","Down"};
 
   // values from systematic tables (better way to do it?)
+  // Variations are not +/- for Up/Down!!!
+
   m_EffCorrFactor["ttbbISR"] = 0.0422;
   m_EffCorrFactor["ttbbFSR"] = 0.0894;
   m_EffCorrFactor["ttbbUE"]  = 0.0268;
@@ -111,14 +113,22 @@ void Createhisto(TString SelCut, TString HeadFile, TString CatFile){
 	// Coparison Bin/Bin
 	for(int ibin=1; ibin<=hiinCentral->GetNbinsX(); ibin++){
 	  
-	  float FracVar = (hiinCentral->GetBinContent(ibin) - hiSyst->GetBinContent(ibin)); 
+	  float FracVar;
+	  // Correct sign in the variation
+	  if(SysNameVar[isysvar] == "Down")
+	    FracVar = -1.0 * (hiinCentral->GetBinContent(ibin) - hiSyst->GetBinContent(ibin));
+	  if(SysNameVar[isysvar] == "Up")
+	    FracVar =  1.0 * (hiSyst->GetBinContent(ibin)      - hiinCentral->GetBinContent(ibin));
 	  
-	  if(hiinCentral->GetBinContent(ibin) < 0.5)
-	    // Keep the full variation if the central bin value is too low
+	  if(hiinCentral->GetBinContent(ibin) < 0.5){
+	    // Keep the full syst. variation if the central bin value is too low
 	    hiljSyst->SetBinContent(ibin, hiSyst->GetBinContent(ibin));  
+	    hiljSyst->SetBinError  (ibin, hiSyst->GetBinError  (ibin));  
+	  }
 	  else{ 
-	    FracVar = FracVar/hiinCentral->GetBinContent(ibin);
-	    hiljSyst->SetBinContent(ibin, ((1.0-FracVar)*hiljSyst->GetBinContent(ibin)));
+	    FracVar = 1.0 + FracVar/hiinCentral->GetBinContent(ibin);
+	    hiljSyst->SetBinContent(ibin, (FracVar*hiljSyst->GetBinContent(ibin)));
+	    hiljSyst->SetBinError  (ibin, (FracVar*hiljSyst->GetBinError  (ibin)));
 	  }
 	  // Debug
 	  // if (hiSyst->GetBinError(ibin) != 0.0) cout << "Yields Error for " << SysName.at(isys) + SysNameVar[isysvar] << " = " << hiljSyst->GetBinError(ibin)  << " Original = " << hiSyst->GetBinError(ibin) << endl;
@@ -126,11 +136,11 @@ void Createhisto(TString SelCut, TString HeadFile, TString CatFile){
 
 	// Include the change of the efficiency in the yields 
 	float effvar = 1.0;
-	if(SysNameVar[isysvar] == "Down") effvar = (1.0 - m_EffCorrFactor[CatFile + SysName.at(isys)]);
-	if(SysNameVar[isysvar] == "Up")   effvar = (1.0 + m_EffCorrFactor[CatFile + SysName.at(isys)]);
+	// if(SysNameVar[isysvar] == "Down") effvar = (1.0 - m_EffCorrFactor[CatFile + SysName.at(isys)]);
+	// if(SysNameVar[isysvar] == "Up")   effvar = (1.0 + m_EffCorrFactor[CatFile + SysName.at(isys)]);
 	
-	if( hiljSyst->Integral() != 0.0 ) 
-	  hiljSyst->Scale(effvar*hiljCentral->Integral()/hiljSyst->Integral());
+	// if( hiljSyst->Integral() != 0.0 ) 
+	//   hiljSyst->Scale(effvar*hiljCentral->Integral()/hiljSyst->Integral());
 	
 	
 	cout << "Yields Ratio for [" << CatFile << "," << ChName[nch] <<  "] " << SysName.at(isys) + SysNameVar[isysvar] << " in \% = " << 100.0*(hiljCentral->Integral()-hiljSyst->Integral())/hiljCentral->Integral() << endl;

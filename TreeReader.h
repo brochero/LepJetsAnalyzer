@@ -205,6 +205,7 @@ std::vector <float> *GenCone_eta=0;
 std::vector <float> *GenCone_phi=0;
 std::vector <float> *GenCone_E=0;
 std::vector <int>   *GenCone_gjetMom=0; // From GenCone
+std::vector <int>   *GenCone_Mom=0; // From GenCone
 int GenCone_NgjetsW;
 float DRAddJets;
 // Gen Info

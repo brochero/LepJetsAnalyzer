@@ -164,7 +164,7 @@ int main(int argc, const char* argv[]){
 
   theTree.SetBranchAddress( "jet_SF_CSV",        &Jet_SF_CSV );
 
-  if(!fname.Contains("Data")){
+  if(!fname.Contains("DataSingle")){
     theTree.SetBranchAddress( "jet_JES_Up",     &Jet_JES_Up );
     theTree.SetBranchAddress( "jet_JES_Down",   &Jet_JES_Down );  
     theTree.SetBranchAddress( "jet_JESCom_Up",  &Jet_JESCom_Up );  
@@ -190,6 +190,7 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress("gencone_gjetIndex", &GenCone_gjetMom);
     theTree.SetBranchAddress("gencone_NgjetsW",   &GenCone_NgjetsW);
     theTree.SetBranchAddress("draddjets",         &DRAddJets);
+    theTree.SetBranchAddress("genjet_gencone_mom",&GenCone_Mom);
 
     theTree.SetBranchAddress("genlepton_pT",          &GenLep_pT);
     theTree.SetBranchAddress("jet_MatchedGenJetIndex",&Jet_GENmatched);
@@ -578,7 +579,7 @@ int main(int argc, const char* argv[]){
     print_progress(theTree.GetEntries(), ievt);
 
     // PU reweight: Includes Syst. Unc.
-    if (_syst && syst_varname.Contains("PileUp"))
+    if (_syst && (syst_varname.Contains("PileUpUp") || syst_varname.Contains("PileUpDown")) )
       PUWeight = (*PUWeight_sys)[pileupSysPar]; // Up
     else PUWeight = (*PUWeight_sys)[0];
         
@@ -623,7 +624,7 @@ int main(int argc, const char* argv[]){
     // From: https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration
     float btagUnc_val = 0.0;
     float btagUnc_TotalUp = 0.0, btagUnc_TotalDown = 0.0;
-    if (!fname.Contains("Data")){
+    if (!fname.Contains("DataSingle")){
       if(_syst && btagSysPar != 0 && syst_varname.Contains("Up"))
 	btagUnc_val = 1.0 * (*Jet_SF_CSV)[btagSysPar];
       else if(_syst && btagSysPar != 0 && syst_varname.Contains("Down")) 
@@ -656,7 +657,7 @@ int main(int argc, const char* argv[]){
     for(int ijet=0; ijet < Jet_pT->size(); ijet++){
 
       float JetSystVar = 1.0;
-      if (!fname.Contains("Data")){
+      if (fname.Contains("DataSingle")){
 	// Measurements show that the jet energy resolution (JER) in data is worse than in the simulation and the jets in MC need to be smeared to describe the data.
 	// https://twiki.cern.ch/twiki/bin/vie
 	JetSystVar = (*Jet_JER_Nom)[ijet];	
@@ -665,8 +666,8 @@ int main(int argc, const char* argv[]){
       if(_syst){
 	// JES
 	if (JESVarIndex > -1){
-	  if(syst_varname.Contains("Up"))	 JetSystVar = 1.0 + (*Jet_JESCom_Up)  [ijet][JESVarIndex];
-	  else if(syst_varname.Contains("Down")) JetSystVar = 1.0 - (*Jet_JESCom_Down)[ijet][JESVarIndex];
+	  if(syst_varname.Contains("Up"))	 JetSystVar = 1.0 + std::abs((*Jet_JESCom_Up)  [ijet][JESVarIndex]);
+	  else if(syst_varname.Contains("Down")) JetSystVar = 1.0 - std::abs((*Jet_JESCom_Down)[ijet][JESVarIndex]);
 	}
 	// JER
 	if(syst_varname.Contains("JERUp"))        JetSystVar = (*Jet_JER_Up)[ijet];
@@ -681,7 +682,7 @@ int main(int argc, const char* argv[]){
 		       (*Jet_E)[ijet]);
       // For MC: Jet mearing applyed.
       jet *= JetSystVar;
-
+ 
       jet.Flavour = (*Jet_partonFlavour)[ijet];
       jet.CSV     = (*Jet_CSV)[ijet];
       if      (jet.CSV < 0.0)  jet.CSV = 0.0000;
@@ -692,7 +693,11 @@ int main(int argc, const char* argv[]){
       jet.KinMom  = -1;
 
       // Jet Mother
-      if((fname.Contains("ttbar")  && !fname.Contains("Bkg"))) jet.Mom = (*Jet_Mom)[ijet];
+      if((fname.Contains("ttbar")  && !fname.Contains("Bkg"))){
+	jet.Mom = (*Jet_Mom)[ijet];
+	int GenConeMom = (*GenCone_Mom)[ijet]; 
+	//std::cout << ijet << " Mom1= " <<  jet.Mom << " Mom2= " << GenConeMom << std::endl;
+      }
       // Kin Mother
       // [0] b from hadronic leg 
       // [1] j from W
@@ -742,7 +747,7 @@ int main(int argc, const char* argv[]){
   *******************************************/    
     std::vector<float> SF_ID_ISO_Tr;
     
-    if (fname.Contains("Data")){
+    if (fname.Contains("DataSingle")){
       SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Tr      [0] 
       SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Tr_Up   [1] 
       SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Tr_Down [2] 
@@ -760,9 +765,18 @@ int main(int argc, const char* argv[]){
       		     heIDISOSF,  heTriggerSF);
       
       if(_syst && syst_varname.Contains("LepSF")){
-	float SFSystUnc = SF_ID_ISO_Tr[0]*0.015; //Additional??
-	if(syst_varname.Contains("Up"))   PUWeight = PUWeight * (SF_ID_ISO_Tr[1] + SFSystUnc) ;
-	if(syst_varname.Contains("Down")) PUWeight = PUWeight * (SF_ID_ISO_Tr[2] - SFSystUnc);
+
+	float SFSystUnc;
+	if(syst_varname.Contains("IDLepSF")){
+	  SFSystUnc = sqrt(pow(SF_ID_ISO_Tr[3]*0.01,2) + pow(SF_ID_ISO_Tr[4],2)); //Additional 1%
+	  if(syst_varname.Contains("Up"))   PUWeight = PUWeight * (SF_ID_ISO_Tr[3] + SFSystUnc);
+	  if(syst_varname.Contains("Down")) PUWeight = PUWeight * (SF_ID_ISO_Tr[3] - SFSystUnc);
+	}
+	else if(syst_varname.Contains("TrLepSF")){
+	  SFSystUnc = sqrt(pow(SF_ID_ISO_Tr[5]*0.01,2) + pow(SF_ID_ISO_Tr[6],2)); //Additional 1%
+	  if(syst_varname.Contains("Up"))   PUWeight = PUWeight * (SF_ID_ISO_Tr[5] + SFSystUnc);
+	  if(syst_varname.Contains("Down")) PUWeight = PUWeight * (SF_ID_ISO_Tr[5] - SFSystUnc);
+	}
       }
       else PUWeight = PUWeight * SF_ID_ISO_Tr[0]; // Central
      

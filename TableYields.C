@@ -336,6 +336,9 @@ Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString 
 
   // All Systematics to be included 
   std::vector<TString> SysName;
+  SysName.push_back("LES");
+  SysName.push_back("IDLepSF");
+  SysName.push_back("TrLepSF");
   SysName.push_back("JER");
   // SysName.push_back("JES");
   SysName.push_back("JESAbsoluteStat");
@@ -384,8 +387,8 @@ Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString 
 
   TFile *file=NULL; // new TFile(namefile);
   if(AddToDC.Contains("DCSys")){
-    std::cout << "Loading " << namefile + "_SYS.root" << " sample..." << std::endl;
-    file = TFile::Open(namefile + "_SYS.root");
+    std::cout << "Loading " << namefile + "_COMBINE.root" << " sample..." << std::endl;
+    file = TFile::Open(namefile + "_COMBINE.root");
   }
   else{
     std::cout << "Loading " << namefile + ".root" << " sample..." << std::endl;
@@ -444,7 +447,7 @@ Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString 
     TString HistoCombName = "hKinAddCSVUnroll"; // To Fix
     // --- Write histograms
     TString outfile;
-    outfile = namefile + "_SYSNorm.root";
+    outfile = namefile + "_COMBINENorm.root";
     TFile *target  = new TFile(outfile,"RECREATE" );  
     target->cd();
 
@@ -528,6 +531,9 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
 
   // All Systematics to be included 
   std::vector<TString> SysName;
+  SysName.push_back("LES");
+  SysName.push_back("IDLepSF");
+  SysName.push_back("TrLepSF");
   SysName.push_back("JER");
   //SysName.push_back("JES");
   SysName.push_back("JESAbsoluteStat");
@@ -586,8 +592,9 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   fprintf(file,"----------------------------------------------------------\n"); 
   fprintf(file,"imax \t 1 # Number of channels\n"); 
   fprintf(file,"jmax \t %i # Number of contribution - 1 \n", (nDCSam-1)); 
-  if(DCNorm) fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", 2*SysName.size()); 
-  else fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", SysName.size()); 
+  int ValSysName = SysName.size();
+  if(DCNorm) fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", (2*ValSysName)); 
+  else fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", ValSysName); 
   fprintf(file,"----------------------------------------------------------\n"); 
   fprintf(file,"----------------------------------------------------------\n"); 
   fprintf(file,"# $CHANNEL means the bin \n"); 
@@ -600,8 +607,8 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
     Yields samEntry = Samples.at(ns);
     if(samEntry.InDataCard.Contains("DCSys")){
       TString namefile = HeadFile + "_" + samEntry.SamComName;
-      if(DCNorm)  namefile += "_SYSNorm.root" ;
-      else  namefile += "_SYS.root" ;
+      if(DCNorm)  namefile += "_COMBINENorm.root" ;
+      else  namefile += "_COMBINE.root" ;
       fprintf(file,"shapes %s \t * %s central/2btag/$CHANNEL/%s_$CHANNEL_2btag $SYSTEMATIC/2btag/$CHANNEL/%s_$CHANNEL_2btag_$SYSTEMATIC \n", 
 	      (samEntry.SamComName).Data(), 
 	      namefile.Data(),
@@ -724,16 +731,25 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   
   fprintf(file,"----------------------------------------------------------\n");
 
-  fprintf(file,"theory group = ScaleRdF ISR FSR UE \n");
-  fprintf(file,"btag_Shape group = btaghf btaghfsI btaghfsII btaglfsI btaglfsII btagcfII btagcfI btaglf \n");
+  fprintf(file,"Theory group = ScaleRdF ISR FSR UE \n");
+
+  fprintf(file,"Lepton_Shape group = LES IDLepSF TrLepSF \n");
   fprintf(file,"Jet_Shape group = JER \n");
   fprintf(file,"JetScale_Shape group = JESAbsoluteStat JESAbsoluteScale JESAbsoluteMPFBias JESFragmentation JESSinglePionECAL JESSinglePionHCAL JESFlavorQCD JESTimePtEta JESRelativeJEREC1 JESRelativeJEREC2 JESRelativeJERHF JESRelativePtBB JESRelativePtEC1 JESRelativePtEC2 JESRelativePtHF JESRelativeBal JESRelativeFSR JESRelativeStatFSR JESRelativeStatEC JESRelativeStatHF JESPileUpDataMC JESPileUpPtRef JESPileUpPtBB JESPileUpPtEC1 JESPileUpPtHF \n");
-
+  fprintf(file,"btag_Shape group = btaghf btaghfsI btaghfsII btaglfsI btaglfsII btagcfII btagcfI btaglf \n");
+  fprintf(file,"btagLF_Shape group = btaglfsI btaglfsII btaglf \n");
+  fprintf(file,"btagHF_Shape group = btaghf btaghfsI btaghfsII \n");
+  fprintf(file,"btagCF_Shape group = btagcfII btagcfI \n");
   fprintf(file,"Other_Shape group = PileUp \n");
+
   if(DCNorm){
-    fprintf(file,"Jet_Rate  group = JER_Rate \n");
-    fprintf(file,"JetScale_Rate  group = JESAbsoluteStat_Rate JESAbsoluteScale_Rate JESAbsoluteMPFBias_Rate JESFragmentation_Rate JESSinglePionECAL_Rate JESSinglePionHCAL_Rate JESFlavorQCD_Rate JESTimePtEta_Rate JESRelativeJEREC1_Rate JESRelativeJEREC2_Rate JESRelativeJERHF_Rate JESRelativePtBB_Rate JESRelativePtEC1_Rate JESRelativePtEC2_Rate JESRelativePtHF_Rate JESRelativeBal_Rate JESRelativeFSR_Rate JESRelativeStatFSR_Rate JESRelativeStatEC_Rate JESRelativeStatHF_Rate JESPileUpDataMC_Rate JESPileUpPtRef_Rate JESPileUpPtBB_Rate JESPileUpPtEC1_Rate JESPileUpPtHF_Rate \n");
-    fprintf(file,"btag_Rate  group = btaghf_Rate btaghfsI_Rate btaghfsII_Rate btaglfsI_Rate btaglfsII_Rate btagcfII_Rate btagcfI_Rate btaglf_Rate \n");
+    fprintf(file,"Lepton_Rate group = LES_Rate IDLepSF_Rate TrLepSF_Rate \n");
+    fprintf(file,"Jet_Rate group = JER_Rate \n");
+    fprintf(file,"JetScale_Rate group = JESAbsoluteStat_Rate JESAbsoluteScale_Rate JESAbsoluteMPFBias_Rate JESFragmentation_Rate JESSinglePionECAL_Rate JESSinglePionHCAL_Rate JESFlavorQCD_Rate JESTimePtEta_Rate JESRelativeJEREC1_Rate JESRelativeJEREC2_Rate JESRelativeJERHF_Rate JESRelativePtBB_Rate JESRelativePtEC1_Rate JESRelativePtEC2_Rate JESRelativePtHF_Rate JESRelativeBal_Rate JESRelativeFSR_Rate JESRelativeStatFSR_Rate JESRelativeStatEC_Rate JESRelativeStatHF_Rate JESPileUpDataMC_Rate JESPileUpPtRef_Rate JESPileUpPtBB_Rate JESPileUpPtEC1_Rate JESPileUpPtHF_Rate \n");
+    fprintf(file,"btag_Rate group = btaghf_Rate btaghfsI_Rate btaghfsII_Rate btaglfsI_Rate btaglfsII_Rate btagcfII_Rate btagcfI_Rate btaglf_Rate \n");
+    fprintf(file,"btagLF_Rate group = btaglfsI_Rate btaglfsII_Rate btaglf_Rate \n");
+    fprintf(file,"btagHF_Rate group = btaghf_Rate btaghfsI_Rate btaghfsII_Rate \n");
+    fprintf(file,"btagCF_Rate group = btagcfII_Rate btagcfI_Rate \n");
     fprintf(file,"Other_Rate  group = PileUp_Rate \n");
   }
 }

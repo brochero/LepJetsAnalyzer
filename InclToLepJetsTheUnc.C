@@ -5,9 +5,9 @@ enum thsys{central=0,ISR,FSR,UE};
 
 std::map<TString, float> m_EffCorrFactor;
 
-void InclToLepJetsTheUnc(TString FileVersion = "JESCom-v0"){
+void InclToLepJetsTheUnc(TString FileVersion = "Full-v0"){
 
-  TString HeadFile = "hSF-" + FileVersion + "_Tree_LepJets_FallSkim_v8-0-6_Spring16-80X_36814pb-1";
+  TString HeadFile = "hSF-" + FileVersion + "_Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1";
   TString fdir = "TopResults/" + FileVersion + "/" + HeadFile;
 
   Createhisto("2btag", fdir, "ttbb");

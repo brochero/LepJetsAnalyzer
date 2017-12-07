@@ -67,7 +67,7 @@ float SFLumi(TString filename,
 
  
   
-  if(filename.Contains("Data"))               NormWeight = 1.0;
+  if(filename.Contains("DataSingleMu") || filename.Contains("DataSingleEG"))               NormWeight = 1.0;
   
   return NormWeight;
 }

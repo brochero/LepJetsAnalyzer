@@ -20,7 +20,7 @@ InputDB        = args.input
 CondorArg      = "'$(filehead)$(filesample) $(outputref)'"
 
 # Systematic Variations
-SysCom = {"PileUp","JER","btagjes","btaglf","btaghf","btaghfsI","btaghfsII","btaglfsI","btaglfsII","btagcfI","btagcfII"}
+SysCom = {"IDLepSF","TrLepSF","LES","PileUp","JER","btagjes","btaglf","btaghf","btaghfsI","btaghfsII","btaglfsI","btaglfsII","btagcfI","btagcfII"}
 SysJES = {"AbsoluteStat","AbsoluteScale","AbsoluteMPFBias","Fragmentation","SinglePionECAL","SinglePionHCAL","FlavorQCD","TimePtEta","RelativeJEREC1", "RelativeJEREC2", "RelativeJERHF","RelativePtBB","RelativePtEC1","RelativePtEC2","RelativePtHF","RelativeBal","RelativeFSR","RelativeStatFSR","RelativeStatEC","RelativeStatHF","PileUpDataMC","PileUpPtRef","PileUpPtBB","PileUpPtEC1","PileUpPtHF"}
 SysVar = {"Up", "Down"}
 SysThe = {"ScaleRnF Up","ScaleRnF Down","ScaleRuF Nom","ScaleRuF Up","ScaleRdF Up","ScaleRdF Down"}

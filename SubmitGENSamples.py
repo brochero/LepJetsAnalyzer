@@ -8,7 +8,7 @@ InputDB        = str(sys.argv[1])
 CondorArg      = "'$(filehead)$(filesample) $(outputref)'"
 
 # Systematic Variations
-SysThe = {"ScaleRnF Up","ScaleRnF Down","ScaleRuF Nom","ScaleRuF Up","ScaleRdF Nom","ScaleRdF Down"}
+SysThe = {"ScaleRnF Up","ScaleRnF Down","ScaleRuF Nom","ScaleRuF Up","ScaleRdF Up","ScaleRdF Down"}
 SysDedicated = {"UEUp","UEDown","ISRUp","ISRDown","FSRUp","FSRDown"}
 
 

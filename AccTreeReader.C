@@ -47,7 +47,7 @@ void display_usage()
   std::cout << "Options:" << std::endl;
   std::cout << "    -i   inputfile  Input file without .root" << std::endl;
   std::cout << "    -eos input files located in eos lxplus" << std::endl;
-  std::cout << "    -o   name in the output file \"h_\"" << std::endl;
+  std::cout << "    -o   name in the output file \"hSF_\"" << std::endl;
   std::cout << "    -cat ttbar categorization" << std::endl;
   std::cout << "    -d   Input file directory. Default directory: InputTrees" << std::endl;
   std::cout << "    -s create a file with the systematic uncertainty yields" << std::endl;
@@ -443,7 +443,7 @@ int main(int argc, const char* argv[]){
     std::cout << "-----------------------------" << std::endl;
   }
   //Output Dir
-  TString dirname="TopResults";   
+  TString dirname = "TopResults/" + hname;   
   // make a dir if it does not exist!!
   struct stat st;
   if(stat(dirname,&st) != 0) system("mkdir " + dirname);

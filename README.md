@@ -26,7 +26,7 @@
 
    d- To run scale variations (ME):
    
-   `python SubmitSamples.py --inpit Inputs/InputsScale.info --option scale`
+   `python SubmitSamples.py --input Inputs/InputsScale.info --option scale`
 
    e- To run over **ttbar INCLUSIVE** samples with theoretical variations (Scale at PS, UE).
    
@@ -57,9 +57,15 @@
 
    NOTE: Take into account that b and c steps produce the output ONLY for the UNROLL histogram.
 
-   d- Merge Theoretical uncertainties:
+   d- To merge files:
 
-   `PrepareCombineFiles.py hSF-?_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1`
+      - Central and systematics for ttbar Bkg:
+
+      	`PrepareCombineFiles.py TopResults/Dir?/hSF-?_Tree_LepJets_Summer_v8-0-6_Spring16-80X_36814pb-1`
+	
+      -	Theoretical uncertainties:
+
+      	`root -l -b -q 'PrepareCombineFiles.C("Full-v0?","Tree_LepJets_EGTightSkim?_v8-0-6_Spring16-80X_36814pb-1")'`
 
 3. To produce all plots:
 

@@ -7,7 +7,7 @@ TString SysVar[2]  = {"Up","Down"};
 void MergeSystematics(TString Sample, std::vector<TString> SysName);
 void MergeSample(std::vector<TString> GenSam, TString SystVarNam);
 
-void PrepareCombineFiles(TString FileVersion = "Full-v0", TString FileProd = "hSF-Full-v0_Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1"){
+void PrepareCombineFiles(TString FileVersion = "Full-v0", TString FileProd = "Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1"){
   
   TString basename = "TopResults/" + FileVersion + "/hSF-" + FileVersion + "_" + FileProd + "_";
   
@@ -80,11 +80,20 @@ void MergeSystematics(TString Sample, std::vector<TString> SysName){
   cout << "Open file " << Sample+".root" << endl;
 
   for(unsigned int ch=0; ch<2; ch++){
+    TH1D *histofile     = (TH1D*)(FilesSam->Get("central/2btag/" + channel[ch] + "/hKinAddCSVUnroll_" + channel[ch] + "_2btag"))->Clone();
+    TH2D *histoyields   = (TH2D*)(FilesSam->Get("central/Yields"))->Clone();
+    TH2D *histoyieldsNW = (TH2D*)(FilesSam->Get("central/YieldsNoWeights"))->Clone();
+
     target->cd();
     target->mkdir("central/2btag/" + channel[ch]);
     target->cd   ("central/2btag/" + channel[ch]);
-    TH1D *histofile = (TH1D*)(FilesSam->Get("central/2btag/" + channel[ch] + "/hKinAddCSVUnroll_" + channel[ch] + "_2btag"))->Clone();
+
     histofile->Write();
+
+    target->cd("central");
+
+    histoyields  ->Write();
+    histoyieldsNW->Write();
   }
 
 
@@ -108,11 +117,27 @@ void MergeSystematics(TString Sample, std::vector<TString> SysName){
       cout << "Open file " << Sample+"_SYS_"+SystVarNamFile+".root" << endl;
       
       for(unsigned int ch=0; ch<2; ch++){
+	TH1D *histofile     = (TH1D*)(FilesSam->Get(SystVarNam + "/2btag/" + channel[ch] + "/hKinAddCSVUnroll_" + channel[ch] + "_2btag_" + SystVarNam))->Clone();
+	TH2D *histoyields;
+	TH2D *histoyieldsNW;
+	if(!SystVarNamFile.Contains("Theory") ){
+	  histoyields   = (TH2D*)(FilesSam->Get(SystVarNam + "/Yields_" + SystVarNam))->Clone();
+	  histoyieldsNW = (TH2D*)(FilesSam->Get(SystVarNam + "/YieldsNoWeights_" + SystVarNam))->Clone();
+	}
+
 	target->cd();
 	target->mkdir(SystVarNam + "/2btag/" + channel[ch]);
 	target->cd   (SystVarNam + "/2btag/" + channel[ch]);
-	TH1D *histofile = (TH1D*)(FilesSam->Get(SystVarNam + "/2btag/" + channel[ch] + "/hKinAddCSVUnroll_" + channel[ch] + "_2btag_"+SystVarNam))->Clone();
+
 	histofile->Write();
+
+	target->cd(SystVarNam);
+	
+	if(!SystVarNamFile.Contains("Theory") ){
+	  histoyields  ->Write();
+	  histoyieldsNW->Write();
+	}
+
       }  
 
       FilesSam->Clear();
@@ -126,7 +151,10 @@ void MergeSystematics(TString Sample, std::vector<TString> SysName){
 
 void MergeSample(std::vector<TString> GenSam, TString SystVarNam){
   
-  TH1D *histofile[2];
+  TH1D *histofile    [2];
+  TH2D *histoyields  [2];
+  TH2D *histoyieldsNW[2];
+
   TString FileTail;
   if (SystVarNam == "central") FileTail = ".root";
   else                         FileTail = "_SYS_" + SystVarNam + ".root";
@@ -141,10 +169,15 @@ void MergeSample(std::vector<TString> GenSam, TString SystVarNam){
       if (SystVarNam == "central") HistoTail = "";
       else HistoTail = "_"+SystVarNam;
       
-      if(igs == 1)
-	histofile[ch] = (TH1D*)(FilesSam->Get(SystVarNam + "/2btag/" + channel[ch] + "/hKinAddCSVUnroll_" + channel[ch] + "_2btag"+HistoTail))->Clone();
+      if(igs == 1){
+	histofile[ch]     = (TH1D*)(FilesSam->Get(SystVarNam + "/2btag/" + channel[ch] + "/hKinAddCSVUnroll_" + channel[ch] + "_2btag" + HistoTail))->Clone();
+	histoyields[ch]   = (TH2D*)(FilesSam->Get(SystVarNam + "/Yields" + HistoTail))->Clone();
+	histoyieldsNW[ch] = (TH2D*)(FilesSam->Get(SystVarNam + "/YieldsNoWeights" + HistoTail))->Clone();
+      }
       else{
-	histofile[ch]->Add((TH1D*)FilesSam->Get(SystVarNam + "/2btag/" + channel[ch] + "/hKinAddCSVUnroll_" + channel[ch] + "_2btag"+HistoTail));
+	histofile[ch]    ->Add( (TH1D*)FilesSam->Get(SystVarNam + "/2btag/" + channel[ch] + "/hKinAddCSVUnroll_" + channel[ch] + "_2btag" + HistoTail) );
+	histoyields[ch]  ->Add( (TH2D*)FilesSam->Get(SystVarNam + "/Yields" + HistoTail) );
+	histoyieldsNW[ch]->Add( (TH2D*)FilesSam->Get(SystVarNam + "/YieldsNoWeights" + HistoTail) );
       }
       
     }//for(ch)
@@ -162,6 +195,12 @@ void MergeSample(std::vector<TString> GenSam, TString SystVarNam){
     target->cd   (SystVarNam + "/2btag/" + channel[ch]);
     
     histofile[ch]->Write();
+
+    target->cd();
+    target->cd   (SystVarNam);
+    
+    histoyields[ch]  ->Write();
+    histoyieldsNW[ch]->Write();
   }
   
   target->Close();

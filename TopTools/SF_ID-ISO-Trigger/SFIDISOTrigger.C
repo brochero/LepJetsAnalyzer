@@ -234,7 +234,7 @@ void SFIDISOTrigger(std::vector<float> &result,
 	  if(Lep.Eta()>VbinTreeta[binTreeta] && Lep.Eta()<=VbinTreeta[binTreeta+1]){ 
 	    
 	    SF_Tr       = heTriggerSF->GetBinContent(binTreeta+1,binTrepT+1);
-	    SF_Tr_Error = heTriggerSF->GetBinError(binTreeta+1,binTrepT+1);
+	    SF_Tr_Error = 0.01 + heTriggerSF->GetBinError(binTreeta+1,binTrepT+1);
 	    
 	    break;
 	  }// if(Lep.Eta())

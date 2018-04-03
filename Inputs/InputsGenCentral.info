@@ -2,10 +2,10 @@
 v8-0-6
 
 # Header
-Tree_LepJets_FallSkim_v8-0-6_Spring16-80X_36814pb-1
+Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1
 
 # Output Reference
-JESCom-v0
+Full-v1
 
 ##########################
 # Samples to be processed

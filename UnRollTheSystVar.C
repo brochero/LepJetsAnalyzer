@@ -2,7 +2,8 @@
 
 void TheoSystVar(TString FileVersion, TString ttbarcat = "ttbb", TString SysName = ""){
 
-  TString InpBaseFile = "hSF-" + FileVersion + "_Tree_LepJets_FallSkim_v8-0-6_Spring16-80X_36814pb-1_ttbar_LepJetsPowhegPythia";
+  // TString InpBaseFile = "hSF-" + FileVersion + "_Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1_ttbar_PowhegPythia";
+  TString InpBaseFile = "hSF-" + FileVersion + "_Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1_ttbar_LepJetsPowhegPythia";
 
   TString dirname[3]     = {"central",
 			    SysName + "Up",
@@ -132,7 +133,7 @@ void TheoSystVar(TString FileVersion, TString ttbarcat = "ttbb", TString SysName
 	leg->SetLineWidth(0.0);
 	leg->SetTextFont(62);
 	leg->SetTextSize(0.04);
-	TString RegionNumber = "Region " + std::to_string(ireg);
+	TString RegionNumber = "Region " + std::to_string(ireg) + " for " + ttbarcat;
 	leg->SetHeader(SysName + " variation");
 	leg->AddEntry((TObject*)0,RegionNumber,"");
 	leg->AddEntry(histo[ich][0].at(0),       "Nominal","L");
@@ -158,20 +159,21 @@ void TheoSystVar(TString FileVersion, TString ttbarcat = "ttbb", TString SysName
 	ireg++;
       } // for(ireg) 
 
-      //cPlots_reg->SaveAs(dirfigname_pdf + "RegionHisto_" + CanNum + "_" + chname[ich] + ".pdf");
-      cPlots_reg->SaveAs(dirfigname_pdf + "RegionHisto_" + CanNum + "_" + chname[ich] + ".png");
+      cPlots_reg->SaveAs(dirfigname_pdf + "RegionHistoSyst_" + CanNum + "_" + chname[ich] + ".pdf");
+      //cPlots_reg->SaveAs(dirfigname_pdf + "RegionHisto_" + CanNum + "_" + chname[ich] + ".png");
     } // for(ican) 
 
   }// for(ich)
   
 }
 
-void UnRollTheSystVar(TString FileVersion="JESCom-v0", TString SysName="ScaleRdF"){
+void UnRollTheSystVar(TString FileVersion="Full-v0", TString SysName="ScaleRdF"){
 
   TheoSystVar(FileVersion, "ttbb", SysName);
   TheoSystVar(FileVersion, "ttbj", SysName);
   TheoSystVar(FileVersion, "ttcc", SysName);
   TheoSystVar(FileVersion, "ttLF", SysName);
   TheoSystVar(FileVersion, "ttjj", SysName);
+  //TheoSystVar(FileVersion, "tt",   SysName);
 
 }

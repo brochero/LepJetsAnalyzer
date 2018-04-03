@@ -282,7 +282,7 @@ void CreateComTable (std::map<TString, TString>  tLine[6], int tch, int tcat, TS
 }
 
 
-void EffAccEstimation(TString FileVersion = "JESCom-v0", TString fbasename = "Tree_LepJets_FallSkim_v8-0-6_Spring16-80X_36814pb-1", TString ttbarname = "ttbar_PowhegPythia"){
+void EffAccEstimation(TString FileVersion = "Full-v0", TString fbasename = "Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1", TString ttbarname = "ttbar_PowhegPythia"){
 
   
   std::map<TString, TString>  fTables[10]; // [systematics]

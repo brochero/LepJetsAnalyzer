@@ -149,6 +149,8 @@ Histos2D h2DSFbtag_b, h2DSFbtag_c, h2DSFbtag_l, h2DSFbtag_btag_b, h2DSFbtag_btag
 Prof     pSFCSVVsCSVAll, pSFCSVErrorVsCSVAll;
 // PDF Weights
 Histos hWPDF, hWPDFAlphaUp, hWPDFAlphaDown;
+// PDF Weights
+Histos hWhdamp;
 // Kinematic Fitter
 Histos    hKinChi2;
 Histos2D  h2DKinChi2_JetMatch;
@@ -219,3 +221,5 @@ float Kin_Chi2;
 std::vector<int>   *KinJet_Index=0;
 std::vector<float> *KinJet_pT=0, *KinJet_eta=0, *KinJet_phi=0, *KinJet_E=0;
 float KinNu_pT, KinNu_eta, KinNu_phi, KinNu_E;
+// hdamp Syst. Unc.
+std::vector<float> *hdampWeight=0;

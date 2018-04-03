@@ -187,7 +187,7 @@ int main(int argc, const char* argv[]){
 
   int Channel;
   float GENWeight; 
-  std::vector<float> *ScaleWeight=0;
+  std::vector<float> *ScaleWeight=0, *PDFWeight=0, *hdampWeight=0;
   float Lep_pT, Lep_eta;
   std::vector<float> *Jet_pT=0, *Jet_eta=0, *Jet_phi=0, *Jet_E=0;
 
@@ -203,6 +203,9 @@ int main(int argc, const char* argv[]){
   
   theTree.SetBranchAddress( "genweight",     &GENWeight  );
   theTree.SetBranchAddress( "scaleweight",   &ScaleWeight);
+  theTree.SetBranchAddress( "hdampweight",   &hdampWeight);
+  theTree.SetBranchAddress( "pdfweight",     &PDFWeight);
+
   theTree.SetBranchAddress( "genchannel",    &Channel    );
   theTree.SetBranchAddress( "genhiggscatid", &GenCat_ID  );
   theTree.SetBranchAddress( "genconecatid",  &GenConeCat );
@@ -223,7 +226,11 @@ int main(int argc, const char* argv[]){
   // TH1::SetDefaultSumw2(kTRUE);  
   
   TH1F *hNJets[2];
-  
+  TH1D *ScaleWeigths_Full[6][2], *ScaleWeigths_Vis[6][2];
+  TH1D *PDFWeigths_Full[6][2], *PDFWeigths_Vis[6][2];
+  TH1D *hdampWeigths_Full[6][2], *hdampWeigths_Vis[6][2];
+  TH1D *ScaleWeigths_FullNotVis[6][2];
+
   TString titlenamech[2];
   titlenamech[0]="#mu+Jets";
   titlenamech[1]="e+Jets";
@@ -242,6 +249,19 @@ int main(int argc, const char* argv[]){
     hNJets[i]->GetXaxis()->SetBinLabel(8,"7");
     hNJets[i]->GetXaxis()->SetBinLabel(9,"#geq 8");        
 
+
+
+    for (int icat=ttjj; icat<=tt; icat++){
+      PDFWeigths_Full[icat][i] = new TH1D("PDFWeigths_Full_" + namecat[icat] + "_" + namech[i], "PDF weights for Evt in the Full Ph-Sp " + titlenamech[i],200,0.,2.); 
+      PDFWeigths_Vis[icat][i]  = new TH1D("PDFWeigths_Vis_"  + namecat[icat] + "_" + namech[i], "PDF weights for Evt in the Vis Ph-Sp "  + titlenamech[i],200,0.,2.); 
+
+      hdampWeigths_Full[icat][i] = new TH1D("hdampWeigths_Full_" + namecat[icat] + "_" + namech[i], "hdamp weights for Evt in the Full Ph-Sp " + titlenamech[i],200,0.,2.); 
+      hdampWeigths_Vis[icat][i]  = new TH1D("hdampWeigths_Vis_"  + namecat[icat] + "_" + namech[i], "hdamp weights for Evt in the Vis Ph-Sp "  + titlenamech[i],200,0.,2.); 
+
+      ScaleWeigths_Full[icat][i] = new TH1D("ScaleWeigths_Full_" + namecat[icat] + "_" + namech[i], "Scale weights for Evt in the Full Ph-Sp " + titlenamech[i],200,0.,2.); 
+      ScaleWeigths_Vis[icat][i]  = new TH1D("ScaleWeigths_Vis_"  + namecat[icat] + "_" + namech[i], "Scale weights for Evt in the Vis Ph-Sp "  + titlenamech[i],200,0.,2.); 
+      ScaleWeigths_FullNotVis[icat][i]  = new TH1D("ScaleWeigths_FullNotVis_"  + namecat[icat] + "_" + namech[i], "Scale weights for Evt in the Full but Not Vis Ph-Sp "  + titlenamech[i],200,0.,2.); 
+    }
   }//for(i)
   
   
@@ -256,8 +276,8 @@ int main(int argc, const char* argv[]){
 
   // Number de events for acceptance
   //          [ttcat][Channel]
-  float NEvt_full[6][3];
-  float NEvt_vis [6][3];
+  double NEvt_full[6][3];
+  double NEvt_vis [6][3];
 
   for(unsigned int ibinx=0; ibinx<3; ibinx++){
     for(unsigned int ibiny=0; ibiny<6; ibiny++){
@@ -282,8 +302,16 @@ int main(int argc, const char* argv[]){
     else if(_syst && syst_varname.Contains("ScaleRuFNom"))  scaleSysPar = 2; // muR=Up,   muF=Nom
     else if(_syst && syst_varname.Contains("ScaleRuFUp"))   scaleSysPar = 3; // muR=Up,   muF=Up
     // Name modified to fix with Combine Structure
-    else if(_syst && syst_varname.Contains("ScaleRdFUp"))  scaleSysPar = 4; // muR=Down, muF=Nom
+    else if(_syst && syst_varname.Contains("ScaleRdFUp"))   scaleSysPar = 4; // muR=Down, muF=Nom
     else if(_syst && syst_varname.Contains("ScaleRdFDown")) scaleSysPar = 5; // muR=Down, muF=Down
+
+    int hdampSysPar;
+    if      (_syst && syst_varname.Contains("hdampUp"))   hdampSysPar = 18; 
+    else if (_syst && syst_varname.Contains("hdampDown")) hdampSysPar = 9; 
+
+    int pdfSysPar;
+    if (_syst && syst_varname.Contains("PDF"))   pdfSysPar = syst_var.Atoi(); 
+    
 
   /********************************
              Event Loop
@@ -291,6 +319,8 @@ int main(int argc, const char* argv[]){
   std::cout << "--- Processing: " << theTree.GetEntries() << " events" << std::endl;
   
   for (Long64_t ievt=0; ievt<theTree.GetEntries();ievt++) {
+  // for (Long64_t ievt=20000000; ievt<theTree.GetEntries();ievt++) {
+  // for (Long64_t ievt=0; ievt<200000;ievt++) {
     
     theTree.GetEntry(ievt);  
     print_progress(theTree.GetEntries(), ievt);    
@@ -307,6 +337,17 @@ int main(int argc, const char* argv[]){
     
     if (_syst && syst_varname.Contains("ScaleR"))
       EvtStep = EvtStep*(*ScaleWeight)[scaleSysPar];
+
+    /******************
+       hdamp Weights
+    ******************/
+
+    if (_syst && syst_varname.Contains("hdamp"))
+      EvtStep = EvtStep*(*hdampWeight)[hdampSysPar];
+
+
+    if (_syst && syst_varname.Contains("PDF"))
+      EvtStep = EvtStep*(*PDFWeight)[pdfSysPar];
 
     /***************************
        Categorization GenTop
@@ -350,11 +391,11 @@ int main(int argc, const char* argv[]){
 
     float Lep_pT_CUT = 30; // Muon
     if (Channel==1) Lep_pT_CUT = 35; // Electron
-    
-    if(Lep_pT > Lep_pT_CUT && abs(Lep_eta) < 2.1){
-      // Visible Phase Space 
-      bool IsVis[6]={false,false,false,false,false,false};
 
+    // Visible Phase Space 
+    bool IsVis[6]={false,false,false,false,false,false};
+    if(Lep_pT > Lep_pT_CUT && abs(Lep_eta) < 2.1){
+      
       if      (IsCat[ttjj] && cone_NbJets > 1 && cone_NJets > 5) IsVis[ttjj]=true;
       else if (IsCat[tt]   && cone_NbJets > 1 && cone_NJets > 5) IsVis[tt]  =true;
 
@@ -367,6 +408,23 @@ int main(int argc, const char* argv[]){
 	if(IsVis[icat]) NEvt_vis[icat][Channel] += EvtStep;
       }
       
+    }
+
+    // Weigths
+    for (int icat=ttjj; icat<=tt; icat++){
+      if(IsCat[icat]){
+	for(unsigned int ipdf=0; ipdf<=99; ipdf++) PDFWeigths_Full[icat][Channel]->Fill((*PDFWeight)[ipdf]);
+
+	hdampWeigths_Full[icat][Channel]->Fill(EvtStep);
+	ScaleWeigths_Full[icat][Channel]->Fill(EvtStep); 
+      }      
+      if(IsVis[icat]){
+	for(unsigned int ipdf=0; ipdf<=99; ipdf++) PDFWeigths_Vis[icat][Channel]->Fill((*PDFWeight)[ipdf]);
+
+	hdampWeigths_Vis[icat][Channel]->Fill(EvtStep);
+	ScaleWeigths_Vis[icat][Channel]->Fill(EvtStep); 
+      }
+      if(IsCat[icat] && !IsVis[icat]) ScaleWeigths_FullNotVis[icat][Channel]->Fill(EvtStep); 
     }
 
     // Jets 
@@ -434,10 +492,18 @@ int main(int argc, const char* argv[]){
     std::cout << "ttbb/ttjj Full Ph-Sp: " << NEvt_full[ttbb][ich]/NEvt_full[ttjj][ich] << std::endl;
     std::cout << "ttbb/ttjj Visible Ph-Sp: " << NEvt_vis[ttbb][ich]/NEvt_vis[ttjj][ich] << std::endl;
     std::cout << "ttbb Acceptance: " << NEvt_vis[ttbb][ich]/NEvt_full[ttbb][ich] << std::endl;
+    std::cout << "ttbb Full: " << NEvt_full[ttbb][ich] << std::endl;
+    std::cout << "ttbb Vis:  " << NEvt_vis[ttbb][ich]  << std::endl;
     std::cout << "ttbj Acceptance: " << NEvt_vis[ttbj][ich]/NEvt_full[ttbj][ich] << std::endl;
     std::cout << "ttcc Acceptance: " << NEvt_vis[ttcc][ich]/NEvt_full[ttcc][ich] << std::endl;
+    std::cout << "ttLF Full: " << NEvt_full[ttLF][ich] << std::endl;
+    std::cout << "ttLF Vis:  " << NEvt_vis[ttLF][ich]  << std::endl;
     std::cout << "ttLF Acceptance: " << NEvt_vis[ttLF][ich]/NEvt_full[ttLF][ich] << std::endl;
+    std::cout << "ttjj Full: " << NEvt_full[ttjj][ich] << std::endl;
+    std::cout << "ttjj Vis:  " << NEvt_vis[ttjj][ich]  << std::endl;
     std::cout << "ttjj Acceptance: " << NEvt_vis[ttjj][ich]/NEvt_full[ttjj][ich] << std::endl;
+    std::cout << "tt Full: "   << NEvt_full[tt][ich] << std::endl;
+    std::cout << "tt Vis:  "   << NEvt_vis[tt][ich] << std::endl;
     std::cout << "tt Acceptance: "   << NEvt_vis[tt][ich]/NEvt_full[tt][ich] << std::endl;
     std::cout << "-----------------------------" << std::endl;
     std::cout << "-----------------------------" << std::endl;
@@ -458,6 +524,18 @@ int main(int argc, const char* argv[]){
     Yields_full[icat]->Write();
   }
   for(int i=0; i<2; i++){    
+
+    for (int icat=ttjj; icat<=tt; icat++){
+      PDFWeigths_Full[icat][i]->Write();
+      PDFWeigths_Vis[icat][i]->Write();
+
+      hdampWeigths_Full[icat][i]->Write();
+      hdampWeigths_Vis[icat][i]->Write();
+
+      ScaleWeigths_Full[icat][i]->Write();
+      ScaleWeigths_Vis[icat][i]->Write();
+      ScaleWeigths_FullNotVis[icat][i]->Write();
+    }
 
     hNJets[i]->Write();
 

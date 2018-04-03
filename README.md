@@ -117,8 +117,16 @@
 
    c- Run the theoretical uncertainties using the dedicated **ttbar INCLUSIVE** samples  (UE, ISR and FSR)
 
-   'python SubmitGENSamples.py Inputs/InputsDedicated.info dedicated'
+   `python SubmitGENSamples.py Inputs/InputsDedicated.info dedicated`
    
    d- Run the color reconection **ttbar INCLUSIVE** samples (gluon and QCD CR).
    
    `python SubmitGENSamples.py Inputs/InputsCR.info`
+
+9. Tables with systematic variations at acceptance level:
+
+   a- After runn all samples at RECO and GEN level, produce tables with:
+
+   `root -l -b -q EffAccEstimation("Full-v0", "Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1", "ttbar_PowhegPythia")`
+   
+   

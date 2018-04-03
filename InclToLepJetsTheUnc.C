@@ -36,29 +36,22 @@ void Createhisto(TString SelCut, TString HeadFile, TString CatFile){
   // values from systematic tables (better way to do it?)
   // Variations are not +/- for Up/Down!!!
 
-  m_EffCorrFactor["ttbbISR"] = 0.0422;
-  m_EffCorrFactor["ttbbFSR"] = 0.0894;
-  m_EffCorrFactor["ttbbUE"]  = 0.0268;
+  // Old Results (08/2017)
+  // m_EffCorrFactor["ttbbISR"] = 0.0422;  m_EffCorrFactor["ttbbFSR"] = 0.0894;  m_EffCorrFactor["ttbbUE"]  = 0.0268;
+  // m_EffCorrFactor["ttbjISR"] = 0.0200;  m_EffCorrFactor["ttbjFSR"] = 0.1100;  m_EffCorrFactor["ttbjUE"]  = 0.0294;
+  // m_EffCorrFactor["ttccISR"] = 0.0036;  m_EffCorrFactor["ttccFSR"] = 0.1491;  m_EffCorrFactor["ttccUE"]  = 0.0174;
+  // m_EffCorrFactor["ttLFISR"] = 0.0137;  m_EffCorrFactor["ttLFFSR"] = 0.1678;  m_EffCorrFactor["ttLFUE"]  = 0.0083;
+  // m_EffCorrFactor["ttjjISR"] = 0.0120;  m_EffCorrFactor["ttjjFSR"] = 0.1335;  m_EffCorrFactor["ttjjUE"]  = 0.0046;
+  // m_EffCorrFactor["ttISR"]   = 0.0291;  m_EffCorrFactor["ttFSR"]   = 0.1811;  m_EffCorrFactor["ttUE"]    = 0.0312;
 
-  m_EffCorrFactor["ttbjISR"] = 0.0200;
-  m_EffCorrFactor["ttbjFSR"] = 0.1100;
-  m_EffCorrFactor["ttbjUE"]  = 0.0294;
-
-  m_EffCorrFactor["ttccISR"] = 0.0036;
-  m_EffCorrFactor["ttccFSR"] = 0.1491;
-  m_EffCorrFactor["ttccUE"]  = 0.0174;
-
-  m_EffCorrFactor["ttLFISR"] = 0.0137;
-  m_EffCorrFactor["ttLFFSR"] = 0.1678;
-  m_EffCorrFactor["ttLFUE"]  = 0.0083;
-
-  m_EffCorrFactor["ttjjISR"] = 0.0120;
-  m_EffCorrFactor["ttjjFSR"] = 0.1335;
-  m_EffCorrFactor["ttjjUE"]  = 0.0046;
-
-  m_EffCorrFactor["ttISR"] = 0.0291;
-  m_EffCorrFactor["ttFSR"] = 0.1811;
-  m_EffCorrFactor["ttUE"]  = 0.0312;
+  // From EGTightSkim (12/2017)
+  // Also includes extended versions
+  m_EffCorrFactor["ttbbISR"] = 0.057;  m_EffCorrFactor["ttbbFSR"] = 0.13;  m_EffCorrFactor["ttbbUE"]  = 0.008;
+  m_EffCorrFactor["ttbjISR"] = 0.019;  m_EffCorrFactor["ttbjFSR"] = 0.12;  m_EffCorrFactor["ttbjUE"]  = 0.025;
+  m_EffCorrFactor["ttccISR"] = 0.006;  m_EffCorrFactor["ttccFSR"] = 0.16;  m_EffCorrFactor["ttccUE"]  = 0.013;
+  m_EffCorrFactor["ttLFISR"] = 0.014;  m_EffCorrFactor["ttLFFSR"] = 0.17;  m_EffCorrFactor["ttLFUE"]  = 0.013;
+  m_EffCorrFactor["ttjjISR"] = 0.010;  m_EffCorrFactor["ttjjFSR"] = 0.13;  m_EffCorrFactor["ttjjUE"]  = 0.010;
+  m_EffCorrFactor["ttISR"]   = 0.030;  m_EffCorrFactor["ttFSR"]   = 0.16;  m_EffCorrFactor["ttUE"]    = 0.009;
 
 
   // Lep+Jets Sample
@@ -136,11 +129,11 @@ void Createhisto(TString SelCut, TString HeadFile, TString CatFile){
 
 	// Include the change of the efficiency in the yields 
 	float effvar = 1.0;
-	// if(SysNameVar[isysvar] == "Down") effvar = (1.0 - m_EffCorrFactor[CatFile + SysName.at(isys)]);
-	// if(SysNameVar[isysvar] == "Up")   effvar = (1.0 + m_EffCorrFactor[CatFile + SysName.at(isys)]);
+	if(SysNameVar[isysvar] == "Down") effvar = (1.0 - m_EffCorrFactor[CatFile + SysName.at(isys)]);
+	if(SysNameVar[isysvar] == "Up")   effvar = (1.0 + m_EffCorrFactor[CatFile + SysName.at(isys)]);
 	
-	// if( hiljSyst->Integral() != 0.0 ) 
-	//   hiljSyst->Scale(effvar*hiljCentral->Integral()/hiljSyst->Integral());
+	if( hiljSyst->Integral() != 0.0 ) 
+	  hiljSyst->Scale(effvar*hiljCentral->Integral()/hiljSyst->Integral());
 	
 	
 	cout << "Yields Ratio for [" << CatFile << "," << ChName[nch] <<  "] " << SysName.at(isys) + SysNameVar[isysvar] << " in \% = " << 100.0*(hiljCentral->Integral()-hiljSyst->Integral())/hiljCentral->Integral() << endl;

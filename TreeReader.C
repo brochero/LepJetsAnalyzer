@@ -205,6 +205,8 @@ int main(int argc, const char* argv[]){
     theTree.SetBranchAddress("gennu_E",               &GenNu_E);
     // PDF Uncertainty
     theTree.SetBranchAddress("pdfweight",             &PDFWeight);
+    // hdamp Uncertainty
+    theTree.SetBranchAddress("hdampweight",             &hdampWeight);
 
   }
   // Kinematic Reconstruction Variables
@@ -238,7 +240,7 @@ int main(int argc, const char* argv[]){
   if(_NUserEvt > 0) MaxEvt = std::min(MaxEvt, _NUserEvt);
 
   // MCatNLO Weights
-  if(fname.Contains("aMCatNLO")){
+  if(fname.Contains("aMCatNLO") || fname.Contains("Sherpa")){
     theTree.SetBranchAddress( "genweight", &GENWeight );
     nNorm_Event = NTotal_Weight;    
     if(_NUserEvt > 0) nNorm_Event = MaxEvt*(NTotal_Weight/theTree.GetEntries());
@@ -301,10 +303,15 @@ int main(int argc, const char* argv[]){
       hSFTriggerError[j][i]  = new TH1D("hSFTriggerError_"+namech[i]+"_"+namecut[j]+syst_varname,"#Delta SF^{Trigger} " + titlenamech[i],400,0,0.1);
       /***************************
            PDF (and Alpha_s)
-      ***************************/
+       ***************************/
       hWPDF[j][i]          = new TH1D("hWPDF_"+namech[i]+"_"+namecut[j]+syst_varname,"W_{PDF} the 100 weights/Evt " + titlenamech[i],160,0.6,1.4);    
       hWPDFAlphaUp[j][i]   = new TH1D("hWPDFAlphaUp_"+namech[i]+"_"+namecut[j]+syst_varname,"W_{#alpha_{s}^{Up}} per Evt " + titlenamech[i],160,0.6,1.4);    
       hWPDFAlphaDown[j][i] = new TH1D("hWPDFAlphaDown_"+namech[i]+"_"+namecut[j]+syst_varname,"W_{#alpha_{s}^{Down}} per Evt " + titlenamech[i],160,0.6,1.4);    
+
+      /***************************
+           PDF (and Alpha_s)
+       ***************************/
+      hWhdamp[j][i] = new TH1D("hWhdamp_"+namech[i]+"_"+namecut[j]+syst_varname,"W_{hdamp} " + titlenamech[i],200,0.,2.);    
 
       /***************************
               SF(b-tag)
@@ -540,6 +547,30 @@ int main(int argc, const char* argv[]){
 
   }
 
+  int hdampSysPar=0;
+  if      (_syst && syst_varname.Contains("hdampUp"))   hdampSysPar = 18;
+  else if (_syst && syst_varname.Contains("hdampDown")) hdampSysPar = 9;
+  // Normalization for hdamp Weights:
+  if (_syst && syst_varname.Contains("hdamp")){
+    TH1D *h_hdampWeights;
+    h_hdampWeights = (TH1D*)fileEntries->Get("ttbbLepJets/hdampWeights");
+    if(hdampSysPar!=0){
+      int ihdampbin = 1;
+      if(hdampSysPar==9)  ihdampbin=2;
+      if(hdampSysPar==18) ihdampbin=3;
+      std::cout << "hdamp normalization: Weighted events = " << h_hdampWeights->GetBinContent(ihdampbin) << std::endl;
+      nNorm_Event = h_hdampWeights->GetBinContent(ihdampbin);
+      if(_NUserEvt > 0) nNorm_Event = MaxEvt*(h_hdampWeights->GetBinContent(ihdampbin)/theTree.GetEntries());
+
+    }
+    else{
+      std::cerr << "No entry for hdamp normalization! Check HISTO!"  << std::endl;
+      std::exit(0);
+    }
+
+  }
+
+
   int JESVarIndex = -999;
 
   if(_syst && syst_varname.Contains("JES")){
@@ -589,6 +620,10 @@ int main(int argc, const char* argv[]){
     // Scale reweight: Syst. Unc.
     if (_syst && syst_varname.Contains("ScaleR"))
       PUWeight = PUWeight*(*ScaleWeight)[scaleSysPar];
+    
+    // hdamp reweight: Syst. Unc.
+    if (_syst && syst_varname.Contains("hdamp"))
+      PUWeight = PUWeight*(*hdampWeight)[hdampSysPar];
     
     unsigned int NJets, NBtagJets;
     
@@ -846,6 +881,13 @@ int main(int argc, const char* argv[]){
 	hWPDFAlphaUp   [icut][Channel]->Fill((*PDFWeight)[101], PUWeight);
 	hWPDFAlphaDown [icut][Channel]->Fill((*PDFWeight)[100], PUWeight);
       }
+
+
+      /******************
+         hdamp Weights 
+      ******************/
+      if(_syst && syst_varname.Contains("hdamp"))  hWhdamp[icut][Channel]->Fill((*hdampWeight)[hdampSysPar], PUWeight);
+
 
       /******************
         Kinematic Var.
@@ -1161,6 +1203,8 @@ int main(int argc, const char* argv[]){
       hWPDFAlphaUp  [j][i]->Write();
       hWPDFAlphaDown[j][i]->Write();
       
+      hWhdamp[j][i]->Write();
+
       hLepPt[j][i]->Write();
       hLepEta[j][i]->Write();
       hLepPhi[j][i]->Write();

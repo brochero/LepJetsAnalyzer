@@ -145,6 +145,8 @@ int main (int argc, char *argv[]){
     
   Yields ttbb;
   ttbb = loadhistoYields(cutname, "\\ttbar\\bbbar", fdir + fname, "ttbar_LepJetsPowhegPythiattbb", "DCSysThe");
+  // ttbb = loadhistoYields(cutname, "\\ttbar\\bbbar", fdir + fname, "ttbb_Sherpattbb", "DC");
+  // ttbb = loadhistoYields(cutname, "\\ttbar\\bbbar", fdir + fname, "ttbb_aMCatNLOttbb", "DC");
   Samples.push_back(ttbb);
   Yields ttb;
   ttb = loadhistoYields(cutname, "\\ttbar\\qb", fdir + fname, "ttbar_LepJetsPowhegPythiattbj", "DCSysThe");
@@ -376,10 +378,6 @@ Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString 
   SysName.push_back("btaglfsII");
   SysName.push_back("btagcfI");
   SysName.push_back("btagcfII");
-  SysName.push_back("ScaleRdF");
-  SysName.push_back("ISR");
-  SysName.push_back("FSR");
-  SysName.push_back("UE");
 
   TString SysNameVar[2] = {"Up","Down"};
 
@@ -442,29 +440,30 @@ Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString 
     std::cout << ChNameTable[nch] << ": " << output.Evt[nch] << " +/- "  << output.Error[nch] << std::endl;
   }
 
-  // Histogram For Combine (Normalized to the number of events of the nominal)
+  // Histogram For Combine Removing negative bins, or Normalized to the number of events of the nominal
   if(AddToDC.Contains("DCSys")){
+    //if(AddToDC.Contains("DCSysThe")){ // Only for theoretical ttbar samples
     TString HistoCombName = "hKinAddCSVUnroll"; // To Fix
     // --- Write histograms
     TString outfile;
-    outfile = namefile + "_COMBINENorm.root";
+    outfile = namefile + "_COMBINENew.root";
     TFile *target  = new TFile(outfile,"RECREATE" );  
     target->cd();
 
     for(int nch = 0; nch < 2; nch++){
       TString hpath = SelCut + "/" + ChName[nch] + "/" + HistoCombName + "_" + ChName[nch] + "_" + SelCut;
-
+      
       TH1D *hiCentral = (TH1D*) file->Get("central/" + hpath);
-
+      
       RemoveNegativeBins(hiCentral);
-
+      
       target->mkdir("central/" + SelCut + "/" + ChName[nch]);
       target->cd   ("central/" + SelCut + "/" + ChName[nch]);
       hiCentral->Write();
       target->cd();
 
       int maxSys = SysName.size();
-      if (AddToDC == "DCSys") maxSys = SysName.size() - 4; // Remove theoretical uncertainties  
+      if (AddToDC == "DCSys") maxSys = SysName.size(); 
 
       // FAKE Uncertainty      
       // for (int nsys = 0; nsys < maxSys; nsys++){
@@ -491,15 +490,16 @@ Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString 
       // 	}
       // }
 
+      // -- All systematic uncertinties
       for (int nsys = 0; nsys < maxSys; nsys++){
       	for (int nsysvar = 0; nsysvar < 2; nsysvar++){
-	  
+
       	  TH1D *hiSyst = (TH1D*) file->Get(SysName.at(nsys) + SysNameVar[nsysvar] + "/" + hpath + "_" + SysName.at(nsys) + SysNameVar[nsysvar]);
       	  RemoveNegativeBins(hiSyst);
-      	  double nEvt = hiSyst->Integral();
-      	  float Ratio = nEvt/output.Evt.at(nch);
-      	  hiSyst->Scale(1.0/Ratio);
-      	  output.RatioComb[nch].push_back(Ratio);
+      	  // double nEvt = hiSyst->Integral();
+      	  // float Ratio = nEvt/output.Evt.at(nch);
+      	  // hiSyst->Scale(1.0/Ratio);
+      	  // output.RatioComb[nch].push_back(Ratio);
       	  // output.RatioComb[nch].push_back(1.0/Ratio);
       	  target->mkdir(SysName.at(nsys) + SysNameVar[nsysvar] + "/" + SelCut + "/" + ChName[nch]);
       	  target->cd   (SysName.at(nsys) + SysNameVar[nsysvar] + "/" + SelCut + "/" + ChName[nch]);
@@ -508,6 +508,30 @@ Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString 
 	  
       	}// for(nsysvar)
       } // for(nsys)
+
+      // -- Only theoretical uncertainties 
+    //   for (int nsys = 0 ; nsys < maxSys; nsys++){
+    //   	for (int nsysvar = 0; nsysvar < 2; nsysvar++){
+	  
+    //   	  TH1D *hiSyst = (TH1D*) file->Get(SysName.at(nsys) + SysNameVar[nsysvar] + "/" + hpath + "_" + SysName.at(nsys) + SysNameVar[nsysvar]);
+    //   	  RemoveNegativeBins(hiSyst);
+
+    // 	  double nEvt = hiSyst->Integral();
+    // 	  float Ratio = nEvt/output.Evt.at(nch);
+    // 	  if (nsys >= (maxSys-3)){
+    // 	    hiSyst->Scale(1.0/Ratio);
+    // 	    std::cout << "Normalizing TH2 for: " <<  SysName.at(nsys) << std::endl;
+    // 	  }
+    // 	  output.RatioComb[nch].push_back(Ratio);
+    // 	  // output.RatioComb[nch].push_back(1.0/Ratio);
+
+    //   	  target->mkdir(SysName.at(nsys) + SysNameVar[nsysvar] + "/" + SelCut + "/" + ChName[nch]);
+    //   	  target->cd   (SysName.at(nsys) + SysNameVar[nsysvar] + "/" + SelCut + "/" + ChName[nch]);
+    //   	  hiSyst->Write();
+    //   	  target->cd();
+	  
+    //   	}// for(nsysvar)
+    //   } // for(nsys)
     }// for(nch)
     
     target->Close();
@@ -571,10 +595,13 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   SysName.push_back("btaglfsII");
   SysName.push_back("btagcfI");
   SysName.push_back("btagcfII");
-  SysName.push_back("ScaleRdF");
-  SysName.push_back("ISR");
-  SysName.push_back("FSR");
-  SysName.push_back("UE");
+
+  std::vector<TString> SysThName;
+  SysThName.push_back("ScaleRdF");
+  SysThName.push_back("ISR");
+  SysThName.push_back("FSR");
+  SysThName.push_back("UE");
+  SysThName.push_back("hdamp");
 
   int ich;
   if (ljchannel == "mujets") ich = 0;
@@ -589,14 +616,14 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
 
   // -- HEAD
   fprintf(file,"## -- DataCard for ttbb->Lep+Jets \n"); 
-  fprintf(file,"----------------------------------------------------------\n"); 
+  fprintf(file,"----------------------------------------------------------\n\n"); 
   fprintf(file,"imax \t 1 # Number of channels\n"); 
   fprintf(file,"jmax \t %i # Number of contribution - 1 \n", (nDCSam-1)); 
-  int ValSysName = SysName.size();
-  if(DCNorm) fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", (2*ValSysName)); 
+  int ValSysName = SysName.size() + 3 + SysThName.size(); // 2 from Xsec + Lumin 
+  if(DCNorm) fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", ValSysName); 
   else fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", ValSysName); 
-  fprintf(file,"----------------------------------------------------------\n"); 
-  fprintf(file,"----------------------------------------------------------\n"); 
+  fprintf(file,"----------------------------------------------------------\n\n"); 
+  fprintf(file,"----------------------------------------------------------\n\n"); 
   fprintf(file,"# $CHANNEL means the bin \n"); 
   fprintf(file,"# $PROCESS means the name process \n"); 
   fprintf(file,"\n# To create each entry: \n"); 
@@ -607,7 +634,7 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
     Yields samEntry = Samples.at(ns);
     if(samEntry.InDataCard.Contains("DCSys")){
       TString namefile = HeadFile + "_" + samEntry.SamComName;
-      if(DCNorm)  namefile += "_COMBINENorm.root" ;
+      if(DCNorm && samEntry.InDataCard == "DCSysThe")  namefile += "_COMBINENew.root" ;
       else  namefile += "_COMBINE.root" ;
       fprintf(file,"shapes %s \t * %s central/2btag/$CHANNEL/%s_$CHANNEL_2btag $SYSTEMATIC/2btag/$CHANNEL/%s_$CHANNEL_2btag_$SYSTEMATIC \n", 
 	      (samEntry.SamComName).Data(), 
@@ -631,14 +658,14 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
 	fprintf(file,"shapes data_obs \t * %s central/2btag/$CHANNEL/%s_$CHANNEL_2btag \n", 
 		namefile.Data(),
 		HistoName.Data());      
-      fprintf(file,"----------------------------------------------------------\n");
+      fprintf(file,"----------------------------------------------------------\n\n");
       fprintf(file,"bin \t %s \n", ljchannel.Data());
       fprintf(file,"observation \t %.1f  \n",
 	      samEntry.Evt[ich]);
     } // if(Data)
   } // for(ns)
   
-  fprintf(file,"----------------------------------------------------------\n");
+  fprintf(file,"----------------------------------------------------------\n\n");
   
   fprintf(file,"bin ");
   for(int ns = 0; ns < nDCSam; ns++) fprintf(file,"\t %s ", ljchannel.Data());
@@ -672,85 +699,178 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   } // for(ns)
   fprintf(file,"\n");
   
-  fprintf(file,"----------------------------------------------------------\n");
+  fprintf(file,"----------------------------------------------------------\n\n");
 
   // Systematics Uncertainties
   for (int nsys = 0; nsys < SysName.size(); nsys++){
-    if (DCNorm) fprintf(file,"%s \t shape ", SysName.at(nsys).Data());
-    else fprintf(file,"%s \t shapeN2 ", SysName.at(nsys).Data());
+    // if (DCNorm && nsys >= (SysName.size() - 4)) fprintf(file,"%s \t shapeN2 ", SysName.at(nsys).Data());
+    // else 
+    fprintf(file,"%s \t shapeN2 ", SysName.at(nsys).Data());
+    for(int ns = 0; ns < Samples.size(); ns++){
+      Yields samEntry = Samples.at(ns);
+      if(samEntry.InDataCard.Contains("DCSys"))   fprintf(file,"\t 1.0 ");      
+      else if(samEntry.InDataCard == "DC") fprintf(file,"\t -   ");      
+    } // for(ns)
+    fprintf(file,"\n");
+  } // for(nsys)
+  
+  // if(DCNorm){
+  //   // Systematics Uncertainties YIELDS
+  //   // for (int nsys = 0; nsys < SysName.size(); nsys++){
+  //   for (int nsys = (SysName.size()-3); nsys < SysName.size(); nsys++){ // Only for theoretical
+  //     fprintf(file,"%s_Rate \t lnN ", SysName.at(nsys).Data());
+  //     for(int ns = 0; ns < Samples.size(); ns++){
+  // 	Yields samEntry = Samples.at(ns);
+  // 	if(samEntry.InDataCard == "DCSysThe"){ 
+  // 	  int sysidup   = 2*nsys;
+  // 	  int sysiddown = sysidup + 1;
+  // 	  if( SysName.at(nsys)=="FSR"){
+  // 	    float FSRfactor = 0.78;
+  // 	    float FSRUp   = FSRfactor*(samEntry.RatioComb[ich].at(sysidup) - 1.0);
+  // 	    float FSRDown = FSRfactor*(1.0 - samEntry.RatioComb[ich].at(sysiddown)); 
+  // 	    fprintf(file,"\t %.3f/%.3f ",(1.0-FSRDown),(1.0+FSRUp));
+  // 	  }
+  // 	  else fprintf(file,"\t %.3f/%.3f ",samEntry.RatioComb[ich].at(sysiddown),samEntry.RatioComb[ich].at(sysidup));
+  // 	}
+  // 	// else if(samEntry.InDataCard == "DCSys") {
+  // 	//   if(nsys<(SysName.size()-4)){
+  // 	//     int sysidup   = 2*nsys;
+  // 	//     int sysiddown = sysidup + 1;
+  // 	//     fprintf(file,"\t %.3f/%.3f ",samEntry.RatioComb[ich].at(sysiddown),samEntry.RatioComb[ich].at(sysidup));
+  // 	//   }
+  // 	//   else fprintf(file,"\t - ");
+  // 	// }
+  // 	// else if(samEntry.InDataCard == "DC") fprintf(file,"\t - ");      
+  // 	else if(samEntry.InDataCard == "DC" || samEntry.InDataCard == "DCSys") fprintf(file,"\t - ");      
+  //     } // for(ns)
+  //     fprintf(file,"\n");
+  //   } // for(nsys)
+  // } // if(DCNorm)
+
+
+  // Theoretical Rates
+  for (int nsys = 0; nsys < SysThName.size(); nsys++){
+    fprintf(file,"%s \t lnN ", SysThName.at(nsys).Data());
     for(int ns = 0; ns < Samples.size(); ns++){
       Yields samEntry = Samples.at(ns);
       if(samEntry.InDataCard == "DCSysThe"){ 
-	if( SysName.at(nsys)=="FSR") fprintf(file,"\t 0.78 ");
-	else fprintf(file,"\t 1.0 ");
+	if(SysThName.at(nsys)=="ScaleRdF" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbb") fprintf(file,"\t 1.017 ");
+	if(SysThName.at(nsys)=="ScaleRdF" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbj") fprintf(file,"\t 1.020 ");
+	if(SysThName.at(nsys)=="ScaleRdF" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattcc") fprintf(file,"\t 1.015 ");
+	if(SysThName.at(nsys)=="ScaleRdF" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattLF") fprintf(file,"\t 1.014 ");
+	if(SysThName.at(nsys)=="ScaleRdF" && samEntry.SamComName == "ttbar_PowhegPythiaBkgtt")       fprintf(file,"\t - ");
+	
+	if(SysThName.at(nsys)=="ISR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbb") fprintf(file,"\t 1.056 ");
+	if(SysThName.at(nsys)=="ISR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbj") fprintf(file,"\t 1.019 ");
+	if(SysThName.at(nsys)=="ISR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattcc") fprintf(file,"\t 1.005 ");
+	if(SysThName.at(nsys)=="ISR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattLF") fprintf(file,"\t 1.011 ");
+	if(SysThName.at(nsys)=="ISR" && samEntry.SamComName == "ttbar_PowhegPythiaBkgtt")       fprintf(file,"\t - ");
+	
+	if(SysThName.at(nsys)=="FSR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbb") fprintf(file,"\t 1.044 ");
+	if(SysThName.at(nsys)=="FSR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbj") fprintf(file,"\t 1.071 ");
+	if(SysThName.at(nsys)=="FSR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattcc") fprintf(file,"\t 1.065 ");
+	if(SysThName.at(nsys)=="FSR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattLF") fprintf(file,"\t 1.068 ");
+	if(SysThName.at(nsys)=="FSR" && samEntry.SamComName == "ttbar_PowhegPythiaBkgtt")       fprintf(file,"\t - ");
+	
+	if(SysThName.at(nsys)=="UE" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbb") fprintf(file,"\t 1.037 ");
+	if(SysThName.at(nsys)=="UE" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbj") fprintf(file,"\t 1.025 ");
+	if(SysThName.at(nsys)=="UE" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattcc") fprintf(file,"\t 1.013 ");
+	if(SysThName.at(nsys)=="UE" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattLF") fprintf(file,"\t 1.013 ");
+	if(SysThName.at(nsys)=="UE" && samEntry.SamComName == "ttbar_PowhegPythiaBkgtt")       fprintf(file,"\t - ");
+
+	if(SysThName.at(nsys)=="hdamp" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbb") fprintf(file,"\t 1.018 ");
+	if(SysThName.at(nsys)=="hdamp" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbj") fprintf(file,"\t 1.025 ");
+	if(SysThName.at(nsys)=="hdamp" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattcc") fprintf(file,"\t 1.018 ");
+	if(SysThName.at(nsys)=="hdamp" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattLF") fprintf(file,"\t 1.022 ");
+	if(SysThName.at(nsys)=="hdamp" && samEntry.SamComName == "ttbar_PowhegPythiaBkgtt")       fprintf(file,"\t - ");
+
+	// 3-btag
+	// if(SysThName.at(nsys)=="ScaleRdF" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbb") fprintf(file,"\t 1.014 ");
+	// if(SysThName.at(nsys)=="ScaleRdF" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbj") fprintf(file,"\t 1.018 ");
+	// if(SysThName.at(nsys)=="ScaleRdF" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattcc") fprintf(file,"\t 1.028 ");
+	// if(SysThName.at(nsys)=="ScaleRdF" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattLF") fprintf(file,"\t 1.019 ");
+	// if(SysThName.at(nsys)=="ScaleRdF" && samEntry.SamComName == "ttbar_PowhegPythiaBkgtt")       fprintf(file,"\t - ");
+	
+	// if(SysThName.at(nsys)=="ISR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbb") fprintf(file,"\t 1.053 ");
+	// if(SysThName.at(nsys)=="ISR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbj") fprintf(file,"\t 1.048 ");
+	// if(SysThName.at(nsys)=="ISR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattcc") fprintf(file,"\t 1.11 ");
+	// if(SysThName.at(nsys)=="ISR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattLF") fprintf(file,"\t 1.075 ");
+	// if(SysThName.at(nsys)=="ISR" && samEntry.SamComName == "ttbar_PowhegPythiaBkgtt")       fprintf(file,"\t - ");
+	
+	// if(SysThName.at(nsys)=="FSR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbb") fprintf(file,"\t 1.065 ");
+	// if(SysThName.at(nsys)=="FSR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbj") fprintf(file,"\t 1.011 ");
+	// if(SysThName.at(nsys)=="FSR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattcc") fprintf(file,"\t 1.093 ");
+	// if(SysThName.at(nsys)=="FSR" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattLF") fprintf(file,"\t 1.081 ");
+	// if(SysThName.at(nsys)=="FSR" && samEntry.SamComName == "ttbar_PowhegPythiaBkgtt")       fprintf(file,"\t - ");
+	
+	// if(SysThName.at(nsys)=="UE" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbb") fprintf(file,"\t 1.052 ");
+	// if(SysThName.at(nsys)=="UE" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattbj") fprintf(file,"\t 1.025 ");
+	// if(SysThName.at(nsys)=="UE" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattcc") fprintf(file,"\t 1.083 ");
+	// if(SysThName.at(nsys)=="UE" && samEntry.SamComName == "ttbar_LepJetsPowhegPythiattLF") fprintf(file,"\t 1.033 ");
+	// if(SysThName.at(nsys)=="UE" && samEntry.SamComName == "ttbar_PowhegPythiaBkgtt")       fprintf(file,"\t - ");
+	
       }
-      else if(samEntry.InDataCard == "DCSys"){ 
-	if(nsys<(SysName.size()-4)){
-	  fprintf(file,"\t 1.0 ");      
-	}
-	else fprintf(file,"\t - ");
-      }
-      else if(samEntry.InDataCard == "DC") fprintf(file,"\t - ");      
+      else if(samEntry.InDataCard == "DCSys" || samEntry.InDataCard == "DC") fprintf(file,"\t - ");
     } // for(ns)
     fprintf(file,"\n");
   } // for(nsys)
 
-  if(DCNorm){
-    // Systematics Uncertainties YIELDS
-    for (int nsys = 0; nsys < SysName.size(); nsys++){
-      fprintf(file,"%s_Rate \t lnN ", SysName.at(nsys).Data());
-      for(int ns = 0; ns < Samples.size(); ns++){
-	Yields samEntry = Samples.at(ns);
-	if(samEntry.InDataCard == "DCSysThe"){ 
-	  int sysidup   = 2*nsys;
-	  int sysiddown = sysidup + 1;
-	  float FSRfactor = 0.78;
-	  if( SysName.at(nsys)=="FSR") fprintf(file,"\t %.3f/%.3f ",FSRfactor*samEntry.RatioComb[ich].at(sysiddown),FSRfactor*samEntry.RatioComb[ich].at(sysidup));
-	  else fprintf(file,"\t %.3f/%.3f ",samEntry.RatioComb[ich].at(sysiddown),samEntry.RatioComb[ich].at(sysidup));
-	}
-	else if(samEntry.InDataCard == "DCSys") {
-	  if(nsys<(SysName.size()-4)){
-	    int sysidup   = 2*nsys;
-	    int sysiddown = sysidup + 1;
-	    fprintf(file,"\t %.3f/%.3f ",samEntry.RatioComb[ich].at(sysiddown),samEntry.RatioComb[ich].at(sysidup));
-	  }
-	  else fprintf(file,"\t - ");
-	}
-	else if(samEntry.InDataCard == "DC") fprintf(file,"\t - ");      
-      } // for(ns)
-      fprintf(file,"\n");
-    } // for(nsys)
-  } // if(DCNorm)
-  
+  // Background: Cross Section Uncertainty
+  // -- QCD (50%)
+  fprintf(file,"XSqcd \t lnN ");
+  for(int ns = 0; ns < Samples.size(); ns++){ 
+    if(Samples.at(ns).InDataCard.Contains("DC") &&
+       Samples.at(ns).SamComName == "QCD") fprintf(file,"\t 0.001/1.5 ");      
+    else if (Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t - ");
+  } 
+ fprintf(file,"\n");
+  // -- W+Jets (10%)
+  fprintf(file,"XSwjets \t lnN ");
+  for(int ns = 0; ns < Samples.size(); ns++){ 
+    if(Samples.at(ns).InDataCard.Contains("DC") &&
+       Samples.at(ns).SamComName == "WJets_aMCatNLO") fprintf(file,"\t 1.1 ");      
+    else if (Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t - ");
+  } 
+  fprintf(file,"\n");
+
   // Luminosity
-  fprintf(file,"# Lumin \t lnN ");
+  fprintf(file,"Lumin \t lnN ");
   for(int ns = 0; ns < Samples.size(); ns++){ 
     if(Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t 1.026 ");      
   } 
  fprintf(file,"\n");
   
-  fprintf(file,"----------------------------------------------------------\n");
+  fprintf(file,"----------------------------------------------------------\n\n");
 
-  fprintf(file,"Theory group = ScaleRdF ISR FSR UE \n");
-
+  fprintf(file,"Theory group = ScaleRdF ISR FSR UE hdamp \n");
+  fprintf(file,"XSBkg  group = XSqcd XSwjets \n");
   fprintf(file,"Lepton_Shape group = LES IDLepSF TrLepSF \n");
-  fprintf(file,"Jet_Shape group = JER \n");
+  fprintf(file,"Jet_Shape group = JER \n\n");
   fprintf(file,"JetScale_Shape group = JESAbsoluteStat JESAbsoluteScale JESAbsoluteMPFBias JESFragmentation JESSinglePionECAL JESSinglePionHCAL JESFlavorQCD JESTimePtEta JESRelativeJEREC1 JESRelativeJEREC2 JESRelativeJERHF JESRelativePtBB JESRelativePtEC1 JESRelativePtEC2 JESRelativePtHF JESRelativeBal JESRelativeFSR JESRelativeStatFSR JESRelativeStatEC JESRelativeStatHF JESPileUpDataMC JESPileUpPtRef JESPileUpPtBB JESPileUpPtEC1 JESPileUpPtHF \n");
-  fprintf(file,"btag_Shape group = btaghf btaghfsI btaghfsII btaglfsI btaglfsII btagcfII btagcfI btaglf \n");
+  fprintf(file,"JetScaleAbs_Shape group    = JESAbsoluteMPFBias JESAbsoluteStat JESAbsoluteScale \n");
+  fprintf(file,"JetScaleRel_Shape group    = JESRelativePtBB JESRelativeStatEC JESRelativeFSR JESRelativeJEREC2 JESRelativeJEREC1 JESRelativeStatFSR JESRelativePtEC2 JESRelativeStatHF JESRelativePtEC1 JESRelativeJERHF JESRelativeBal JESRelativePtHF \n");
+  fprintf(file,"JetScalePU_Shape group     = JESPileUpPtRef JESPileUpPtBB JESPileUpDataMC JESPileUpPtHF JESPileUpPtEC1 \n");
+  fprintf(file,"JetScaleOthers_Shape group = JESFragmentation JESFlavorQCD JESSinglePionECAL JESSinglePionHCAL JESTimePtEta \n\n");
+  fprintf(file,"btag_Shape   group = btaghf btaghfsI btaghfsII btaglfsI btaglfsII btagcfII btagcfI btaglf \n");
   fprintf(file,"btagLF_Shape group = btaglfsI btaglfsII btaglf \n");
   fprintf(file,"btagHF_Shape group = btaghf btaghfsI btaghfsII \n");
-  fprintf(file,"btagCF_Shape group = btagcfII btagcfI \n");
-  fprintf(file,"Other_Shape group = PileUp \n");
+  fprintf(file,"btagCF_Shape group = btagcfII btagcfI \n\n");
+  fprintf(file,"Other_Shape  group = PileUp Lumin\n");
 
   if(DCNorm){
-    fprintf(file,"Lepton_Rate group = LES_Rate IDLepSF_Rate TrLepSF_Rate \n");
-    fprintf(file,"Jet_Rate group = JER_Rate \n");
-    fprintf(file,"JetScale_Rate group = JESAbsoluteStat_Rate JESAbsoluteScale_Rate JESAbsoluteMPFBias_Rate JESFragmentation_Rate JESSinglePionECAL_Rate JESSinglePionHCAL_Rate JESFlavorQCD_Rate JESTimePtEta_Rate JESRelativeJEREC1_Rate JESRelativeJEREC2_Rate JESRelativeJERHF_Rate JESRelativePtBB_Rate JESRelativePtEC1_Rate JESRelativePtEC2_Rate JESRelativePtHF_Rate JESRelativeBal_Rate JESRelativeFSR_Rate JESRelativeStatFSR_Rate JESRelativeStatEC_Rate JESRelativeStatHF_Rate JESPileUpDataMC_Rate JESPileUpPtRef_Rate JESPileUpPtBB_Rate JESPileUpPtEC1_Rate JESPileUpPtHF_Rate \n");
-    fprintf(file,"btag_Rate group = btaghf_Rate btaghfsI_Rate btaghfsII_Rate btaglfsI_Rate btaglfsII_Rate btagcfII_Rate btagcfI_Rate btaglf_Rate \n");
-    fprintf(file,"btagLF_Rate group = btaglfsI_Rate btaglfsII_Rate btaglf_Rate \n");
-    fprintf(file,"btagHF_Rate group = btaghf_Rate btaghfsI_Rate btaghfsII_Rate \n");
-    fprintf(file,"btagCF_Rate group = btagcfII_Rate btagcfI_Rate \n");
-    fprintf(file,"Other_Rate  group = PileUp_Rate \n");
+    // fprintf(file,"Theory_Rate group = ISR_Rate FSR_Rate UE_Rate \n");
+    // fprintf(file,"Lepton_Rate group = LES_Rate IDLepSF_Rate TrLepSF_Rate \n");
+    // fprintf(file,"Jet_Rate group = JER_Rate \n\n");
+    // fprintf(file,"JetScale_Rate group = JESAbsoluteStat_Rate JESAbsoluteScale_Rate JESAbsoluteMPFBias_Rate JESFragmentation_Rate JESSinglePionECAL_Rate JESSinglePionHCAL_Rate JESFlavorQCD_Rate JESTimePtEta_Rate JESRelativeJEREC1_Rate JESRelativeJEREC2_Rate JESRelativeJERHF_Rate JESRelativePtBB_Rate JESRelativePtEC1_Rate JESRelativePtEC2_Rate JESRelativePtHF_Rate JESRelativeBal_Rate JESRelativeFSR_Rate JESRelativeStatFSR_Rate JESRelativeStatEC_Rate JESRelativeStatHF_Rate JESPileUpDataMC_Rate JESPileUpPtRef_Rate JESPileUpPtBB_Rate JESPileUpPtEC1_Rate JESPileUpPtHF_Rate \n");
+    // fprintf(file,"JetScaleAbs_Rate group    = JESAbsoluteMPFBias_Rate JESAbsoluteStat_Rate JESAbsoluteScale_Rate \n");
+    // fprintf(file,"JetScaleRel_Rate group    = JESRelativePtBB_Rate JESRelativeStatEC_Rate JESRelativeFSR_Rate JESRelativeJEREC2_Rate JESRelativeJEREC1_Rate JESRelativeStatFSR_Rate JESRelativePtEC2_Rate JESRelativeStatHF_Rate JESRelativePtEC1_Rate JESRelativeJERHF_Rate JESRelativeBal_Rate JESRelativePtHF_Rate \n");
+    // fprintf(file,"JetScalePU_Rate group     = JESPileUpPtRef_Rate JESPileUpPtBB_Rate JESPileUpDataMC_Rate JESPileUpPtHF_Rate JESPileUpPtEC1_Rate \n");
+    // fprintf(file,"JetScaleOthers_Rate group = JESFragmentation_Rate JESFlavorQCD_Rate JESSinglePionECAL_Rate JESSinglePionHCAL_Rate JESTimePtEta_Rate \n\n");
+    // fprintf(file,"btag_Rate   group = btaghf_Rate btaghfsI_Rate btaghfsII_Rate btaglfsI_Rate btaglfsII_Rate btagcfII_Rate btagcfI_Rate btaglf_Rate \n");
+    // fprintf(file,"btagLF_Rate group = btaglfsI_Rate btaglfsII_Rate btaglf_Rate \n");
+    // fprintf(file,"btagHF_Rate group = btaghf_Rate btaghfsI_Rate btaghfsII_Rate \n");
+    // fprintf(file,"btagCF_Rate group = btagcfII_Rate btagcfI_Rate \n\n");
+    // fprintf(file,"Other_Rate  group = PileUp_Rate \n");
   }
 }
 
@@ -758,8 +878,9 @@ void RemoveNegativeBins(TH1D *histo){
   for(int ibin=1; ibin<=histo->GetNbinsX(); ibin ++){
     float bcont = histo->GetBinContent(ibin);
     if (bcont < 0.0) {
-      std::cout << "Warning!!! Negative bin entry! Setting it to 0.0" << std::endl;
+      std::cout << "Warning!!! Negative bin entry (" << bcont << ")! Setting it to 0.0" << std::endl;
       histo->SetBinContent(ibin,0.0);
+      histo->SetBinError(ibin,0.0);
     }
   }
 }

@@ -24,7 +24,7 @@ TString catname[6] = {"ttjj","ttbb","ttbj","ttcc","ttLF","tt"};
 
 TString tabname[2] = {"tab","systab"};
 
-enum syssource{ScaleRnF=0, ScaleRuF, ScaleRdF, ISR, FSR, UE, EDR, gCR, gCREDR, QCDCREDR};
+enum syssource{ScaleRnF=0, ScaleRuF, ScaleRdF, ISR, FSR, UE, hdamp, EDR, gCR, gCREDR, QCDCREDR};
 
 TString ToString (double number, double precision = 1.){
   ostringstream ostemp;  
@@ -32,12 +32,22 @@ TString ToString (double number, double precision = 1.){
   return ostemp.str();
 }
 
-double Uncertainty (double vnom, double vdown, double vup){
+double Uncertainty (double vnom, double vdown, double vup, TString source = ""){
 
   double DownVar = std::abs(vnom - vdown)/vnom;
   double UpVar   = std::abs(vnom - vup)  /vnom;
 
-  return 100.*std::max(DownVar,UpVar);
+  if(source.Contains("FSR")){
+    cout << "Reducing the " << source << " variation! " << endl;
+    float CorrSqr2[3] = {1.0,1.0,1.0};
+    CorrSqr2[Up]   = 0.40; // 40% from 2 to sqrt(2)
+    CorrSqr2[Down] = 0.60; // 60% from 1/2 to 1/sqrt(2)
+    return 100.*std::max(CorrSqr2[Down]*DownVar,CorrSqr2[Up]*UpVar);
+  }
+  
+  // return 100.*(DownVar+UpVar)*0.5; // Mean value
+  // return 100.*std::min(DownVar,UpVar); // Min value
+  return 100.*std::max(DownVar,UpVar); // Max value
 
 }
 
@@ -57,19 +67,19 @@ TString TableEntry (Cat pr, int var, int ch, TString source = ""){
 
 TString SysTableEntry (Cat pr, int ch, TString source = "", TString ttcat = ""){
 
-  float Un_Nfull = Uncertainty (pr.Nfull[Nom][ch], pr.Nfull[Down][ch], pr.Nfull[Up][ch]);
-  float Un_Nvis  = Uncertainty (pr.Nvis[Nom][ch], pr.Nvis[Down][ch], pr.Nvis[Up][ch]);
-  float Un_NvisW = Uncertainty ((pr.NormW[Nom]*pr.Nvis[Nom][ch]), (pr.NormW[Down]*pr.Nvis[Down][ch]), (pr.NormW[Up]*pr.Nvis[Up][ch]));
+  float Un_Nfull = Uncertainty (pr.Nfull[Nom][ch], pr.Nfull[Down][ch], pr.Nfull[Up][ch],source);
+  float Un_Nvis  = Uncertainty (pr.Nvis[Nom][ch], pr.Nvis[Down][ch], pr.Nvis[Up][ch],source);
+  float Un_NvisW = Uncertainty ((pr.NormW[Nom]*pr.Nvis[Nom][ch]), (pr.NormW[Down]*pr.Nvis[Down][ch]), (pr.NormW[Up]*pr.Nvis[Up][ch]),source);
 
-  float Un_Nnw = Uncertainty (pr.Nnw[Nom][ch], pr.Nnw[Down][ch], pr.Nnw[Up][ch]);
-  float Un_N   = Uncertainty (pr.N[Nom][ch], pr.N[Down][ch], pr.N[Up][ch]);
+  float Un_Nnw = Uncertainty (pr.Nnw[Nom][ch], pr.Nnw[Down][ch], pr.Nnw[Up][ch],source);
+  float Un_N   = Uncertainty (pr.N[Nom][ch], pr.N[Down][ch], pr.N[Up][ch],source);
 
-  float Un_Acc = Uncertainty (pr.Acc[Nom][ch], pr.Acc[Down][ch], pr.Acc[Up][ch]);
-  float Un_Eff = Uncertainty (pr.Eff[Nom][ch], pr.Eff[Down][ch], pr.Eff[Up][ch]);
+  float Un_Acc = Uncertainty (pr.Acc[Nom][ch], pr.Acc[Down][ch], pr.Acc[Up][ch],source);
+  float Un_Eff = Uncertainty (pr.Eff[Nom][ch], pr.Eff[Down][ch], pr.Eff[Up][ch],source);
 
   float Un_AccEff = Uncertainty (pr.Acc[Nom][ch]  * pr.Eff[Nom][ch], 
 				 pr.Acc[Down][ch] * pr.Eff[Down][ch], 
-				 pr.Acc[Up][ch]   * pr.Eff[Up][ch]);
+				 pr.Acc[Up][ch]   * pr.Eff[Up][ch],source);  
 
   return source              + " & " + 
     ttcat                    + " & " +
@@ -84,19 +94,19 @@ TString SysTableEntry (Cat pr, int ch, TString source = "", TString ttcat = ""){
 
 }
 
-TString SysTableAccEffEntry (Cat prjj, Cat prbb, int ch){
+TString SysTableAccEffEntry (Cat prjj, Cat prbb, int ch, TString source){
 
   float Un_Accttbbttjj = Uncertainty ((prbb.Acc[Nom][ch] / prjj.Acc[Nom][ch]),
 				      (prbb.Acc[Down][ch]/ prjj.Acc[Down][ch]),
-				      (prbb.Acc[Up][ch]  / prjj.Acc[Up][ch]));
+				      (prbb.Acc[Up][ch]  / prjj.Acc[Up][ch]),source);
 
   float Un_Effttbbttjj = Uncertainty ((prbb.Eff[Nom][ch] / prjj.Eff[Nom][ch]),
 				      (prbb.Eff[Down][ch]/ prjj.Eff[Down][ch]),
-				      (prbb.Eff[Up][ch]  / prjj.Eff[Up][ch]));
+				      (prbb.Eff[Up][ch]  / prjj.Eff[Up][ch]),source);
 
   float Un_AccEffttbbttjj = Uncertainty ( ( (prbb.Acc[Nom][ch]  * prbb.Eff[Nom][ch])   / (prjj.Acc[Nom][ch]  * prjj.Eff[Nom][ch])  ),
 					  ( (prbb.Acc[Down][ch] * prbb.Eff[Down][ch])  / (prjj.Acc[Down][ch] * prjj.Eff[Down][ch]) ),
-					  ( (prbb.Acc[Up][ch]   * prbb.Eff[Up][ch])    / (prjj.Acc[Up][ch]   * prjj.Eff[Up][ch])   ) );
+					  ( (prbb.Acc[Up][ch]   * prbb.Eff[Up][ch])    / (prjj.Acc[Up][ch]   * prjj.Eff[Up][ch])   ),source );
 
   TString MRT = "\\multirow{2}{*}{ ";
 
@@ -116,8 +126,6 @@ std::map<TString, TString> EffAccCreator(TString systname, TString Variation1, T
 
     TString namefile = FileVersion + "_" + basename + catname[icat];
 
-    cout << namefile  << endl;
-
     TFile *file[2][3] = {NULL, NULL, NULL,
 			 NULL, NULL, NULL};
     // GEN
@@ -130,18 +138,16 @@ std::map<TString, TString> EffAccCreator(TString systname, TString Variation1, T
     file[RECO][Down] = TFile::Open("TopResults/" + FileVersion + "/hSF-" + namefile +  "_SYS_" + systname + Variation1 + ".root");
     file[RECO][Up]   = TFile::Open("TopResults/" + FileVersion + "/hSF-" + namefile +  "_SYS_" + systname + Variation2 + ".root");
 
-
     TH1D *RECOYi[3]     = {NULL,NULL,NULL};
     TH1D *RECOYiNoWe[3] = {NULL,NULL,NULL};
     TH2D *GENYiFull[3]  = {NULL,NULL,NULL};
     TH2D *GENYiVis[3]   = {NULL,NULL,NULL}; 
 
-
     TString dirname[3];
     dirname[Nom]  = "central";
     TString hyieldname[3];
     hyieldname[Nom]  = "";
-    if(systname.Contains("UE") || systname.Contains("SR") || systname.Contains("ScaleR")){
+    if(systname.Contains("hdamp") || systname.Contains("UE") || systname.Contains("SR") || systname.Contains("ScaleR")){
       dirname[Down] = systname + Variation1;
       dirname[Up]   = systname + Variation2;
       hyieldname[Down] = "_" + systname + Variation1;
@@ -161,7 +167,10 @@ std::map<TString, TString> EffAccCreator(TString systname, TString Variation1, T
       RECOYi[ivar]     = (TH1D*)file[RECO][ivar]->Get(dirname[ivar]+"/Yields" + hyieldname[ivar])         ->Clone("RECO"   + dirname[ivar]);  
       RECOYiNoWe[ivar] = (TH1D*)file[RECO][ivar]->Get(dirname[ivar]+"/YieldsNoWeights" + hyieldname[ivar])->Clone("RECONW" + dirname[ivar]);  
 
+      cout << "Reco" << endl;
+
       GENYiFull[ivar]  = (TH2D*)file[GEN][ivar]->Get("Yields_FullPh-Sp_" + catname[icat])->Clone("GENFull" + dirname[ivar]);  
+      cout << "Acc1" << endl;
       GENYiVis [ivar]  = (TH2D*)file[GEN][ivar]->Get("Yields_VisPh-Sp_"  + catname[icat])->Clone("GENVis"  + dirname[ivar]);  
     
       cout << "Histograms " << dirname[ivar] << " loaded..." << endl;
@@ -211,7 +220,7 @@ std::map<TString, TString> EffAccCreator(TString systname, TString Variation1, T
   // Table comparing Acc and Eff of ttbb w.r.t. the ttjj
   for(int icat=ttbb; icat<=tt; icat++){  
     for (unsigned int ich=0; ich<=2; ich++){    
-      Tables[tabname[1]+catname[ttjj]+catname[icat]+chname[ich]] = SysTableEntry (ttcat[ttjj], ich, systname, catname[ttjj]) + SysTableAccEffEntry (ttcat[ttjj],ttcat[icat], ich); 
+      Tables[tabname[1]+catname[ttjj]+catname[icat]+chname[ich]] = SysTableEntry (ttcat[ttjj], ich, systname, catname[ttjj]) + SysTableAccEffEntry (ttcat[ttjj],ttcat[icat], ich, systname); 
       Tables[tabname[1]+catname[icat]+chname[ich]] = SysTableEntry (ttcat[icat], ich, systname, catname[icat]) + " &  &  \\\\ \\hline";
     } // for(ich)
   } // for(icat)
@@ -283,9 +292,17 @@ void CreateComTable (std::map<TString, TString>  tLine[6], int tch, int tcat, TS
 
 
 void EffAccEstimation(TString FileVersion = "Full-v0", TString fbasename = "Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1", TString ttbarname = "ttbar_PowhegPythia"){
+//void EffAccEstimation(TString FileVersion = "JESCom-v0", TString fbasename = "Tree_LepJets_FallSkim_v8-0-6_Spring16-80X_36814pb-1", TString ttbarname = "ttbar_PowhegPythia"){
+//void EffAccEstimation(TString FileVersion = "3btag-v0", TString fbasename = "Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1", TString ttbarname = "ttbar_PowhegPythia"){
 
   
-  std::map<TString, TString>  fTables[10]; // [systematics]
+  std::map<TString, TString>  fTables[11]; // [systematics]
+  
+  fTables[hdamp] = EffAccCreator("hdamp",
+				 "Down",
+				 "Up",
+				 FileVersion, 
+				 fbasename + "_" + ttbarname);
   
   fTables[ISR] = EffAccCreator("ISR",
 			       "Down",
@@ -359,8 +376,14 @@ void EffAccEstimation(TString FileVersion = "Full-v0", TString fbasename = "Tree
 
   // Tables
   for(int icat=ttjj; icat<=tt; icat++){  
+    CreateTable (fTables, mujets,  icat, dirTeXname);
+    CreateTable (fTables, ejets,   icat, dirTeXname);
     CreateTable (fTables, lepjets, icat, dirTeXname);
-    if (icat !=ttjj) CreateComTable (fTables, lepjets, icat, dirTeXname);
+    if (icat !=ttjj){
+      CreateComTable (fTables, mujets,  icat, dirTeXname);
+      CreateComTable (fTables, ejets,   icat, dirTeXname);
+      CreateComTable (fTables, lepjets, icat, dirTeXname);
+    }
   }
 
 }

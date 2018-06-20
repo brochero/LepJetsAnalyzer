@@ -291,7 +291,97 @@ int main(int argc, const char* argv[]){
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(6,"#geq 5");
       if(namecut[j].Contains("2btag")) hNBtagJets[j][i]->GetXaxis()->SetRange(3,6);
       if(namecut[j].Contains("3btag")) hNBtagJets[j][i]->GetXaxis()->SetRange(4,6);
+
+
+      hAddJetsMatchFrac[j][i]= new TH1D("hAddJetsMatchFrac_"+namech[i]+"_"+namecut[j]+syst_varname,"Fraction of additional jets identified " + titlenamech[i] + ";Fraction",6,-0.1,1.1);
+      hNAddJets_IDGen[j][i]  = new TH1D("hNAddJets_IDGen_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (GenMom) " + titlenamech[i] + ";Number of add. jets",4,1.5,5.5);
+      hNAddJets_IDKin[j][i]  = new TH1D("hNAddJets_IDKin_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (KinMom) " + titlenamech[i] + ";Number of add. jets",4,1.5,5.5);
+      h2DNAddJets_IDGenKin[j][i]  = new TH2D("h2DNAddJets_IDGenKin_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets " + titlenamech[i] + ";N add. Jets (GenMom);N add. Jets (KinMom)",4,1.5,5.5,4,1.5,5.5);
+      h2DNAddJets_IDGenKin[j][i]->SetOption("COLTEXT");
+
+      pNAddJets_IDGenVsChi2[j][i]  = new TProfile("pNAddJets_IDGenVsChi2_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (GenMom) Vs Chi2 " + titlenamech[i] + ";Number of add. jets; #chi2",4,1.5,5.5,0,20);
+      pNAddJets_IDKinVsChi2[j][i]  = new TProfile("pNAddJets_IDKinVsChi2_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (KinMom) Vs Chi2 " + titlenamech[i] + ";Number of add. jets; #chi2",4,1.5,5.5,0,20);
+      pNAddJets_IDGenVsProb[j][i]  = new TProfile("pNAddJets_IDGenVsProb_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (GenMom) Vs Fit Prob " + titlenamech[i] + ";Number of add. jets ; Prob.",4,1.5,5.5,0.,1.);
+      pNAddJets_IDKinVsProb[j][i]  = new TProfile("pNAddJets_IDKinVsProb_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (KinMom) Vs Fit Prob " + titlenamech[i] + ";Number of add. jets; Prob.",4,1.5,5.5,0.,1.);
+
+      h2DPairMatchVsAddGen[j][i]  = new TH2D("h2DPairMatchVsAddGen_"+namech[i]+"_"+namecut[j]+syst_varname,"Matching in Add Jets Vs Number of Add Jets (GenMom) " + titlenamech[i] + ";Matching;N add. Jets (GenMom)",3,0.,3.,4,1.5,5.5);
+      h2DPairMatchVsAddGen[j][i]->SetOption("COLTEXT");
+      h2DPairMatchVsAddGen[j][i]->GetXaxis()->SetBinLabel(1,"None");
+      h2DPairMatchVsAddGen[j][i]->GetXaxis()->SetBinLabel(2,"One");
+      h2DPairMatchVsAddGen[j][i]->GetXaxis()->SetBinLabel(3,"Both");
+
+      h2DPairMatchVsAddKin[j][i]  = new TH2D("h2DPairMatchVsAddKin_"+namech[i]+"_"+namecut[j]+syst_varname,"Matching in Add Jets Vs Number of Add Jets (KinMom) " + titlenamech[i] + ";Matching;N add. Jets (KinMom)",3,0.,3.,4,1.5,5.5);
+      h2DPairMatchVsAddKin[j][i]->SetOption("COLTEXT");
+      h2DPairMatchVsAddKin[j][i]->GetXaxis()->SetBinLabel(1,"None");
+      h2DPairMatchVsAddKin[j][i]->GetXaxis()->SetBinLabel(2,"One");
+      h2DPairMatchVsAddKin[j][i]->GetXaxis()->SetBinLabel(3,"Both");
       
+      h2DPairMatchpTVsAddGen[j][i]  = new TH2D("h2DPairMatchpTVsAddGen_"+namech[i]+"_"+namecut[j]+syst_varname,"Matching in Add Jets (pT order) Vs Number of Add Jets (GenMom) " + titlenamech[i] + ";Matching;N add. Jets (GenMom)",3,0.,3.,4,1.5,5.5);
+      h2DPairMatchpTVsAddGen[j][i]->SetOption("COLTEXT");
+      h2DPairMatchpTVsAddGen[j][i]->GetXaxis()->SetBinLabel(1,"None");
+      h2DPairMatchpTVsAddGen[j][i]->GetXaxis()->SetBinLabel(2,"One");
+      h2DPairMatchpTVsAddGen[j][i]->GetXaxis()->SetBinLabel(3,"Both");
+
+      h2DPairMatchpTVsAddKin[j][i]  = new TH2D("h2DPairMatchpTVsAddKin_"+namech[i]+"_"+namecut[j]+syst_varname,"Matching in Add Jets (pT order) Vs Number of Add Jets (KinMom) " + titlenamech[i] + ";Matching;N add. Jets (KinMom)",3,0.,3.,4,1.5,5.5);
+      h2DPairMatchpTVsAddKin[j][i]->SetOption("COLTEXT");
+      h2DPairMatchpTVsAddKin[j][i]->GetXaxis()->SetBinLabel(1,"None");
+      h2DPairMatchpTVsAddKin[j][i]->GetXaxis()->SetBinLabel(2,"One");
+      h2DPairMatchpTVsAddKin[j][i]->GetXaxis()->SetBinLabel(3,"Both");
+
+      // int DRbin = 10;
+      // float DRmin = 0.0, DRmax = 5.;
+      // int Mbin = 6;
+      // float Mmin = 0., Mmax=300.;
+      // Non Uniform
+      int DRNbin = 3;
+      float DRbin[4] = {0.4,1.0,2.0,5.0};
+      int MNbin = 4;
+      float Mbin[5] = {0.,60.,100.,170.,400.};      
+
+      h2DAddKinVsAddGen_DR[j][i]    = new TH2D("h2DAddKinVsAddGen_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: DR add jets (KinMom) Vs DR add jets (GenMom) " + titlenamech[i] + ";DR (KinMom);DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
+      h2DAddKinVsAddGen_DR[j][i]->SetOption("COLTEXT");
+      h2DAddKinpTVsAddGenpT_DR[j][i] = new TH2D("h2DAddKinpTVsAddGenpT_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: DR add jets (KinMom) Vs DR add jets (GenMom) " + titlenamech[i] + ";DR (KinMom);DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
+      h2DAddKinpTVsAddGenpT_DR[j][i]->SetOption("COLTEXT");
+
+      h2DAddKinVsAddGen_M[j][i] = new TH2D("h2DAddKinVsAddGen_M_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: Mass add jets (KinMom) Vs Mass add jets (GenMom) " + titlenamech[i] + ";Mass(KinMom)[GeV];Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
+      h2DAddKinVsAddGen_M[j][i]->SetOption("COLTEXT");
+      h2DAddKinpTVsAddGenpT_M[j][i] = new TH2D("h2DAddKinpTVsAddGenpT_M_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: Mass add jets (KinMom) Vs Mass add jets (GenMom) " + titlenamech[i] + ";Mass(KinMom)[GeV];Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
+      h2DAddKinpTVsAddGenpT_M[j][i]->SetOption("COLTEXT");
+      
+      // GENERATION/RECONSTRUCTION LEVEL
+      h2DAddKinVsAddGen_GENDR[j][i] = new TH2D("h2DAddKinVsAddGen_GENDR_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: GEN-DR add jets (KinMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";GEN-DR(KinMom);GEM-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
+      h2DAddKinVsAddGen_GENDR[j][i]->SetOption("COLTEXT");
+      
+      h2DAddKinpTVsAddGenpT_GENDR[j][i] = new TH2D("h2DAddKinpTVsAddGenpT_GENDR_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: GEN-DR add jets (GenMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";GEN-DR(KinMom);GEN-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
+      h2DAddKinpTVsAddGenpT_GENDR[j][i]->SetOption("COLTEXT");
+      
+      h2DAddGenVsAddGEN_DR[j][i] = new TH2D("h2DAddGenVsAddGEN_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: DR add jets (GenMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";DR(GenMom);GEN-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
+      h2DAddGenVsAddGEN_DR[j][i]->SetOption("COLTEXT");
+      h2DAddKinVsAddGEN_DR[j][i] = new TH2D("h2DAddKinVsAddGEN_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: DR add jets (KinMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";DR(KinMom);GEN-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
+      h2DAddKinVsAddGEN_DR[j][i]->SetOption("COLTEXT");
+
+      h2DAddGenpTVsAddGEN_DR[j][i] = new TH2D("h2DAddGenpTVsAddGEN_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: DR add jets (GenMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";DR(GenMom);GEN-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
+      h2DAddGenpTVsAddGEN_DR[j][i]->SetOption("COLTEXT");
+      h2DAddKinpTVsAddGEN_DR[j][i] = new TH2D("h2DAddKinpTVsAddGEN_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: DR add jets (KinMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";DR(KinMom);GEN-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
+      h2DAddKinpTVsAddGEN_DR[j][i]->SetOption("COLTEXT");
+      h2DAddKinpTVsAddGENKin_DR[j][i] = new TH2D("h2DAddKinpTVsAddGENKin_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: DR add jets (KinMom) Vs GEN-DR add jets (KinMom) " + titlenamech[i] + ";DR(KinMom);GEN-DR(KinMom)",DRNbin,DRbin,DRNbin,DRbin);
+      h2DAddKinpTVsAddGENKin_DR[j][i]->SetOption("COLTEXT");
+      
+      h2DAddKinVsAddGen_GENM[j][i] = new TH2D("h2DAddKinVsAddGen_GENM_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: GEN-Mass add jets (KinMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";GEN-Mass(KinMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
+      h2DAddKinVsAddGen_GENM[j][i]->SetOption("COLTEXT");
+      h2DAddKinpTVsAddGenpT_GENM[j][i] = new TH2D("h2DAddKinpTVsAddGenpT_GENM_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: GEN-Mass add jets (KinMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";GEN-Mass(KinMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
+      h2DAddKinpTVsAddGenpT_GENM[j][i]->SetOption("COLTEXT");
+      h2DAddGenVsAddGEN_M[j][i] = new TH2D("h2DAddGenVsAddGEN_M_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: Mass add jets (GenMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";Mass(GenMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
+      h2DAddGenVsAddGEN_M[j][i]->SetOption("COLTEXT");
+      h2DAddKinVsAddGEN_M[j][i] = new TH2D("h2DAddKinVsAddGEN_M_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: Mass add jets (KinMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";Mass(KinMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
+      h2DAddKinVsAddGEN_M[j][i]->SetOption("COLTEXT");
+      h2DAddGenpTVsAddGEN_M[j][i] = new TH2D("h2DAddGenpTVsAddGEN_M_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: Mass add jets (GenMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";Mass(GenMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
+      h2DAddGenpTVsAddGEN_M[j][i]->SetOption("COLTEXT");
+      h2DAddKinpTVsAddGEN_M[j][i] = new TH2D("h2DAddKinpTVsAddGEN_M_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: Mass add jets (KinMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";Mass(KinMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
+      h2DAddKinpTVsAddGEN_M[j][i]->SetOption("COLTEXT");
+      h2DAddKinpTVsAddGENKin_M[j][i] = new TH2D("h2DAddKinpTVsAddGENKin_M_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: Mass add jets (KinMom) Vs Mass add GEN-jets (KinMom) " + titlenamech[i] + ";Mass(KinMom)[GeV];GEN-Mass(KinMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
+      h2DAddKinpTVsAddGENKin_M[j][i]->SetOption("COLTEXT");
+
       /***************************
           SF(ID,ISO & Trigger)
       ***************************/
@@ -367,6 +457,7 @@ int main(int argc, const char* argv[]){
         Kinematic Reconstruction
       ***************************/
       hKinChi2 [j][i] = new TH1D("hKinChi2_" + namech[i] + "_" + namecut[j]+syst_varname, "#chi^{2} for Kin. RECO " + titlenamech[i] + ";#chi^{2}", 100,0,20);
+      hKinProb [j][i] = new TH1D("hKinProb_" + namech[i] + "_" + namecut[j]+syst_varname, "Probability for Kin. RECO " + titlenamech[i] + ";P", 20,0,1.0);
       h2DKinChi2_JetMatch[j][i] = new TH2D("hKinChi2_JetMatch_" + namech[i] + "_" + namecut[j]+syst_varname, "#chi^{2} Vs # of Jet Matches for Kin. RECO " + titlenamech[i], 100,0,20,5,0,5);
       effKinGenIndex [j][i] = new TEfficiency("effKinGenIndex_" + namech[i] + "_" + namecut[j]+syst_varname, "Kin. RECO vs GEN " + titlenamech[i] + "; [0]->All 4 jets, [1]->Top, [2]->W, [3]->Add; Match Eff.", 4,0,4);
       purKinGenIndex [j][i] = new TEfficiency("purKinGenIndex_" + namech[i] + "_" + namecut[j]+syst_varname, "Kin. RECO vs GEN Purity " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add; Purity", 3,0,3);
@@ -607,7 +698,7 @@ int main(int argc, const char* argv[]){
   for (Long64_t ievt=0; ievt<MaxEvt; ievt++) {
     
     theTree.GetEntry(ievt);  
-    print_progress(theTree.GetEntries(), ievt);
+    print_progress(MaxEvt, ievt);
 
     // PU reweight: Includes Syst. Unc.
     if (_syst && (syst_varname.Contains("PileUpUp") || syst_varname.Contains("PileUpDown")) )
@@ -644,7 +735,7 @@ int main(int argc, const char* argv[]){
     // Lep pT_mu > 30GeV
     if(Channel == 0 && Lep.Pt() < 30)  continue; 
     // Lep pT_e  > 35GeV
-    if(Channel == 1 && Lep.Pt() < 35)  continue; 
+    if(Channel == 1 && Lep.Pt() < 30)  continue; 
     
     // Transverse W Mass
     TLorentzVector METv;
@@ -715,6 +806,14 @@ int main(int argc, const char* argv[]){
 		       (*Jet_eta)[ijet],
 		       (*Jet_phi)[ijet],
 		       (*Jet_E)[ijet]);
+      // if (ievt == 3354){
+      // 	std::cout << ievt << " <==> IndexpT  = " <<  (*Jet_pTIndex)[ijet] << std::endl; 
+      // 	std::cout << ievt << " <==> eta = " << (*Jet_eta)[ijet] << std::endl; 
+      // 	std::cout << ievt << " <==> phi = " << (*Jet_phi)[ijet] << std::endl; 
+      // 	std::cout << ievt << " <==> pT  = " << (*Jet_pT)[ijet] << std::endl; 
+      // 	std::cout << ievt << " <==> E  = " << (*Jet_E)[ijet] << std::endl; 
+      // 	std::cout << ievt << " ============================= "  << std::endl; 
+      // }
       // For MC: Jet mearing applyed.
       jet *= JetSystVar;
  
@@ -726,12 +825,14 @@ int main(int argc, const char* argv[]){
       jet.CvsB    = (*Jet_CvsB)[ijet];
       jet.Mom     = -1;
       jet.KinMom  = -1;
+      jet.GenIndex = -1;
+      jet.pTIndex  = (*Jet_pTIndex)[ijet];
 
       // Jet Mother
       if((fname.Contains("ttbar")  && !fname.Contains("Bkg"))){
-	jet.Mom = (*Jet_Mom)[ijet];
-	int GenConeMom = (*GenCone_Mom)[ijet]; 
-	//std::cout << ijet << " Mom1= " <<  jet.Mom << " Mom2= " << GenConeMom << std::endl;
+	jet.GenIndex = (*Jet_GENmatched)[ijet];
+	jet.Mom      = (*Jet_Mom)[ijet];
+	// int GenConeMom = (*GenCone_Mom)[ijet]; 
       }
       // Kin Mother
       // [0] b from hadronic leg 
@@ -767,12 +868,16 @@ int main(int argc, const char* argv[]){
                 Number of GENJets
     *******************************************/    
     int NGenJets = 0;
-    if (_ttbar_cat){
+    std::vector<TLorentzVector> GenJets;
+    if ((fname.Contains("ttbar")  && !fname.Contains("Bkg"))){
       for(int igenjet=0; igenjet < GenJet_pT->size(); igenjet++){
-	TLorentzVector TLGenJet((*GenJet_pT) [igenjet],
-				(*GenJet_eta)[igenjet],
-				(*GenJet_phi)[igenjet],
-				(*GenJet_E)  [igenjet]); 
+	TLorentzVector TLGenJet;
+	TLGenJet.SetPtEtaPhiE((*GenJet_pT) [igenjet],
+			      (*GenJet_eta)[igenjet],
+			      (*GenJet_phi)[igenjet],
+			      (*GenJet_E)  [igenjet]); 
+
+	GenJets.push_back(TLGenJet);
 	if( TLGenJet.Pt() > 20 ) NGenJets++;
       }
     }
@@ -816,7 +921,39 @@ int main(int argc, const char* argv[]){
       else PUWeight = PUWeight * SF_ID_ISO_Tr[0]; // Central
      
     }// else(Contain("Data"))
-    
+
+    /***************************
+          Fit Probability
+    ***************************/
+    double KinProb = std::exp(-0.5*Kin_Chi2);
+
+    /***************************
+     Number of additional jets
+    ***************************/
+    std::vector<int> vAddGenIndex, vAddKinIndex, vAddGenpTIndex, vAddKinpTIndex,vAddGenpTLocIndex, vAddKinpTLocIndex;
+    int nAddKin = 0;
+    if(NJets > 5){
+      for(int ijet=0; ijet < Jets.size(); ijet++){
+	ComJet jet = Jets[ijet];
+	if(jet.Mom != 24 && jet.Mom != 6){    
+	  vAddGenIndex.push_back(ijet);
+	  vAddGenpTLocIndex.push_back(ijet);
+	  vAddGenpTIndex.push_back(jet.pTIndex);
+	}
+	if(jet.KinMom != 24 && jet.KinMom != 6){
+	  vAddKinIndex.push_back(ijet);
+	  vAddKinpTLocIndex.push_back(ijet);
+	  vAddKinpTIndex.push_back(jet.pTIndex);
+	}
+      }// for(ijets)
+      nAddKin = vAddKinIndex.size();
+    } // if(NJets)
+
+    if (NJets > 5  && NBtagJets > 1){
+    for(int ijet=0; ijet < Jets.size(); ijet++){
+      ComJet jet = Jets[ijet];
+    }
+    }
     /***************************
             Selection
     ***************************/
@@ -824,13 +961,13 @@ int main(int argc, const char* argv[]){
     bool JumpCutEvent[Nhcuts];
     for(unsigned int bcut=0; bcut<Nhcuts; bcut++) JumpCutEvent[bcut] = true;
 
-    JumpCutEvent[0] = false;                               // Single Lepton (from Tree)
-    if(NJets > 5)                  JumpCutEvent[1]= false; // lep + 6 Jets 
-    if(NJets > 5 && NBtagJets > 1) JumpCutEvent[2]= false; // lep + 6 Jets + 2 b-tag
-    if(NJets > 5 && NBtagJets > 2) JumpCutEvent[3]= false; // lep + 6 Jets + 3 b-tag
-    if(NJets > 3)                  JumpCutEvent[4]= false; // lep + 4 Jets 
-    if(NJets > 3 && NBtagJets > 1) JumpCutEvent[5]= false; // lep + 4 Jets + 2 b-tag 
-    if(NBtagJets > 1)              JumpCutEvent[6]= false; // lep + 2 b-tag 
+    JumpCutEvent[0] = false;                                                 // Single Lepton (from Tree)
+    if(NJets > 5)                                    JumpCutEvent[1]= false; // lep + 6 Jets 
+    if(NJets > 5  && NBtagJets > 1)                  JumpCutEvent[2]= false; // lep + 6 Jets + 2 b-tag
+    if(NJets > 5  && NBtagJets > 2)                  JumpCutEvent[3]= false; // lep + 6 Jets + 3 b-tag
+    if(NJets > 5  && NBtagJets > 1 && KinProb > 0.2) JumpCutEvent[4]= false; // lep + 6 Jets + 2 b-tag + Fit Probability > 0.2
+    if(NJets > 5  && NBtagJets > 1 && nAddKin == 2)                  JumpCutEvent[5]= false; // lep + 6 Jets + 2 b-tag + 2 Add Jets
+    if(NJets > 5  && NBtagJets > 1 && nAddKin == 2 && KinProb > 0.2) JumpCutEvent[6]= false; // lep + 6 Jets + 2 b-tag + 2 Add Jets + Fit Probability > 0.2
 
 
     bool JumpEvent = false;
@@ -913,9 +1050,10 @@ int main(int argc, const char* argv[]){
       h2DSFbtag_Global  [icut][Channel]->Fill((*Jet_SF_CSV)[btagUnc::CENTRAL], btagUnc_val, PUWeight);
 
       // Jet Variables
-      int kinGenConeMatch = 0, TopkinGenConeMatch = 0, WkinGenConeMatch = 0, OkinGenConeMatch = 0;
+      int nkinGenConeMatch = 0, nTopGenCone = 0, nWGenCone = 0, nAddGenCone = 0;
       bool fKinAddjj = true;
       bool fGenAddjj = true;
+      
       for(int ijet=0; ijet < Jets.size(); ijet++){
 	ComJet jet = Jets[ijet];
 	// b-Jet Efficiencies
@@ -942,7 +1080,7 @@ int main(int argc, const char* argv[]){
 	  hCvsL [ijet][icut][Channel]->Fill(jet.CvsL, PUWeight);
 	  hCvsB [ijet][icut][Channel]->Fill(jet.CvsB, PUWeight);
 	}
-
+	
 	//Dijet Invariant Mass 
 	int jbmax = std::min(NhJets,NJets);
 	for(int jjet=ijet+1; jjet < jbmax; jjet++){
@@ -1003,19 +1141,12 @@ int main(int argc, const char* argv[]){
 	    pSFCSVUpVsCSVAdd  [icut][Channel]->Fill(jet_.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL]+btagUnc_TotalUp,   PUWeight);
 	    pSFCSVDownVsCSVAdd[icut][Channel]->Fill(jet_.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL]-btagUnc_TotalDown, PUWeight);
 
-	    fKinAddjj = false;
+	    fKinAddjj = false; // FIRST Pair of additional jets! That means the pair with the highest CSV  
 	  }
 	}// for(jjet)
 
 	// Jet Tag Efficiencies
 	if(NJets > 3){ 
-	  // Categorization Comp
-	  effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttbb",GenttHCat,NGenJets), 0.5);
-	  effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttb", GenttHCat,NGenJets), 1.5);
-	  effCatHiggs [icut][Channel]-> Fill(ttbar_category("tt2b",GenttHCat,NGenJets), 2.5);
-	  effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttcc",GenttHCat,NGenJets), 3.5);
-	  effCatHiggs [icut][Channel]-> Fill(ttbar_category("tt",  GenttHCat,NGenJets), 4.5);
-
 	  // -- CSV purity
 	  // Jets from Top
 	  if(ijet < 2)                   purTagCSV[icut][Channel]-> Fill(jet.Mom == 6, 0.5);
@@ -1029,23 +1160,31 @@ int main(int argc, const char* argv[]){
 	  // Jets from W
 	  if(jet.KinMom == 24) purKinGenIndex[icut][Channel]->Fill(jet.Mom == 24, 1.5);
 	  // Add Jets
-	  if(jet.KinMom != 24 && jet.KinMom != 6) purKinGenIndex[icut][Channel]->Fill(jet.Mom != 24 && jet.Mom != 6, 2.5);
-
+	  if(jet.KinMom != 24 && jet.KinMom != 6){ 
+	    purKinGenIndex[icut][Channel]->Fill(jet.Mom != 24 && jet.Mom != 6, 2.5);
+	  }
 
 	  // GenCone Vs Kinematic Reconstruction 
 	  if (jet.Mom == 6 || jet.Mom == 24){ 
 	    
-	    if(jet.Mom == jet.KinMom) kinGenConeMatch++; 
+	    if(jet.Mom == jet.KinMom) nkinGenConeMatch++; 
 	    
-	    if(jet.Mom == 6) { effKinGenIndex[icut][Channel]->Fill(jet.KinMom == 6,  1.5); TopkinGenConeMatch++;}
+	    if(jet.Mom == 6){ 
+	      nTopGenCone++;
+	      effKinGenIndex[icut][Channel]->Fill(jet.KinMom == 6,  1.5); 
+	    }
 	    if(jet.Mom == 24){ 
-	      effKinGenIndex[icut][Channel]->Fill(jet.KinMom == 24, 2.5); WkinGenConeMatch++;
+	      nWGenCone++;	
+	      effKinGenIndex[icut][Channel]->Fill(jet.KinMom == 24, 2.5); 
 	      // Eff. Vs Xi2
 	      effKinGenIndexVsChi2[icut][Channel]->Fill(jet.KinMom == 24, Kin_Chi2);
 	    }
 
 	  } // if ((jet.Mom)
-	  else if(jet.Mom != 6 && jet.Mom != 24){ effKinGenIndex[icut][Channel]->Fill((jet.KinMom != 24 && jet.KinMom != 6), 3.5); OkinGenConeMatch++;}
+	  else if(jet.Mom != 6 && jet.Mom != 24){ 
+	    nAddGenCone++;
+	    effKinGenIndex[icut][Channel]->Fill((jet.KinMom != 24 && jet.KinMom != 6), 3.5); 
+	  }
 
 	  // CSV Jet Postion Eff (No weights)
 	  bool isGoodCSVOrder = false;
@@ -1071,13 +1210,22 @@ int main(int argc, const char* argv[]){
 	} // if(NJets > 3)
 	
       }//for(ijet)     
-       
+      
       // GenCone Vs Kinematic Reconstruction 
       if(NJets > 3){ 
+	// Categorization Comp
+	effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttbb",GenttHCat,NGenJets), 0.5);
+	effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttb", GenttHCat,NGenJets), 1.5);
+	effCatHiggs [icut][Channel]-> Fill(ttbar_category("tt2b",GenttHCat,NGenJets), 2.5);
+	effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttcc",GenttHCat,NGenJets), 3.5);
+	effCatHiggs [icut][Channel]-> Fill(ttbar_category("tt",  GenttHCat,NGenJets), 4.5);
+		
 	// Kinematic Reconstruction
 	TLorentzVector KinWl, KinWh, Kintl, Kinth;
 	hKinChi2 [icut][Channel]->Fill(Kin_Chi2,PUWeight);
-	h2DKinChi2_JetMatch[icut][Channel]->Fill(Kin_Chi2, kinGenConeMatch, PUWeight);
+	h2DKinChi2_JetMatch[icut][Channel]->Fill(Kin_Chi2, nkinGenConeMatch, PUWeight);
+
+	hKinProb [icut][Channel]->Fill(KinProb,PUWeight);
 	
 	KinWl = Lep + KinNu;
 	KinWh = KinJet[1] + KinJet[2];
@@ -1105,13 +1253,208 @@ int main(int argc, const char* argv[]){
 	
 
 	bool IsKinGenMatch = false;
-	if ( kinGenConeMatch == (TopkinGenConeMatch + WkinGenConeMatch) ) IsKinGenMatch = true;
+	if ( nkinGenConeMatch == (nTopGenCone + nWGenCone) ) IsKinGenMatch = true;
 	effKinGenIndex[icut][Channel]->Fill(IsKinGenMatch, 0.5, PUWeight);
 	for(int ikj=0; ikj < 4; ikj++){
 	  hKinJetPt[ikj][icut][Channel]->Fill(KinJet[ikj].Pt(), PUWeight);
 	}
 
       } //if(NJet > 3)
+
+
+      if(NJets > 5){ 
+	
+	// Number of Additional jets per event
+	hNAddJets_IDGen [icut][Channel]->Fill(nAddGenCone,PUWeight);
+	hNAddJets_IDKin [icut][Channel]->Fill(nAddKin,    PUWeight);
+
+	pNAddJets_IDKinVsChi2[icut][Channel]->Fill(nAddKin,     Kin_Chi2, PUWeight);
+	pNAddJets_IDGenVsChi2[icut][Channel]->Fill(nAddGenCone, Kin_Chi2, PUWeight);
+	pNAddJets_IDKinVsProb[icut][Channel]->Fill(nAddKin,     KinProb,  PUWeight);
+	pNAddJets_IDGenVsProb[icut][Channel]->Fill(nAddGenCone, KinProb,  PUWeight);
+
+	h2DNAddJets_IDGenKin [icut][Channel]->Fill(nAddGenCone,nAddKin,PUWeight);
+
+
+	// Additional jets matching 
+	int nAddJetsMatch = 0;
+	for(int iaj = 0; iaj < vAddGenIndex.size(); iaj++){
+	  for(int jaj = 0; jaj < vAddKinIndex.size(); jaj++){
+	    if(vAddGenIndex.at(iaj) == vAddKinIndex.at(jaj)) nAddJetsMatch ++;
+	  }
+	}
+	
+	hAddJetsMatchFrac[icut][Channel]-> Fill((1.0*nAddJetsMatch)/(1.0*vAddGenIndex.size()), PUWeight);
+	
+	// events with AT LEAST two additional jets
+	if (vAddGenIndex.size()>1 && vAddKinIndex.size()>1){
+
+	  if (vAddGenIndex.at(0) == vAddKinIndex.at(0) &&
+	      vAddGenIndex.at(1) == vAddKinIndex.at(1)) {// Full Match Pair
+	    h2DPairMatchVsAddGen[icut][Channel]->Fill(2.5,vAddGenIndex.size(),PUWeight);
+	    h2DPairMatchVsAddKin[icut][Channel]->Fill(2.5,vAddKinIndex.size(),PUWeight);	    
+	  }
+	  else if (vAddGenIndex.at(0) == vAddKinIndex.at(0) ||
+		   vAddGenIndex.at(1) == vAddKinIndex.at(1) ||
+		   vAddGenIndex.at(0) == vAddKinIndex.at(1) ||
+		   vAddGenIndex.at(1) == vAddKinIndex.at(0)) { // Only one add jet
+	    h2DPairMatchVsAddGen[icut][Channel]->Fill(1.5,vAddGenIndex.size(),PUWeight);
+	    h2DPairMatchVsAddKin[icut][Channel]->Fill(1.5,vAddKinIndex.size(),PUWeight);	    
+	  }
+	  else { // No one
+	    h2DPairMatchVsAddGen[icut][Channel]->Fill(0.5,vAddGenIndex.size(),PUWeight);
+	    h2DPairMatchVsAddKin[icut][Channel]->Fill(0.5,vAddKinIndex.size(),PUWeight);	    
+	  }
+	  
+	  // -- Pair arranged by pT
+	  for(unsigned int ijet=0; ijet < vAddGenpTIndex.size(); ijet++){
+	    for(unsigned int jjet=ijet+1; jjet < vAddGenpTIndex.size(); jjet++){		
+	      if(vAddGenpTIndex.at(jjet) < vAddGenpTIndex.at(ijet)){
+		int tempIndex = vAddGenpTIndex.at(ijet);
+		int tempLocIndex = vAddGenpTLocIndex.at(ijet);
+		vAddGenpTIndex.at(ijet) = vAddGenpTIndex.at(jjet);
+		vAddGenpTLocIndex.at(ijet) = vAddGenpTLocIndex.at(jjet);
+		vAddGenpTIndex.at(jjet) = tempIndex;
+		vAddGenpTLocIndex.at(jjet) = tempLocIndex;
+	      }// if(Index_j > Index_i)
+	    }// for(j)
+	  }// for(i)
+	  for(unsigned int ijet=0; ijet < vAddKinpTIndex.size(); ijet++){
+	    for(unsigned int jjet=ijet+1; jjet < vAddKinpTIndex.size(); jjet++){		
+	      if(vAddKinpTIndex.at(jjet) < vAddKinpTIndex.at(ijet)){
+		int tempIndex = vAddKinpTIndex.at(ijet);
+		int tempLocIndex = vAddKinpTLocIndex.at(ijet);
+		vAddKinpTIndex.at(ijet) = vAddKinpTIndex.at(jjet);
+		vAddKinpTLocIndex.at(ijet) = vAddKinpTLocIndex.at(jjet);
+		vAddKinpTIndex.at(jjet) = tempIndex;
+		vAddKinpTLocIndex.at(jjet) = tempLocIndex;
+	      }// if(Index_j > Index_i)
+	    }// for(j)
+	  }// for(i)
+	  	  
+	  if (vAddGenpTIndex.at(0) == vAddKinpTIndex.at(0) &&
+	      vAddGenpTIndex.at(1) == vAddKinpTIndex.at(1)) {// Full Match Pair
+	    h2DPairMatchpTVsAddGen[icut][Channel]->Fill(2.5,vAddGenpTIndex.size(),PUWeight);
+	    h2DPairMatchpTVsAddKin[icut][Channel]->Fill(2.5,vAddKinpTIndex.size(),PUWeight);	    
+	  }
+	  else if (vAddGenpTIndex.at(0) == vAddKinpTIndex.at(0) ||
+		   vAddGenpTIndex.at(1) == vAddKinpTIndex.at(1) ||
+		   vAddGenpTIndex.at(0) == vAddKinpTIndex.at(1) ||
+		   vAddGenpTIndex.at(1) == vAddKinpTIndex.at(0)) { // Only one add jet
+	    h2DPairMatchpTVsAddGen[icut][Channel]->Fill(1.5,vAddGenpTIndex.size(),PUWeight);
+	    h2DPairMatchpTVsAddKin[icut][Channel]->Fill(1.5,vAddKinpTIndex.size(),PUWeight);	    
+	  }
+	  else { // No one
+	    h2DPairMatchpTVsAddGen[icut][Channel]->Fill(0.5,vAddGenpTIndex.size(),PUWeight);
+	    h2DPairMatchpTVsAddKin[icut][Channel]->Fill(0.5,vAddKinpTIndex.size(),PUWeight);	    
+	  }
+	  
+	  // Histograms
+	  ComJet AddGenjet[2], AddKinjet[2];
+	  ComJet AddGenpTjet[2], AddKinpTjet[2];
+
+	  for (int iaj = 0; iaj<2; iaj++){
+	    AddGenjet[iaj] = Jets[vAddGenIndex.at(iaj)];
+	    AddKinjet[iaj] = Jets[vAddKinIndex.at(iaj)];
+	    
+	    AddGenpTjet[iaj] = Jets[vAddGenpTLocIndex.at(iaj)];
+	    AddKinpTjet[iaj] = Jets[vAddKinpTLocIndex.at(iaj)];
+	  }
+
+	  TLorentzVector GENAddGenjet[2], GENAddKinjet[2]; 
+	  TLorentzVector GENAddGenpTjet[2], GENAddKinpTjet[2];
+
+	  bool GoodGENJetMatch = false;
+	  if(AddGenjet[0].GenIndex > 0 &&
+	     AddGenjet[1].GenIndex > 0 &&
+	     AddGenpTjet[0].GenIndex > 0 &&
+	     AddGenpTjet[1].GenIndex > 0) GoodGENJetMatch = true;
+	  
+	  bool GoodGENKinJetMatch = false;
+	  if(AddKinjet[0].GenIndex > 0 &&
+	     AddKinjet[1].GenIndex > 0 &&
+	     AddKinpTjet[0].GenIndex > 0 &&
+	     AddKinpTjet[1].GenIndex > 0) GoodGENKinJetMatch = true;
+
+	  for (int iaj = 0; iaj<2; iaj++){
+	    if(GoodGENJetMatch){
+	      GENAddGenjet[iaj]   = GenJets.at(AddGenjet[iaj].GenIndex);
+	      GENAddGenpTjet[iaj] = GenJets.at(AddGenpTjet[iaj].GenIndex);
+	    }	    
+	    if(GoodGENKinJetMatch){
+	      GENAddKinjet[iaj]   = GenJets.at(AddKinjet[iaj].GenIndex);
+	      GENAddKinpTjet[iaj] = GenJets.at(AddKinpTjet[iaj].GenIndex);
+	    }
+	  }
+	  
+	  float AddGenM  = (AddGenjet[0]+AddGenjet[1]).M(); 
+	  float AddGenDR = AddGenjet[0].DeltaR(AddGenjet[1]); 	  
+	  float AddKinM  = (AddKinjet[0]+AddKinjet[1]).M(); 
+	  float AddKinDR = AddKinjet[0].DeltaR(AddKinjet[1]); 	  
+
+	  float AddGenpTM  = (AddGenpTjet[0]+AddGenpTjet[1]).M(); 
+	  float AddGenpTDR = AddGenpTjet[0].DeltaR(AddGenpTjet[1]); 	  
+	  float AddKinpTM  = (AddKinpTjet[0]+AddKinpTjet[1]).M(); 
+	  float AddKinpTDR = AddKinpTjet[0].DeltaR(AddKinpTjet[1]); 	  
+
+	  h2DAddKinVsAddGen_DR    [icut][Channel] ->Fill(AddKinDR,  AddGenDR,   PUWeight);
+	  h2DAddKinpTVsAddGenpT_DR[icut][Channel] ->Fill(AddKinpTDR,AddGenpTDR, PUWeight);
+	  h2DAddKinVsAddGen_M     [icut][Channel] ->Fill(AddKinM,  AddGenM,   PUWeight);
+	  h2DAddKinpTVsAddGenpT_M [icut][Channel] ->Fill(AddKinpTM,AddGenpTM, PUWeight);
+
+	  float GENAddGenM = 0.;
+	  float GENAddGenDR = 0.;
+	  float GENAddKinM = 0.;
+	  float GENAddKinDR = 0.;
+
+	  float GENAddGenpTM = 0.;
+	  float GENAddGenpTDR = 0.;
+	  float GENAddKinpTM = 0.;
+	  float GENAddKinpTDR = 0.;
+
+	  if(GoodGENJetMatch){
+	    GENAddGenM    = (GENAddGenjet[0]+GENAddGenjet[1]).M(); 
+	    GENAddGenpTM  = (GENAddGenpTjet[0]+GENAddGenpTjet[1]).M(); 
+	    GENAddGenDR   = GENAddGenjet[0].DeltaR(GENAddGenjet[1]); 	  
+	    GENAddGenpTDR = GENAddGenpTjet[0].DeltaR(GENAddGenpTjet[1]); 	  
+	    
+	  }
+
+	  if(GoodGENKinJetMatch){
+	    GENAddKinM    = (GENAddKinjet[0]+GENAddKinjet[1]).M(); 
+	    GENAddKinpTM  = (GENAddKinpTjet[0]+GENAddKinpTjet[1]).M(); 
+	    GENAddKinDR   = GENAddKinjet[0].DeltaR(GENAddKinjet[1]); 	  
+	    GENAddKinpTDR = GENAddKinpTjet[0].DeltaR(GENAddKinpTjet[1]); 	  
+	  }
+
+	  if(GoodGENJetMatch){
+	    h2DAddGenVsAddGEN_DR  [icut][Channel]->Fill(AddGenDR,   GENAddGenDR,   PUWeight);
+	    h2DAddKinVsAddGEN_DR  [icut][Channel]->Fill(AddKinDR,   GENAddGenDR,   PUWeight);
+	    h2DAddGenpTVsAddGEN_DR[icut][Channel]->Fill(AddGenpTDR, GENAddGenpTDR, PUWeight);
+	    h2DAddKinpTVsAddGEN_DR[icut][Channel]->Fill(AddKinpTDR, GENAddGenpTDR, PUWeight);
+	    h2DAddGenVsAddGEN_M   [icut][Channel]->Fill(AddGenM,    GENAddGenM,    PUWeight);
+	    h2DAddKinVsAddGEN_M   [icut][Channel]->Fill(AddKinM,    GENAddGenM,    PUWeight);
+	    h2DAddGenpTVsAddGEN_M [icut][Channel]->Fill(AddGenpTM,  GENAddGenpTM,  PUWeight);
+	    h2DAddKinpTVsAddGEN_M [icut][Channel]->Fill(AddKinpTM,  GENAddGenpTM,  PUWeight);
+	  }
+
+	  if(GoodGENKinJetMatch){
+	    h2DAddKinpTVsAddGENKin_DR[icut][Channel]->Fill(AddKinpTDR, GENAddKinpTDR, PUWeight);
+	    h2DAddKinpTVsAddGENKin_M [icut][Channel]->Fill(AddKinpTM,  GENAddKinpTM, PUWeight);
+	  }
+	  
+	  if(GoodGENJetMatch && GoodGENKinJetMatch){
+	    h2DAddKinVsAddGen_GENM     [icut][Channel] ->Fill(GENAddKinM,    GENAddGenM,    PUWeight);
+	    h2DAddKinpTVsAddGenpT_GENM [icut][Channel] ->Fill(GENAddKinpTM,  GENAddGenpTM,  PUWeight);
+	    h2DAddKinVsAddGen_GENDR    [icut][Channel] ->Fill(GENAddKinDR,   GENAddGenDR,   PUWeight);
+	    h2DAddKinpTVsAddGenpT_GENDR[icut][Channel] ->Fill(GENAddKinpTDR, GENAddGenpTDR, PUWeight);
+	  }
+
+	} // if(AddJets) 
+	
+      }// if(NJets>5)
+	
+	
     }//for(icuts)     
     
     Jets.clear();
@@ -1191,6 +1534,50 @@ int main(int argc, const char* argv[]){
 
     for(int i=0; i<Nhch; i++){
       
+      // Plot Normalization
+      if (hAddJetsMatchFrac[j][i]->Integral() != 0.0) 
+	hAddJetsMatchFrac[j][i]->Scale(1.0/hAddJetsMatchFrac[j][i]->Integral());
+
+      if (h2DPairMatchVsAddGen[j][i]->Integral() != 0.0) 
+	h2DPairMatchVsAddGen[j][i]->Scale(1.0/h2DPairMatchVsAddGen[j][i]->Integral());
+      if (h2DPairMatchVsAddKin[j][i]->Integral() != 0.0) 
+	h2DPairMatchVsAddKin[j][i]->Scale(1.0/h2DPairMatchVsAddKin[j][i]->Integral());
+      if (h2DPairMatchpTVsAddGen[j][i]->Integral() != 0.0) 
+	h2DPairMatchpTVsAddGen[j][i]->Scale(1.0/h2DPairMatchpTVsAddGen[j][i]->Integral());
+      if (h2DPairMatchpTVsAddKin[j][i]->Integral() != 0.0) 
+	h2DPairMatchpTVsAddKin[j][i]->Scale(1.0/h2DPairMatchpTVsAddKin[j][i]->Integral());
+
+      if(h2DAddKinVsAddGen_GENDR[j][i]->Integral() != 0.0)
+      h2DAddKinVsAddGen_GENDR[j][i]->Scale(1.0/h2DAddKinVsAddGen_GENDR[j][i]->Integral());
+      if(h2DAddKinpTVsAddGenpT_GENDR[j][i]->Integral() != 0.0)
+      h2DAddKinpTVsAddGenpT_GENDR[j][i]->Scale(1.0/h2DAddKinpTVsAddGenpT_GENDR[j][i]->Integral());
+      if(h2DAddKinVsAddGen_GENM[j][i]->Integral() != 0.0)
+      h2DAddKinVsAddGen_GENM[j][i]->Scale(1.0/h2DAddKinVsAddGen_GENM[j][i]->Integral());
+      if(h2DAddKinpTVsAddGenpT_GENM[j][i]->Integral() != 0.0)
+      h2DAddKinpTVsAddGenpT_GENM[j][i]->Scale(1.0/h2DAddKinpTVsAddGenpT_GENM[j][i]->Integral());
+      if(h2DAddGenVsAddGEN_DR[j][i]->Integral() != 0.0)
+      h2DAddGenVsAddGEN_DR[j][i]->Scale(1.0/h2DAddGenVsAddGEN_DR[j][i]->Integral());
+      if(h2DAddKinVsAddGEN_DR[j][i]->Integral() != 0.0)
+      h2DAddKinVsAddGEN_DR[j][i]->Scale(1.0/h2DAddKinVsAddGEN_DR[j][i]->Integral());
+      if(h2DAddGenVsAddGEN_M[j][i]->Integral() != 0.0)
+      h2DAddGenVsAddGEN_M[j][i]->Scale(1.0/h2DAddGenVsAddGEN_M[j][i]->Integral());
+      if(h2DAddKinVsAddGEN_M[j][i]->Integral() != 0.0)
+      h2DAddKinVsAddGEN_M[j][i]->Scale(1.0/h2DAddKinVsAddGEN_M[j][i]->Integral());
+      if(h2DAddKinVsAddGEN_M[j][i]->Integral() != 0.0)
+      h2DAddKinVsAddGEN_M[j][i]->Scale(1.0/h2DAddGenpTVsAddGEN_DR[j][i]->Integral());
+      if(h2DAddKinpTVsAddGEN_DR[j][i]->Integral() != 0.0)
+      h2DAddKinpTVsAddGEN_DR[j][i]->Scale(1.0/h2DAddKinpTVsAddGEN_DR[j][i]->Integral());
+      if(h2DAddKinpTVsAddGEN_DR[j][i]->Integral() != 0.0)
+      h2DAddKinpTVsAddGEN_DR[j][i]->Scale(1.0/h2DAddGenpTVsAddGEN_M[j][i]->Integral());
+      if(h2DAddKinpTVsAddGEN_M[j][i]->Integral() != 0.0)
+      h2DAddKinpTVsAddGEN_M[j][i]->Scale(1.0/h2DAddKinpTVsAddGEN_M[j][i]->Integral());
+      if(h2DAddKinpTVsAddGENKin_DR[j][i]->Integral() != 0.0)
+      h2DAddKinpTVsAddGENKin_DR[j][i]->Scale(1.0/h2DAddKinpTVsAddGENKin_DR[j][i]->Integral());
+      if(h2DAddKinpTVsAddGENKin_M[j][i]->Integral() != 0.0)
+      h2DAddKinpTVsAddGENKin_M[j][i]->Scale(1.0/h2DAddKinpTVsAddGENKin_M[j][i]->Write());
+
+
+
       target->mkdir(dirhistosname + "/" + namecut[j] + "/" + namech[i]);
       target->cd   (dirhistosname + "/" + namecut[j] + "/" + namech[i]);
       
@@ -1211,6 +1598,42 @@ int main(int argc, const char* argv[]){
       
       hNJets[j][i]->Write();
       hNBtagJets[j][i]->Write();            
+      
+      hNAddJets_IDGen     [j][i]->Write();
+      hNAddJets_IDKin     [j][i]->Write();
+      h2DNAddJets_IDGenKin[j][i]->Write();
+      hAddJetsMatchFrac   [j][i]->Write();
+
+      pNAddJets_IDGenVsChi2[j][i]->Write();
+      pNAddJets_IDKinVsChi2[j][i]->Write();
+      pNAddJets_IDGenVsProb[j][i]->Write();
+      pNAddJets_IDKinVsProb[j][i]->Write();
+      
+      h2DPairMatchVsAddGen[j][i]  ->Write();
+      h2DPairMatchVsAddKin[j][i]  ->Write();
+      h2DPairMatchpTVsAddGen[j][i]->Write();
+      h2DPairMatchpTVsAddKin[j][i]->Write();
+
+      h2DAddKinVsAddGen_DR    [j][i]->Write();
+      h2DAddKinpTVsAddGenpT_DR[j][i]->Write();
+      h2DAddKinVsAddGen_M     [j][i]->Write();
+      h2DAddKinpTVsAddGenpT_M [j][i]->Write();
+
+      h2DAddKinVsAddGen_GENDR[j][i]->Write();
+      h2DAddKinpTVsAddGenpT_GENDR[j][i]->Write();
+      h2DAddKinVsAddGen_GENM[j][i]->Write();
+      h2DAddKinpTVsAddGenpT_GENM[j][i]->Write();
+      h2DAddGenVsAddGEN_DR[j][i]->Write();
+      h2DAddKinVsAddGEN_DR[j][i]->Write();
+      h2DAddGenVsAddGEN_M[j][i]->Write();
+      h2DAddKinVsAddGEN_M[j][i]->Write();
+      h2DAddGenpTVsAddGEN_DR[j][i]->Write();
+      h2DAddKinpTVsAddGEN_DR[j][i]->Write();
+      h2DAddGenpTVsAddGEN_M[j][i]->Write();
+      h2DAddKinpTVsAddGEN_M[j][i]->Write();
+      h2DAddKinpTVsAddGENKin_DR[j][i]->Write();
+      h2DAddKinpTVsAddGENKin_M[j][i]->Write();
+
 
       h2DSFbtag_Global[j][i]  ->Write();
       hSFbtag_Global[j][i]    ->Write();
@@ -1252,6 +1675,7 @@ int main(int argc, const char* argv[]){
 
       // Kinematic Reconstruction
       hKinChi2       [j][i]->Write();
+      hKinProb       [j][i]->Write();
       h2DKinChi2_JetMatch[j][i]->Write();
 
       hKinWlMass     [j][i]->Write();

@@ -109,7 +109,7 @@ const unsigned int NhJets = 6;
 // Channel and cut names 
 TString namech     [Nhch + 1] = {"mujets","ejets","lepjets"};
 TString titlenamech[Nhch]     = {"#mu+Jets","e+Jets"};
-TString namecut    [Nhcuts]   = {"lepton","6Jets","2btag","3btag","4Jets","4Jets2btag","Only2btag"};
+TString namecut    [Nhcuts]   = {"lepton","6Jets","2btag","3btag","Prob02","2Add","2AddProb02"};
 // Acceptancies and Efficiencies
 int    AccEvent[Nhcuts][Nhch+1];
 double EffEvent[Nhcuts][Nhch+1];
@@ -131,6 +131,15 @@ Histos hPV;
 Histos hMET, hMET_Phi, hHT;
 Histos hmT;
 Histos hNJets, hNBtagJets;
+Histos hNAddJets_IDGen, hNAddJets_IDKin;
+Histos2D h2DNAddJets_IDGenKin;
+Prof pNAddJets_IDGenVsChi2,pNAddJets_IDKinVsChi2,pNAddJets_IDGenVsProb,pNAddJets_IDKinVsProb;
+Histos hAddJetsMatchFrac;
+Histos2D h2DPairMatchVsAddGen,h2DPairMatchVsAddKin,h2DPairMatchpTVsAddGen,h2DPairMatchpTVsAddKin;
+Histos2D h2DAddKinVsAddGen_DR, h2DAddKinpTVsAddGenpT_DR, h2DAddKinVsAddGen_M, h2DAddKinpTVsAddGenpT_M;
+
+Histos2D h2DAddKinVsAddGen_GENDR, h2DAddKinpTVsAddGenpT_GENDR, h2DAddKinVsAddGen_GENM, h2DAddKinpTVsAddGenpT_GENM, h2DAddGenVsAddGEN_DR, h2DAddKinVsAddGEN_DR, h2DAddGenVsAddGEN_M, h2DAddKinVsAddGEN_M, h2DAddGenpTVsAddGEN_DR, h2DAddKinpTVsAddGEN_DR, h2DAddGenpTVsAddGEN_M, h2DAddKinpTVsAddGEN_M, h2DAddKinpTVsAddGENKin_DR, h2DAddKinpTVsAddGENKin_M;
+
 // Categorization
 Eff effCatHiggs;
 // Lepton
@@ -152,7 +161,7 @@ Histos hWPDF, hWPDFAlphaUp, hWPDFAlphaDown;
 // PDF Weights
 Histos hWhdamp;
 // Kinematic Fitter
-Histos    hKinChi2;
+Histos    hKinChi2,hKinProb;
 Histos2D  h2DKinChi2_JetMatch;
 Histos    hKinWlTransMass, hKinWlMass, hKinWlpT, hKintlMass, hKintlpT;
 Histos    hKinWhMass, hKinWhpT, hKinthMass, hKinthpT;

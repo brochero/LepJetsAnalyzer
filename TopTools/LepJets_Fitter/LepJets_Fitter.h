@@ -5,7 +5,7 @@
 class ComJet: public TLorentzVector{
  public:
   float CSV, CvsL, CvsB;
-  int Flavour, pTIndex, Mom, KinMom;
+  int Flavour, pTIndex, Mom, KinMom, GenIndex;
 };
 
 double JetEResolution         (double energy);

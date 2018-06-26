@@ -20,7 +20,7 @@ InputDB        = args.input
 CondorArg      = "'$(filehead)$(filesample) $(outputref)'"
 
 # Systematic Variations
-SysCom = {"IDLepSF","TrLepSF","LES","PileUp","JER","btagjes","btaglf","btaghf","btaghfsI","btaghfsII","btaglfsI","btaglfsII","btagcfI","btagcfII"}
+SysCom = {"IDLepSF","TrLepSF","LES","PileUp","JER","btag_LF","btag_LFStats1","btag_LFStats2","btag_HF","btag_HFStats1","btag_HFStats2","btag_cErr1","btag_cErr2"}
 SysJES = {"AbsoluteStat","AbsoluteScale","AbsoluteMPFBias","Fragmentation","SinglePionECAL","SinglePionHCAL","FlavorQCD","TimePtEta","RelativeJEREC1", "RelativeJEREC2", "RelativeJERHF","RelativePtBB","RelativePtEC1","RelativePtEC2","RelativePtHF","RelativeBal","RelativeFSR","RelativeStatFSR","RelativeStatEC","RelativeStatHF","PileUpDataMC","PileUpPtRef","PileUpPtBB","PileUpPtEC1","PileUpPtHF"}
 SysVar = {"Up", "Down"}
 SysThe = {"ScaleRnF Up","ScaleRnF Down","ScaleRuF Nom","ScaleRuF Up","ScaleRdF Up","ScaleRdF Down"}
@@ -158,4 +158,4 @@ queue 1
 
     fout = None
     
-os.system("condor_submit " + RunFileName)
+# os.system("condor_submit " + RunFileName)

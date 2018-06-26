@@ -1,9 +1,22 @@
 #ifndef __CINT__
 #include "TreeReader.h"
+#include "VariablesDefinition.h"
 #endif
 
 #ifndef __CINT__
 
+// JER
+#include "JER/JER_806/JetResolution.h"
+#include "JER/JER_806/JetResolutionObject.h"
+
+void JERCorrection(JME::JetResolutionScaleFactor res_sf, JME::JetResolution resolution, float rho, std::vector<ComJet> *jets, int nSystVar);
+void JESCorrection(std::vector<ComJet> *jets);
+// btag
+btagCollection SetupbtagSF(TString FileName_HF, TString FileName_LF);
+float GetbtagSF(hbtag SF, ComJet jet);
+float GetbtagEvtWeight(hbtag SF, std::vector<ComJet> jets);
+// Id for Systematics
+int FindSysID(const std::vector<TString> Names, TString Name);
 
 void display_usage()
 {
@@ -43,8 +56,6 @@ int main(int argc, const char* argv[]){
   const char * _ttbar_id = 0;
   
   // Arguments used
-  //std::set<int> usedargs;
-  //Parsing input options
   if(argc == 1){
     display_usage();
     return -1;
@@ -114,7 +125,6 @@ int main(int argc, const char* argv[]){
   }
 
   // eos directory
-  // if(_eos) fdir = "root://eoscms.cern.ch//eos/cms/store/user/brochero/" + fdir + "/";
   if(_eos) fdir = "root://cms-xrdr.sdfarm.kr:1094///xrd/store/user/brochero/v8-0-6/";
   //make a dir if output does not exist!!
   struct stat st;
@@ -139,9 +149,11 @@ int main(int argc, const char* argv[]){
   **********************************/  
   theTree.SetBranchAddress( "event",    &Event );
   theTree.SetBranchAddress( "run",      &Run );
-  theTree.SetBranchAddress( "PUWeight", &PUWeight_sys );
   theTree.SetBranchAddress( "channel",  &Channel );
   theTree.SetBranchAddress( "GoodPV",   &GoodPV );
+
+  theTree.SetBranchAddress( "PUWeight", &PUWeight_sys );
+
   theTree.SetBranchAddress( "MET",      &MET );
   theTree.SetBranchAddress( "MET_phi",  &MET_Phi );
 
@@ -158,57 +170,37 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "jet_index", &Jet_pTIndex );
 
   theTree.SetBranchAddress( "jet_partonFlavour", &Jet_partonFlavour );
+  theTree.SetBranchAddress( "jet_hadronFlavour", &Jet_hadronFlavour );
   theTree.SetBranchAddress( "jet_CSV",           &Jet_CSV );
-  theTree.SetBranchAddress( "jet_CvsB",          &Jet_CvsB );
-  theTree.SetBranchAddress( "jet_CvsL",          &Jet_CvsL );
-
-  theTree.SetBranchAddress( "jet_SF_CSV",        &Jet_SF_CSV );
-
+  
   if(!fname.Contains("DataSingle")){
-    theTree.SetBranchAddress( "jet_JES_Up",     &Jet_JES_Up );
-    theTree.SetBranchAddress( "jet_JES_Down",   &Jet_JES_Down );  
     theTree.SetBranchAddress( "jet_JESCom_Up",  &Jet_JESCom_Up );  
     theTree.SetBranchAddress( "jet_JESCom_Down",&Jet_JESCom_Down );  
-
+    // Rho for JER
     theTree.SetBranchAddress( "jet_JER_Up",     &Jet_JER_Up );
     theTree.SetBranchAddress( "jet_JER_Nom",    &Jet_JER_Nom );
     theTree.SetBranchAddress( "jet_JER_Down",   &Jet_JER_Down );
   }
   
   if(fname.Contains("ttbar") && !fname.Contains("Bkg")){
-    // ttbar event categorization  
-    theTree.SetBranchAddress("genconecatid",      &GenConeCat);
-    // ttH Categorization
-    theTree.SetBranchAddress("genhiggscatid",      &GenttHCat);
-
-    theTree.SetBranchAddress("scaleweight",       &ScaleWeight );
-
-    theTree.SetBranchAddress("gencone_gjet_pT",   &GenCone_pT);
-    theTree.SetBranchAddress("gencone_gjet_eta",  &GenCone_eta);
-    theTree.SetBranchAddress("gencone_gjet_phi",  &GenCone_phi);
-    theTree.SetBranchAddress("gencone_gjet_E",    &GenCone_E);
-    theTree.SetBranchAddress("gencone_gjetIndex", &GenCone_gjetMom);
-    theTree.SetBranchAddress("gencone_NgjetsW",   &GenCone_NgjetsW);
-    theTree.SetBranchAddress("draddjets",         &DRAddJets);
-    theTree.SetBranchAddress("genjet_gencone_mom",&GenCone_Mom);
-
-    theTree.SetBranchAddress("genlepton_pT",          &GenLep_pT);
-    theTree.SetBranchAddress("jet_MatchedGenJetIndex",&Jet_GENmatched);
+    
+    // PDF Uncertainty
+    theTree.SetBranchAddress("pdfweight",   &PDFWeight);
+    // hdamp Uncertainty
+    theTree.SetBranchAddress("hdampweight", &hdampWeight);
+    // Scale Uncertainties
+    theTree.SetBranchAddress("scaleweight", &ScaleWeight );
+    theTree.SetBranchAddress("rho",         &Rho);
+    // Jet Origin
     theTree.SetBranchAddress("jet_gencone_mom",       &Jet_Mom);
+    theTree.SetBranchAddress("jet_MatchedGenJetIndex",&Jet_GENmatched);
+    
     theTree.SetBranchAddress("genjet_pT",             &GenJet_pT);
     theTree.SetBranchAddress("genjet_eta",            &GenJet_eta);
     theTree.SetBranchAddress("genjet_phi",            &GenJet_phi);
     theTree.SetBranchAddress("genjet_E",              &GenJet_E);
-    theTree.SetBranchAddress("gennu_pT",              &GenNu_pT);
-    theTree.SetBranchAddress("gennu_eta",             &GenNu_eta);
-    theTree.SetBranchAddress("gennu_phi",             &GenNu_phi);
-    theTree.SetBranchAddress("gennu_E",               &GenNu_E);
-    // PDF Uncertainty
-    theTree.SetBranchAddress("pdfweight",             &PDFWeight);
-    // hdamp Uncertainty
-    theTree.SetBranchAddress("hdampweight",             &hdampWeight);
-
   }
+  
   // Kinematic Reconstruction Variables
   theTree.SetBranchAddress("kin_chi2",  &Kin_Chi2);
   // Neutrino
@@ -259,17 +251,44 @@ int main(int argc, const char* argv[]){
     
   for(int j=0; j<Nhcuts; j++){   // Cut
     for(int i=0; i<Nhch; i++){ // Channel
-      hPV[j][i]         = new TH1D("hPV_"+namech[i]+"_"+namecut[j]+syst_varname,"PV Distribution  " + titlenamech[i] + ";PV",30,0,60);
-      hMET[j][i]        = new TH1D("hMET_"+ namech[i]+"_"+namecut[j]+syst_varname,"#slash{E}_{T} " + titlenamech[i] + ";#slash{E}_{T}[GeV]",10,0,200);
-      hMET_Phi[j][i]    = new TH1D("hMET_Phi_"+ namech[i]+"_"+namecut[j]+syst_varname,"#Phi_{#slash{E}_{T}} " + titlenamech[i] + ";#Phi_{#slash{E}_{T}}[rad]",16,0,3.2);
-      hmT[j][i]         = new TH1D("hmT_"+ namech[i]+"_"+namecut[j]+syst_varname,"transverse Mass Lepton/MET " + titlenamech[i] + ";m_{T}[GeV]",40,0,160);
-      hHT[j][i]         = new TH1D("hHT_"+namech[i]+"_"+namecut[j]+syst_varname,"H_{T} " + titlenamech[i] + ";HT[GeV]",100,0,600);
-      
-      hLepPt [j][i]    = new TH1D("hLepPt_"  + namech[i] + "_" + namecut[j]+syst_varname, "Lepton p_{T} " + titlenamech[i] + ";Lepton p_{T}[GeV]",20,0.0,200.0);
-      hLepEta[j][i]    = new TH1D("hLepEta_" + namech[i] + "_" + namecut[j]+syst_varname, "#eta_{Lep} "   + titlenamech[i] + ";Lepton #eta",12,0.0,2.2);
-      hLepPhi[j][i]    = new TH1D("hLepPhi_" + namech[i] + "_" + namecut[j]+syst_varname, "#phi_{Lep} "   + titlenamech[i] + ";Lepton #Phi[rad]",16,0.0,3.2);
-      
-      hNJets[j][i]     = new TH1D("hNJets_" + namech[i] + "_" + namecut[j]+syst_varname, "Jet multiplicity " + titlenamech[i] + ";Number of jets",9,-0.5,8.5);
+      // Global Variables
+      hPV[j][i]      = new TH1D("hPV_"     +namech[i]+"_"+namecut[j]+syst_varname, "PV Distribution "     +titlenamech[i]+";PV",                       30,0,60);
+      hMET[j][i]     = new TH1D("hMET_"    +namech[i]+"_"+namecut[j]+syst_varname, "#slash{E}_{T} "       +titlenamech[i]+";#slash{E}_{T}[GeV]",       10,0,200);
+      hMET_Phi[j][i] = new TH1D("hMET_Phi_"+namech[i]+"_"+namecut[j]+syst_varname, "#Phi_{#slash{E}_{T}} "+titlenamech[i]+";#Phi_{#slash{E}_{T}}[rad]",16,0,3.2);
+      // PDF (and Alpha_s)
+      hWPDF[j][i]          = new TH1D("hWPDF_"         +namech[i]+"_"+namecut[j]+syst_varname, "W_{PDF} the 100 weights/Evt "  +titlenamech[i],160,0.6,1.4);    
+      hWPDFAlphaUp[j][i]   = new TH1D("hWPDFAlphaUp_"  +namech[i]+"_"+namecut[j]+syst_varname, "W_{#alpha_{s}^{Up}} per Evt "  +titlenamech[i],160,0.6,1.4);    
+      hWPDFAlphaDown[j][i] = new TH1D("hWPDFAlphaDown_"+namech[i]+"_"+namecut[j]+syst_varname, "W_{#alpha_{s}^{Down}} per Evt "+titlenamech[i],160,0.6,1.4);    
+      hWhdamp[j][i]        = new TH1D("hWhdamp_"       +namech[i]+"_"+namecut[j]+syst_varname, "W_{hdamp} "                    +titlenamech[i],200,0.,2.);    
+      // SF(ID,ISO & Trigger)
+      hSFIDISOTr[j][i]      = new TH1D("hSFIDISOTr_"     +namech[i]+"_"+namecut[j]+syst_varname, "SF_{ID,ISO}^{Tr} "       +titlenamech[i],80,0.8,1.2);    
+      hSFIDISOTrError[j][i] = new TH1D("hSFIDISOTrError_"+namech[i]+"_"+namecut[j]+syst_varname, "#Delta SF_{ID,ISO}^{Tr} "+titlenamech[i],20,0,0.02); 
+      hSFIDISO[j][i]        = new TH1D("hSFIDISO_"       +namech[i]+"_"+namecut[j]+syst_varname, "SF_{ID,ISO} "            +titlenamech[i],80,0.8,1.2);    
+      hSFIDISOError[j][i]   = new TH1D("hSFIDISOError_"  +namech[i]+"_"+namecut[j]+syst_varname, "#Delta SF_{ID,ISO} "     +titlenamech[i],20,0,0.02); 
+      hSFTrigger[j][i]      = new TH1D("hSFTrigger_"     +namech[i]+"_"+namecut[j]+syst_varname, "SF^{Trigger} "           +titlenamech[i],80,0.8,1.2);    
+      hSFTriggerError[j][i] = new TH1D("hSFTriggerError_"+namech[i]+"_"+namecut[j]+syst_varname, "#Delta SF^{Trigger} "    +titlenamech[i],20,0,0.02);
+      // SF(b-tag)
+      hSFbtag_Global[j][i]  = new TH1D("hSFbtag_Global_"+namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag} " + titlenamech[i] + ";SF_{b-tag}",40,0.0,4.0);
+
+      pSFCSVVsCSV[j][i]     = new TProfile("pSFCSVVsCSV_"   +namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag}"           +titlenamech[i]+";CSV;SF_{b-tag}",20,0.0,1.0,0.0,2.0);
+      pSFCSVVsCSVAdd[j][i]  = new TProfile("pSFCSVVsCSVAdd_"+namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag} Add. Jets "+titlenamech[i]+";CSV;SF_{b-tag}",20,0.0,1.0,0.0,2.0);
+      // Lepton Variables
+      hLepPt [j][i] = new TH1D("hLepPt_" +namech[i]+"_"+namecut[j]+syst_varname, "Lepton p_{T} "              +titlenamech[i]+";Lepton p_{T}[GeV]",20,0.0,200.0);
+      hLepEta[j][i] = new TH1D("hLepEta_"+namech[i]+"_"+namecut[j]+syst_varname, "#eta_{Lep} "                +titlenamech[i]+";Lepton #eta",      12,0.0,2.2);
+      hLepPhi[j][i] = new TH1D("hLepPhi_"+namech[i]+"_"+namecut[j]+syst_varname, "#phi_{Lep} "                +titlenamech[i]+";Lepton #Phi[rad]", 16,0.0,3.2);
+      hmT[j][i]     = new TH1D("hmT_"    +namech[i]+"_"+namecut[j]+syst_varname, "transverse Mass Lepton/MET "+titlenamech[i]+";m_{T}[GeV]",       40,0,160);
+      // Jets Variables 
+      for(int ij=0; ij<NhJets; ij++){
+	TString jetn;
+	std::ostringstream jni;
+	jni << ij;
+	jetn = "Jet-" + jni.str();	
+	
+	hJetPt[ij][j][i] = new TH1D("hJetPt_" +jetn+"_" +namech[i]+"_"+namecut[j]+syst_varname, "p_{T}^{Jet} "+jetn+" "+titlenamech[i]+";p_{T}[GeV]",40,0,200);		
+	hCSV[ij][j][i]   = new TH1D("hCSV_"   +jetn+"_" +namech[i]+"_"+namecut[j]+syst_varname, "CSV "        +jetn+" "+titlenamech[i]+";CSVv2",     20,0,1);
+      }
+      // Jet Multiplicity
+      hNJets[j][i] = new TH1D("hNJets_"+namech[i]+"_"+namecut[j]+syst_varname, "Jet multiplicity "+titlenamech[i]+";Number of jets",9,-0.5,8.5);
       hNJets[j][i]->GetXaxis()->SetBinLabel(1,"0");
       hNJets[j][i]->GetXaxis()->SetBinLabel(2,"1");
       hNJets[j][i]->GetXaxis()->SetBinLabel(3,"2");
@@ -281,8 +300,8 @@ int main(int argc, const char* argv[]){
       hNJets[j][i]->GetXaxis()->SetBinLabel(9,"#geq 8");
       if(namecut[j] != "lepton") hNJets[j][i]->GetXaxis()->SetRange(7,9);
       if(namecut[j].Contains("4Jets")) hNJets[j][i]->GetXaxis()->SetRange(5,9);
-
-      hNBtagJets[j][i]  = new TH1D("hNBtagJets_"+namech[i]+"_"+namecut[j]+syst_varname,"b-tag jet multiplicity " + titlenamech[i] + ";Number of b-jets",6,-0.5,5.5);
+      // b-Jet Multiplicuty
+      hNBtagJets[j][i] = new TH1D("hNBtagJets_"+namech[i]+"_"+namecut[j]+syst_varname, "b-tag jet multiplicity "+titlenamech[i]+";Number of b-jets",6,-0.5,5.5);
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(1,"0");
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(2,"1");
       hNBtagJets[j][i]->GetXaxis()->SetBinLabel(3,"2");
@@ -292,263 +311,42 @@ int main(int argc, const char* argv[]){
       if(namecut[j].Contains("2btag")) hNBtagJets[j][i]->GetXaxis()->SetRange(3,6);
       if(namecut[j].Contains("3btag")) hNBtagJets[j][i]->GetXaxis()->SetRange(4,6);
 
-
-      hAddJetsMatchFrac[j][i]= new TH1D("hAddJetsMatchFrac_"+namech[i]+"_"+namecut[j]+syst_varname,"Fraction of additional jets identified " + titlenamech[i] + ";Fraction",6,-0.1,1.1);
-      hNAddJets_IDGen[j][i]  = new TH1D("hNAddJets_IDGen_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (GenMom) " + titlenamech[i] + ";Number of add. jets",4,1.5,5.5);
-      hNAddJets_IDKin[j][i]  = new TH1D("hNAddJets_IDKin_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (KinMom) " + titlenamech[i] + ";Number of add. jets",4,1.5,5.5);
-      h2DNAddJets_IDGenKin[j][i]  = new TH2D("h2DNAddJets_IDGenKin_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets " + titlenamech[i] + ";N add. Jets (GenMom);N add. Jets (KinMom)",4,1.5,5.5,4,1.5,5.5);
-      h2DNAddJets_IDGenKin[j][i]->SetOption("COLTEXT");
-
-      pNAddJets_IDGenVsChi2[j][i]  = new TProfile("pNAddJets_IDGenVsChi2_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (GenMom) Vs Chi2 " + titlenamech[i] + ";Number of add. jets; #chi2",4,1.5,5.5,0,20);
-      pNAddJets_IDKinVsChi2[j][i]  = new TProfile("pNAddJets_IDKinVsChi2_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (KinMom) Vs Chi2 " + titlenamech[i] + ";Number of add. jets; #chi2",4,1.5,5.5,0,20);
-      pNAddJets_IDGenVsProb[j][i]  = new TProfile("pNAddJets_IDGenVsProb_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (GenMom) Vs Fit Prob " + titlenamech[i] + ";Number of add. jets ; Prob.",4,1.5,5.5,0.,1.);
-      pNAddJets_IDKinVsProb[j][i]  = new TProfile("pNAddJets_IDKinVsProb_"+namech[i]+"_"+namecut[j]+syst_varname,"Number of additional reco-jets (KinMom) Vs Fit Prob " + titlenamech[i] + ";Number of add. jets; Prob.",4,1.5,5.5,0.,1.);
-
-      h2DPairMatchVsAddGen[j][i]  = new TH2D("h2DPairMatchVsAddGen_"+namech[i]+"_"+namecut[j]+syst_varname,"Matching in Add Jets Vs Number of Add Jets (GenMom) " + titlenamech[i] + ";Matching;N add. Jets (GenMom)",3,0.,3.,4,1.5,5.5);
-      h2DPairMatchVsAddGen[j][i]->SetOption("COLTEXT");
-      h2DPairMatchVsAddGen[j][i]->GetXaxis()->SetBinLabel(1,"None");
-      h2DPairMatchVsAddGen[j][i]->GetXaxis()->SetBinLabel(2,"One");
-      h2DPairMatchVsAddGen[j][i]->GetXaxis()->SetBinLabel(3,"Both");
-
-      h2DPairMatchVsAddKin[j][i]  = new TH2D("h2DPairMatchVsAddKin_"+namech[i]+"_"+namecut[j]+syst_varname,"Matching in Add Jets Vs Number of Add Jets (KinMom) " + titlenamech[i] + ";Matching;N add. Jets (KinMom)",3,0.,3.,4,1.5,5.5);
-      h2DPairMatchVsAddKin[j][i]->SetOption("COLTEXT");
-      h2DPairMatchVsAddKin[j][i]->GetXaxis()->SetBinLabel(1,"None");
-      h2DPairMatchVsAddKin[j][i]->GetXaxis()->SetBinLabel(2,"One");
-      h2DPairMatchVsAddKin[j][i]->GetXaxis()->SetBinLabel(3,"Both");
-      
-      h2DPairMatchpTVsAddGen[j][i]  = new TH2D("h2DPairMatchpTVsAddGen_"+namech[i]+"_"+namecut[j]+syst_varname,"Matching in Add Jets (pT order) Vs Number of Add Jets (GenMom) " + titlenamech[i] + ";Matching;N add. Jets (GenMom)",3,0.,3.,4,1.5,5.5);
-      h2DPairMatchpTVsAddGen[j][i]->SetOption("COLTEXT");
-      h2DPairMatchpTVsAddGen[j][i]->GetXaxis()->SetBinLabel(1,"None");
-      h2DPairMatchpTVsAddGen[j][i]->GetXaxis()->SetBinLabel(2,"One");
-      h2DPairMatchpTVsAddGen[j][i]->GetXaxis()->SetBinLabel(3,"Both");
-
-      h2DPairMatchpTVsAddKin[j][i]  = new TH2D("h2DPairMatchpTVsAddKin_"+namech[i]+"_"+namecut[j]+syst_varname,"Matching in Add Jets (pT order) Vs Number of Add Jets (KinMom) " + titlenamech[i] + ";Matching;N add. Jets (KinMom)",3,0.,3.,4,1.5,5.5);
-      h2DPairMatchpTVsAddKin[j][i]->SetOption("COLTEXT");
-      h2DPairMatchpTVsAddKin[j][i]->GetXaxis()->SetBinLabel(1,"None");
-      h2DPairMatchpTVsAddKin[j][i]->GetXaxis()->SetBinLabel(2,"One");
-      h2DPairMatchpTVsAddKin[j][i]->GetXaxis()->SetBinLabel(3,"Both");
-
-      // int DRbin = 10;
-      // float DRmin = 0.0, DRmax = 5.;
-      // int Mbin = 6;
-      // float Mmin = 0., Mmax=300.;
-      // Non Uniform
-      int DRNbin = 3;
-      float DRbin[4] = {0.4,1.0,2.0,5.0};
-      int MNbin = 4;
-      float Mbin[5] = {0.,60.,100.,170.,400.};      
-
-      h2DAddKinVsAddGen_DR[j][i]    = new TH2D("h2DAddKinVsAddGen_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: DR add jets (KinMom) Vs DR add jets (GenMom) " + titlenamech[i] + ";DR (KinMom);DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
-      h2DAddKinVsAddGen_DR[j][i]->SetOption("COLTEXT");
-      h2DAddKinpTVsAddGenpT_DR[j][i] = new TH2D("h2DAddKinpTVsAddGenpT_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: DR add jets (KinMom) Vs DR add jets (GenMom) " + titlenamech[i] + ";DR (KinMom);DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
-      h2DAddKinpTVsAddGenpT_DR[j][i]->SetOption("COLTEXT");
-
-      h2DAddKinVsAddGen_M[j][i] = new TH2D("h2DAddKinVsAddGen_M_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: Mass add jets (KinMom) Vs Mass add jets (GenMom) " + titlenamech[i] + ";Mass(KinMom)[GeV];Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
-      h2DAddKinVsAddGen_M[j][i]->SetOption("COLTEXT");
-      h2DAddKinpTVsAddGenpT_M[j][i] = new TH2D("h2DAddKinpTVsAddGenpT_M_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: Mass add jets (KinMom) Vs Mass add jets (GenMom) " + titlenamech[i] + ";Mass(KinMom)[GeV];Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
-      h2DAddKinpTVsAddGenpT_M[j][i]->SetOption("COLTEXT");
-      
-      // GENERATION/RECONSTRUCTION LEVEL
-      h2DAddKinVsAddGen_GENDR[j][i] = new TH2D("h2DAddKinVsAddGen_GENDR_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: GEN-DR add jets (KinMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";GEN-DR(KinMom);GEM-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
-      h2DAddKinVsAddGen_GENDR[j][i]->SetOption("COLTEXT");
-      
-      h2DAddKinpTVsAddGenpT_GENDR[j][i] = new TH2D("h2DAddKinpTVsAddGenpT_GENDR_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: GEN-DR add jets (GenMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";GEN-DR(KinMom);GEN-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
-      h2DAddKinpTVsAddGenpT_GENDR[j][i]->SetOption("COLTEXT");
-      
-      h2DAddGenVsAddGEN_DR[j][i] = new TH2D("h2DAddGenVsAddGEN_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: DR add jets (GenMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";DR(GenMom);GEN-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
-      h2DAddGenVsAddGEN_DR[j][i]->SetOption("COLTEXT");
-      h2DAddKinVsAddGEN_DR[j][i] = new TH2D("h2DAddKinVsAddGEN_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: DR add jets (KinMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";DR(KinMom);GEN-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
-      h2DAddKinVsAddGEN_DR[j][i]->SetOption("COLTEXT");
-
-      h2DAddGenpTVsAddGEN_DR[j][i] = new TH2D("h2DAddGenpTVsAddGEN_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: DR add jets (GenMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";DR(GenMom);GEN-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
-      h2DAddGenpTVsAddGEN_DR[j][i]->SetOption("COLTEXT");
-      h2DAddKinpTVsAddGEN_DR[j][i] = new TH2D("h2DAddKinpTVsAddGEN_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: DR add jets (KinMom) Vs GEN-DR add jets (GenMom) " + titlenamech[i] + ";DR(KinMom);GEN-DR(GenMom)",DRNbin,DRbin,DRNbin,DRbin);
-      h2DAddKinpTVsAddGEN_DR[j][i]->SetOption("COLTEXT");
-      h2DAddKinpTVsAddGENKin_DR[j][i] = new TH2D("h2DAddKinpTVsAddGENKin_DR_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: DR add jets (KinMom) Vs GEN-DR add jets (KinMom) " + titlenamech[i] + ";DR(KinMom);GEN-DR(KinMom)",DRNbin,DRbin,DRNbin,DRbin);
-      h2DAddKinpTVsAddGENKin_DR[j][i]->SetOption("COLTEXT");
-      
-      h2DAddKinVsAddGen_GENM[j][i] = new TH2D("h2DAddKinVsAddGen_GENM_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: GEN-Mass add jets (KinMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";GEN-Mass(KinMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
-      h2DAddKinVsAddGen_GENM[j][i]->SetOption("COLTEXT");
-      h2DAddKinpTVsAddGenpT_GENM[j][i] = new TH2D("h2DAddKinpTVsAddGenpT_GENM_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: GEN-Mass add jets (KinMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";GEN-Mass(KinMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
-      h2DAddKinpTVsAddGenpT_GENM[j][i]->SetOption("COLTEXT");
-      h2DAddGenVsAddGEN_M[j][i] = new TH2D("h2DAddGenVsAddGEN_M_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: Mass add jets (GenMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";Mass(GenMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
-      h2DAddGenVsAddGEN_M[j][i]->SetOption("COLTEXT");
-      h2DAddKinVsAddGEN_M[j][i] = new TH2D("h2DAddKinVsAddGEN_M_"+namech[i]+"_"+namecut[j]+syst_varname,"CSV ORDER: Mass add jets (KinMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";Mass(KinMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
-      h2DAddKinVsAddGEN_M[j][i]->SetOption("COLTEXT");
-      h2DAddGenpTVsAddGEN_M[j][i] = new TH2D("h2DAddGenpTVsAddGEN_M_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: Mass add jets (GenMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";Mass(GenMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
-      h2DAddGenpTVsAddGEN_M[j][i]->SetOption("COLTEXT");
-      h2DAddKinpTVsAddGEN_M[j][i] = new TH2D("h2DAddKinpTVsAddGEN_M_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: Mass add jets (KinMom) Vs Mass add GEN-jets (GenMom) " + titlenamech[i] + ";Mass(KinMom)[GeV];GEN-Mass(GenMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
-      h2DAddKinpTVsAddGEN_M[j][i]->SetOption("COLTEXT");
-      h2DAddKinpTVsAddGENKin_M[j][i] = new TH2D("h2DAddKinpTVsAddGENKin_M_"+namech[i]+"_"+namecut[j]+syst_varname,"pT ORDER: Mass add jets (KinMom) Vs Mass add GEN-jets (KinMom) " + titlenamech[i] + ";Mass(KinMom)[GeV];GEN-Mass(KinMom)[GeV]",MNbin,Mbin,MNbin,Mbin);
-      h2DAddKinpTVsAddGENKin_M[j][i]->SetOption("COLTEXT");
-
-      /***************************
-          SF(ID,ISO & Trigger)
-      ***************************/
-      hSFIDISOTr[j][i]       = new TH1D("hSFIDISOTr_"+namech[i]+"_"+namecut[j]+syst_varname,"SF_{ID,ISO}^{Tr} " + titlenamech[i],400,0.8,1.2);    
-      hSFIDISOTrError[j][i]  = new TH1D("hSFIDISOTrError_"+namech[i]+"_"+namecut[j]+syst_varname,"#Delta SF_{ID,ISO}^{Tr} " + titlenamech[i],400,0,0.1); 
-      hSFIDISO[j][i]         = new TH1D("hSFIDISO_"+namech[i]+"_"+namecut[j]+syst_varname,"SF_{ID,ISO} " + titlenamech[i],400,0.8,1.2);    
-      hSFIDISOError[j][i]    = new TH1D("hSFIDISOError_"+namech[i]+"_"+namecut[j]+syst_varname,"#Delta SF_{ID,ISO} " + titlenamech[i],400,0,0.1); 
-      hSFTrigger[j][i]       = new TH1D("hSFTrigger_"+namech[i]+"_"+namecut[j]+syst_varname,"SF^{Trigger} " + titlenamech[i],400,0.8,1.2);    
-      hSFTriggerError[j][i]  = new TH1D("hSFTriggerError_"+namech[i]+"_"+namecut[j]+syst_varname,"#Delta SF^{Trigger} " + titlenamech[i],400,0,0.1);
-      /***************************
-           PDF (and Alpha_s)
-       ***************************/
-      hWPDF[j][i]          = new TH1D("hWPDF_"+namech[i]+"_"+namecut[j]+syst_varname,"W_{PDF} the 100 weights/Evt " + titlenamech[i],160,0.6,1.4);    
-      hWPDFAlphaUp[j][i]   = new TH1D("hWPDFAlphaUp_"+namech[i]+"_"+namecut[j]+syst_varname,"W_{#alpha_{s}^{Up}} per Evt " + titlenamech[i],160,0.6,1.4);    
-      hWPDFAlphaDown[j][i] = new TH1D("hWPDFAlphaDown_"+namech[i]+"_"+namecut[j]+syst_varname,"W_{#alpha_{s}^{Down}} per Evt " + titlenamech[i],160,0.6,1.4);    
-
-      /***************************
-           PDF (and Alpha_s)
-       ***************************/
-      hWhdamp[j][i] = new TH1D("hWhdamp_"+namech[i]+"_"+namecut[j]+syst_varname,"W_{hdamp} " + titlenamech[i],200,0.,2.);    
-
-      /***************************
-              SF(b-tag)
-      ***************************/
-      h2DSFbtag_Global[j][i]   = new TH2D("h2DSFbtag_Global_"+namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag} Vs  #Delta SF_{b-tag} " + titlenamech[i] + ";SF_{b-tag};#Delta SF_{b-tag}", 40, 0.0, 4.0, 50, 0.0, 0.5);
-      hSFbtag_Global[j][i]     = new TH1D("hSFbtag_Global_"+namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag} " + titlenamech[i] + ";SF_{b-tag}",40, 0.0, 4.0);
-      hSFbtag_Global_var[j][i] = new TH1D("hSFbtag_Global_var_"+namech[i]+"_"+namecut[j]+syst_varname, "Global #Delta SF_{b-tag} " + titlenamech[i] + ";#Delta SF_{b-tag}", 20, 0.0, 0.10);
-      pSFCSVVsCSVAll[j][i]     = new TProfile("pSFCSVVsCSVAll_"+namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag}" + titlenamech[i] + ";CSV;SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
-      pSFCSVErrorVsCSVAll[j][i]= new TProfile("pSFCSVErrorVsCSVAll_"+namech[i]+"_"+namecut[j]+syst_varname, "#Delta SF_{b-tag}" + titlenamech[i] + ";CSV;#Delta SF_{b-tag}", 20, 0.0, 1.0, -1.0, 1.0);
-
-      // B-tag efficiency histograms
-      h2DSFbtag_b[j][i]    = new TH2D("hSFbtag_b_"+namech[i]+"_"+namecut[j]+syst_varname, "N^{b}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_c[j][i]    = new TH2D("hSFbtag_c_"+namech[i]+"_"+namecut[j]+syst_varname, "N^{c}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_l[j][i]    = new TH2D("hSFbtag_l_"+namech[i]+"_"+namecut[j]+syst_varname, "N^{l}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
-
-      h2DSFbtag_btag_b[j][i]    = new TH2D("hSFbtag_btag_b_"+namech[i]+"_"+namecut[j]+syst_varname, "N_{btag}^{b}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_btag_c[j][i]    = new TH2D("hSFbtag_btag_c_"+namech[i]+"_"+namecut[j]+syst_varname, "N_{btag}^{c}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
-      h2DSFbtag_btag_l[j][i]    = new TH2D("hSFbtag_btag_l_"+namech[i]+"_"+namecut[j]+syst_varname, "N_{btag}^{l}(p_{T} vs #eta) " + titlenamech[i] + ";p_{T}[GeV];#eta",7,0.0,140.0,4,0.0,2.4);
-      
-      /***************************
-                 Jets 
-      ***************************/
-      for(int ij=0; ij<NhJets; ij++){
-	TString jetn;
-	std::ostringstream jni;
-	jni << ij;
-	jetn = "Jet-" + jni.str();	
-	
-	hCSV[ij][j][i]   = new TH1D("hCSV_"   + jetn + "_" + namech[i] + "_" + namecut[j]+syst_varname,"CSV " + jetn + " " + titlenamech[i] + ";CSVv2",20,0,1);
-	hCvsL[ij][j][i]  = new TH1D("hCvsL_"  + jetn + "_" + namech[i] + "_" + namecut[j]+syst_varname,"CvsL " + jetn + " " + titlenamech[i] + ";CvsL",20,-1,1);
-	hCvsB[ij][j][i]  = new TH1D("hCvsB_"  + jetn + "_" + namech[i] + "_" + namecut[j]+syst_varname,"CvsB " + jetn + " " + titlenamech[i] + ";CvsB",20,-1,1);
-	hJetPt[ij][j][i] = new TH1D("hJetPt_" + jetn + "_" + namech[i] + "_" + namecut[j]+syst_varname,"p_{T}^{Jet} " + jetn + " " + titlenamech[i] + ";p_{T}[GeV]",40,0,200);
-
-	hJetpTUncVar[ij][j][i] = new TH1D("hJetpTUncVar_" + jetn + "_" + namech[i] + "_" + namecut[j]+syst_varname, "#Delta pT^{Jet} " + jetn + " " + titlenamech[i], 20.0, 0.0, 2.0);
-	
-	for(int jj=ij+1; jj<NhJets; jj++){
-	  TString jetMassn;
-	  std::ostringstream jni, jnj;
-	  jni << ij;
-	  jnj << jj;
-	  jetMassn = "Jet" + jni.str() + jnj.str();
-	  
-	  hMassJet[ij][jj][j][i] = new TH1D("hMassJet_" + jetMassn + "_" + namech[i] + "_" + namecut[j]+syst_varname,"Mass of Dijets "+ jetMassn + " " + titlenamech[i] + "; M_{jj}[GeV]",150,0,300);
-	  hDRJet[ij][jj][j][i]   = new TH1D("hDRJet_"   + jetMassn + "_" + namech[i] + "_" + namecut[j]+syst_varname,"#Delta R of Dijets "+ jetMassn + " " + titlenamech[i] + "; #Delta R_{jj}",25,0,5);
-	  h2DCSV[ij][jj][j][i]   = new TH2D("h2DCSV_"   + jetMassn + "_" + namech[i] + "_" + namecut[j]+syst_varname, "CSVv2 Discriminant for 3rd and 4th Jets " + titlenamech[i], 20,0,1,20,0,1);
-	}
-	
-      }
-      
-      hInvMassjj[j][i]  = new TH1D("hInvMassjj_" + namech[i] + "_"+namecut[j]+syst_varname, "Compatible Inv. Mass " + titlenamech[i],80,40,120);
-
       /***************************
         Kinematic Reconstruction
       ***************************/
-      hKinChi2 [j][i] = new TH1D("hKinChi2_" + namech[i] + "_" + namecut[j]+syst_varname, "#chi^{2} for Kin. RECO " + titlenamech[i] + ";#chi^{2}", 100,0,20);
-      hKinProb [j][i] = new TH1D("hKinProb_" + namech[i] + "_" + namecut[j]+syst_varname, "Probability for Kin. RECO " + titlenamech[i] + ";P", 20,0,1.0);
-      h2DKinChi2_JetMatch[j][i] = new TH2D("hKinChi2_JetMatch_" + namech[i] + "_" + namecut[j]+syst_varname, "#chi^{2} Vs # of Jet Matches for Kin. RECO " + titlenamech[i], 100,0,20,5,0,5);
-      effKinGenIndex [j][i] = new TEfficiency("effKinGenIndex_" + namech[i] + "_" + namecut[j]+syst_varname, "Kin. RECO vs GEN " + titlenamech[i] + "; [0]->All 4 jets, [1]->Top, [2]->W, [3]->Add; Match Eff.", 4,0,4);
-      purKinGenIndex [j][i] = new TEfficiency("purKinGenIndex_" + namech[i] + "_" + namecut[j]+syst_varname, "Kin. RECO vs GEN Purity " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add; Purity", 3,0,3);
-
-      effKinGenIndexVsChi2 [j][i] = new TEfficiency("effKinGenIndexVsChi2_" + namech[i] + "_" + namecut[j]+syst_varname, "Kin. RECO Vs Chi2 Efficiency " + titlenamech[i] + "; #chi^{2}; W Efficiency", 40,0,20);
-
-      hKinWlTransMass[j][i] = new TH1D("hKinWlTransMass_" + namech[i] + "_" + namecut[j]+syst_varname, "Inv. Trans. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{T}^{W#to l#nu} [GeV]", 50,0,150);
-      hKinWlMass[j][i]      = new TH1D("hKinWlMass_" + namech[i] + "_" + namecut[j]+syst_varname, "Inv. Mass of W(lep) from Kin Reco " + titlenamech[i] + "; M_{W#to l#nu} [GeV]", 80,40,120);
-      hKinWlpT[j][i]        = new TH1D("hKinWlpT_"   + namech[i] + "_" + namecut[j]+syst_varname, "p_{T} of W(lep) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
-
-      hKinWhMass[j][i] = new TH1D("hKinWhMass_" + namech[i] + "_" + namecut[j]+syst_varname, "Inv. Mass of W(had) from Kin Reco " + titlenamech[i] + "; M_{W#to jj} [GeV]", 80, 40, 120);
-      hKinWhpT[j][i]   = new TH1D("hKinWhpT_"   + namech[i] + "_" + namecut[j]+syst_varname, "p_{T} of W(had) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
-
-      hKinWMass[j][i] = new TH1D("hKinWMass_" + namech[i] + "_" + namecut[j]+syst_varname, "Inv. Mass of W from Kin Reco " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
-      hKinWpT[j][i]   = new TH1D("hKinWpT_"   + namech[i] + "_" + namecut[j]+syst_varname, "p_{T} of W from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
-
-      hKinTagWMass [j][i]  = new TH1D("hKinTagWMass_" + namech[i] + "_" + namecut[j]+syst_varname, "Inv. Mass of W_{jj} boson " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
-      hKinTagAddMass[j][i] = new TH1D("hKinTagAddMass_" + namech[i] + "_" + namecut[j]+syst_varname, "Inv. Mass of Additional Jets " + titlenamech[i] + "; M [GeV]", 150, 0, 300);
-      hKinTagAddDR  [j][i] = new TH1D("hKinTagAddDR_" + namech[i] + "_" + namecut[j]+syst_varname, "#Delta R of Additional Jets " + titlenamech[i] + "; #Delta R", 25, 0, 5);
-
-      hKintlMass[j][i] = new TH1D("hKintlMass_" + namech[i] + "_" + namecut[j]+syst_varname, "Inv. Mass of Top(lep) from Kin Reco " + titlenamech[i] + "; M_{t_{l}} [GeV]", 100, 100, 300);
-      hKintlpT[j][i]   = new TH1D("hKintlpT_"   + namech[i] + "_" + namecut[j]+syst_varname, "p_{T} of Top(lep) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
-
-      hKinthMass[j][i] = new TH1D("hKinthMass_" + namech[i] + "_" + namecut[j]+syst_varname, "Inv. Mass of Top(had) from Kin Reco " + titlenamech[i] + "; M_{t_{h}} [GeV]", 100, 100, 300);
-      hKinthpT[j][i]   = new TH1D("hKinthpT_"   + namech[i] + "_" + namecut[j]+syst_varname, "p_{T} of Top(had) from Kin Reco " + titlenamech[i] + "; p_{T} [GeV]", 30,0,300);
-
-      hKinAdd1CSV[j][i]   = new TH1D("hKinAdd1CSV_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",20,0.,1.);
-      hKinAdd2CSV[j][i]   = new TH1D("hKinAdd2CSV_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",20,0.,1.);
-      hKinAdd12CSV[j][i]  = new TH1D("hKinAdd12CSV_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit "  + titlenamech[i] + ";CSVv2",40,0.,2.);
-      hKinAddCSVUnroll[j][i]  = new TH1D("hKinAddCSVUnroll_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit (Unrolled) "  + titlenamech[i] + ";CSV Bin",400,0.,400);
-
-      hKinAdd1CSV_30[j][i]   = new TH1D("hKinAdd1CSV_30_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",30,0.,1.);
-      hKinAdd2CSV_30[j][i]   = new TH1D("hKinAdd2CSV_30_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",30,0.,1.);
-      hKinAdd12CSV_30[j][i]  = new TH1D("hKinAdd12CSV_30_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit "  + titlenamech[i] + ";CSVv2",60,0.,2.);
-      hKinAddCSVUnroll_30[j][i]  = new TH1D("hKinAddCSVUnroll_30_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit (Unrolled) "  + titlenamech[i] + ";CSV Bin",900,0.,900);
-
-      hKinAdd1CSV_40[j][i]   = new TH1D("hKinAdd1CSV_40_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-1 from KinFit " + titlenamech[i] + ";CSVv2",40,0.,1.);
-      hKinAdd2CSV_40[j][i]   = new TH1D("hKinAdd2CSV_40_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-2 from KinFit " + titlenamech[i] + ";CSVv2",40,0.,1.);
-      hKinAdd12CSV_40[j][i]  = new TH1D("hKinAdd12CSV_40_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit "  + titlenamech[i] + ";CSVv2",80,0.,2.);
-      hKinAddCSVUnroll_40[j][i]  = new TH1D("hKinAddCSVUnroll_40_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jets from KinFit (Unrolled) "  + titlenamech[i] + ";CSV Bin",1600,0.,1600);
-
-      h2DKinAddCSV[j][i]  = new TH2D("h2DKinAddCSV_" + namech[i] + "_" + namecut[j]+syst_varname, "CSVv2 Discriminant for the Add (kin) Jets " + titlenamech[i], 20,0.,1.,20,0.,1.);
-
-      h2DKinAddCSV_30[j][i]  = new TH2D("h2DKinAddCSV_30_" + namech[i] + "_" + namecut[j]+syst_varname, "CSVv2 Discriminant for the Add (kin) Jets " + titlenamech[i], 30,0.,1.,30,0.,1.);
-
-      h2DKinAddCSV_40[j][i]  = new TH2D("h2DKinAddCSV_40_" + namech[i] + "_" + namecut[j]+syst_varname, "CSVv2 Discriminant for the Add (kin) Jets " + titlenamech[i], 40,0.,1.,40,0.,1.);
-      
-      pSFCSVVsCSVAdd[j][i]  = new TProfile("pSFCSVVsCSVAdd_"+namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag} Add. Jets " + titlenamech[i] + ";CSV;SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
-      pSFCSVUpVsCSVAdd[j][i]= new TProfile("pSFCSVUpVsCSVAdd_"+namech[i]+"_"+namecut[j]+syst_varname, "#Delta_{Up} SF_{b-tag} Add. Jets " + titlenamech[i] + ";CSV;#Delta SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
-      pSFCSVDownVsCSVAdd[j][i]= new TProfile("pSFCSVDownVsCSVAdd_"+namech[i]+"_"+namecut[j]+syst_varname, "#Delta_{Down} SF_{b-tag} Add. Jets " + titlenamech[i] + ";CSV;#Delta SF_{b-tag}", 20, 0.0, 1.0, 0.0, 2.0);
-      
+      // Global
+      hKinChi2 [j][i] = new TH1D("hKinChi2_"+namech[i]+"_"+namecut[j]+syst_varname, "#chi^{2} for Kin. RECO "   +titlenamech[i]+";#chi^{2}",40,0,20);
+      hKinProb [j][i] = new TH1D("hKinProb_"+namech[i]+"_"+namecut[j]+syst_varname, "Probability for Kin. RECO "+titlenamech[i]+";P",       20,0,1.0);
+      // Jets 
       TString kinJetname[4];
-      kinJetname[0] = "bFromH";
-      kinJetname[1] = "W1";
-      kinJetname[2] = "W2";
-      kinJetname[3] = "bFromL";
-      for(unsigned int ikj=0; ikj<4; ikj++){
-	hKinJetPt[ikj][j][i] = new TH1D ("hKinJetPt_" + kinJetname[ikj] + "_"  + namech[i] + "_" + namecut[j]+syst_varname, "pT KIN Assignment " + titlenamech[i] + "; p_{T}^{j}[GeV]", 50,0,150);
-	hGENJetPt[ikj][j][i] = new TH1D ("hGENJetPt_" + kinJetname[ikj] + "_"  + namech[i] + "_" + namecut[j]+syst_varname, "pT GEN Assignment " + titlenamech[i] + "; p_{T}^{j}[GeV]", 50,0,150);
-      }
-      
-      hTJetPosition[j][i] = new TH1D ("hTJetPosition_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV Position for jets from Top "   + titlenamech[i] + "; CSV Jet Index", 7,0,7);
-      hWJetPosition[j][i] = new TH1D ("hWJetPosition_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV Position for jets from W "     + titlenamech[i] + "; CSV Jet Index", 7,0,7);
-      hOJetPosition[j][i] = new TH1D ("hOJetPosition_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV Position for additional jets " + titlenamech[i] + "; CSV Jet Index", 7,0,7);
-      effTagCSV    [j][i] = new TEfficiency ("effTagCSV_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV Tag Eff. " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add; Match Eff.", 3,0,3);
-      purTagCSV    [j][i] = new TEfficiency ("purTagCSV_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV Purity " + titlenamech[i] + "; [0]->Top, [1]->W, [2]->Add; Purity", 3,0,3);
-      hGenTagWMass  [j][i] = new TH1D("hGenTagWMass_" + namech[i] + "_" + namecut[j]+syst_varname, "Inv. Mass of W boson " + titlenamech[i] + "; M_{W} [GeV]", 80, 40, 120);
-      hGenTagAddMass[j][i] = new TH1D("hGenTagAddMass_" + namech[i] + "_" + namecut[j]+syst_varname, "Inv. Mass of Add Jets " + titlenamech[i] + "; M [GeV]", 150, 0, 300);
-      hGenTagAddDR  [j][i] = new TH1D("hGenTagAddDR_" + namech[i] + "_" + namecut[j]+syst_varname, "#Delta R of Add Jets " + titlenamech[i] + "; #Delta R", 25, 0, 5);
-      hGenTagAdd1CSV[j][i]   = new TH1D("hGenTagAdd1CSV_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-1 from GenTag " + titlenamech[i] + ";CSVv2",20,0,1);
-      hGenTagAdd2CSV[j][i]   = new TH1D("hGenTagAdd2CSV_"  + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet-2 from GenTag " + titlenamech[i] + ";CSVv2",20,0,1);
-      hGenTagAdd12CSV[j][i]  = new TH1D("hGenTagAdd12CSV_" + namech[i] + "_" + namecut[j]+syst_varname, "CSV For add Jet from GenTag "   + titlenamech[i] + ";CSVv2",40,0,2);
-      h2DGenTagAddCSV[j][i]  = new TH2D("h2DGenTagAddCSV_" + namech[i] + "_" + namecut[j]+syst_varname, "CSVv2 Discriminant for the Add (GenTag) Jets " + titlenamech[i], 20,0,1,20,0,1);
+      kinJetname[0] = "bFromH"; kinJetname[1] = "W1"; kinJetname[2] = "W2";  kinJetname[3] = "bFromL";
+      for(unsigned int ikj=0; ikj<4; ikj++)
+	hKinJetPt[ikj][j][i] = new TH1D ("hKinJetPt_"+kinJetname[ikj]+"_" +namech[i]+"_"+namecut[j]+syst_varname, "pT KIN Assignment "+titlenamech[i]+"; p_{T}^{j}[GeV]", 50,0,150);
+      // W leptonic
+      hKinWlTransMass[j][i] = new TH1D("hKinWlTransMass_"+namech[i]+"_"+namecut[j]+syst_varname, "Inv. Trans. Mass of W(lep) from Kin Reco "+titlenamech[i]+"; M_{T}^{W#to l#nu} [GeV]",50,0,150);
+      hKinWlMass[j][i]      = new TH1D("hKinWlMass_"     +namech[i]+"_"+namecut[j]+syst_varname, "Inv. Mass of W(lep) from Kin Reco "       +titlenamech[i]+"; M_{W#to l#nu} [GeV]",    80,40,120);
+      hKinWlpT[j][i]        = new TH1D("hKinWlpT_"       +namech[i]+"_"+namecut[j]+syst_varname, "p_{T} of W(lep) from Kin Reco "           +titlenamech[i]+"; p_{T} [GeV]",            30,0,300);
+      // W hadronic
+      hKinWhMass[j][i] = new TH1D("hKinWhMass_"+namech[i]+"_"+namecut[j]+syst_varname, "Inv. Mass of W(had) from Kin Reco "+titlenamech[i]+"; M_{W#to jj} [GeV]",80,40,120);
+      hKinWhpT[j][i]   = new TH1D("hKinWhpT_"  +namech[i]+"_"+namecut[j]+syst_varname, "p_{T} of W(had) from Kin Reco "    +titlenamech[i]+"; p_{T} [GeV]",      30,0,300);
+      // Top leptonic 
+      hKintlMass[j][i] = new TH1D("hKintlMass_"+namech[i]+"_"+namecut[j]+syst_varname, "Inv. Mass of Top(lep) from Kin Reco "+titlenamech[i]+"; M_{t_{l}} [GeV]",100,100,300);
+      hKintlpT[j][i]   = new TH1D("hKintlpT_"  +namech[i]+"_"+namecut[j]+syst_varname, "p_{T} of Top(lep) from Kin Reco "    +titlenamech[i]+"; p_{T} [GeV]",    30,0,300);
+      // Top hadronic
+      hKinthMass[j][i] = new TH1D("hKinthMass_"+namech[i]+"_"+namecut[j]+syst_varname, "Inv. Mass of Top(had) from Kin Reco "+titlenamech[i]+"; M_{t_{h}} [GeV]",100,100,300);
+      hKinthpT[j][i]   = new TH1D("hKinthpT_"  +namech[i]+"_"+namecut[j]+syst_varname, "p_{T} of Top(had) from Kin Reco "    +titlenamech[i]+"; p_{T} [GeV]",    30,0,300);
+      // Additional Jets
+      hKinTagAddMass[j][i] = new TH1D("hKinTagAddMass_"+namech[i]+"_"+namecut[j]+syst_varname, "Inv. Mass of Additional Jets "+titlenamech[i]+"; M [GeV]", 150,0,300);
+      hKinTagAddDR  [j][i] = new TH1D("hKinTagAddDR_"  +namech[i]+"_"+namecut[j]+syst_varname, "#Delta R of Additional Jets " +titlenamech[i]+"; #Delta R",25,0,5);
+      // CSV for Additional Jets
+      hKinAdd1CSV[j][i]      = new TH1D("hKinAdd1CSV_"     +namech[i]+"_"+namecut[j]+syst_varname, "CSV For add Jet-1 from KinFit "            +titlenamech[i]+";CSVv2",  20,0.,1.);
+      hKinAdd2CSV[j][i]      = new TH1D("hKinAdd2CSV_"     +namech[i]+"_"+namecut[j]+syst_varname, "CSV For add Jet-2 from KinFit "            +titlenamech[i]+";CSVv2",  20,0.,1.);
+      hKinAddCSVUnroll[j][i] = new TH1D("hKinAddCSVUnroll_"+namech[i]+"_"+namecut[j]+syst_varname, "CSV For add Jets from KinFit (Unrolled) "  +titlenamech[i]+";CSV Bin",400,0.,400);
 
-      effCatHiggs[j][i] = new TEfficiency ("effCatHiggs_" + namech[i] + "_" + namecut[j]+syst_varname, "Cat Vs Higgs Cat. " + titlenamech[i] + "; Category; Match Eff.", 5,0,5);
-
-
+      h2DKinAddCSV[j][i]     = new TH2D("h2DKinAddCSV_"    +namech[i]+"_"+namecut[j]+syst_varname, "CSVv2 Discriminant for the Add (kin) Jets "+titlenamech[i],           20,0.,1.,20,0.,1.);
     }//for(i->channel)
   }//for(j->cut)
   
-  /***************************
-      BEST escenario plots  
-  ***************************/
-  h2DTJetPosition    = new TH2D("h2DTJetPosition" + syst_varname, "CSV Position for jets from Top Vs Dijet Rank",  7,0,7,7,0,7);
-  h2DWJetPosition    = new TH2D("h2DWJetPosition" + syst_varname, "CSV Position for jets from W Vs Dijet Rank",    7,0,7,7,0,7);
-  
-  h2DttbarNGenJets   = new TH2D("h2DttbarNGenJets" + syst_varname, "Number of b and W jets per event",    3,0,3,4,0,4);
-  h2DttbarNGenJets->GetXaxis()->SetBinLabel(1,"b-jets from top");
-  h2DttbarNGenJets->GetXaxis()->SetBinLabel(2,"jets from W");
-  h2DttbarNGenJets->GetXaxis()->SetBinLabel(3,"Nj(Kin/Gen) matched");
-
   TStopwatch sw;
   sw.Start(kTRUE);
 
@@ -564,7 +362,7 @@ int main(int argc, const char* argv[]){
   for(unsigned int iAEc=0; iAEc<Nhcuts; iAEc++){
     for(unsigned int iAEch=0; iAEch<(Nhch+1); iAEch++){ AccEvent[iAEc][iAEch] = 0 ; EffEvent[iAEc][iAEch] = 0.0; }
   }
-      
+  
   /************************
      SF Parametrization
   *************************/
@@ -576,41 +374,14 @@ int main(int argc, const char* argv[]){
 		  &hmuIDISOSF, &hmuTriggerSF, &hmuTrackerSF, 
 		  &heIDISOSF, &heTriggerSF);
 
-  // Jet uncertainties (btag, JES and JER)
+  /*******************************
+      Theoretical Uncertainties
+  *******************************/
+
   if(_syst && 
      syst_name!="UE"  && 
      syst_name!="ISR" &&
      syst_name!="FSR") fname += "_SYS" + syst_varname;
-
-  /***************************
-     ttbar Categorization
-  ***************************/
-  if(_ttbar_cat) fname += ttbar_id; // add in the sample name the ttbar category
-
-  // New WP for 80X: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
-  // float CSV_WP = 0.8484; // Medium Moriond-17
-  float CSV_WP = 0.9535; // Tight Moriond-17
-  int btagSysPar = 0;
-
-  // Global SF uncertainty: 18 Components
-  if     (_syst && syst_varname.Contains("btagjesUp"))     btagSysPar = btagUnc::JES_UP;
-  else if(_syst && syst_varname.Contains("btagjesDown"))   btagSysPar = btagUnc::JES_DN;
-  else if(_syst && syst_varname.Contains("btaglfUp"))      btagSysPar = btagUnc::LF_UP;
-  else if(_syst && syst_varname.Contains("btaglfDown"))    btagSysPar = btagUnc::LF_DN;
-  else if(_syst && syst_varname.Contains("btaghfUp"))      btagSysPar = btagUnc::HF_UP;
-  else if(_syst && syst_varname.Contains("btaghfDown"))    btagSysPar = btagUnc::HF_DN;
-  else if(_syst && syst_varname.Contains("btaghfsIUp"))    btagSysPar = btagUnc::HFSTAT1_UP;
-  else if(_syst && syst_varname.Contains("btaghfsIDown"))  btagSysPar = btagUnc::HFSTAT1_DN;
-  else if(_syst && syst_varname.Contains("btaghfsIIUp"))   btagSysPar = btagUnc::HFSTAT2_UP;
-  else if(_syst && syst_varname.Contains("btaghfsIIDown")) btagSysPar = btagUnc::HFSTAT2_DN;
-  else if(_syst && syst_varname.Contains("btaglfsIUp"))    btagSysPar = btagUnc::LFSTAT1_UP;
-  else if(_syst && syst_varname.Contains("btaglfsIDown"))  btagSysPar = btagUnc::LFSTAT1_DN;
-  else if(_syst && syst_varname.Contains("btaglfsIIUp"))   btagSysPar = btagUnc::LFSTAT2_UP;
-  else if(_syst && syst_varname.Contains("btaglfsIIDown")) btagSysPar = btagUnc::LFSTAT2_DN;
-  else if(_syst && syst_varname.Contains("btagcfIUp"))     btagSysPar = btagUnc::CFERR1_UP;
-  else if(_syst && syst_varname.Contains("btagcfIDown"))   btagSysPar = btagUnc::CFERR1_DN;
-  else if(_syst && syst_varname.Contains("btagcfIIUp"))    btagSysPar = btagUnc::CFERR2_UP;
-  else if(_syst && syst_varname.Contains("btagcfIIDown"))  btagSysPar = btagUnc::CFERR2_DN;
 
   // Scale Uncertainty
   // From: https://indico.cern.ch/event/494682/contribution/2/attachments/1223578/1800218/mcaod-Feb15-2016.pdf
@@ -638,6 +409,7 @@ int main(int argc, const char* argv[]){
 
   }
 
+  // h_damp Uncertainty
   int hdampSysPar=0;
   if      (_syst && syst_varname.Contains("hdampUp"))   hdampSysPar = 18;
   else if (_syst && syst_varname.Contains("hdampDown")) hdampSysPar = 9;
@@ -661,29 +433,84 @@ int main(int argc, const char* argv[]){
 
   }
 
+  /*****************************************
+    Jet uncertainties (btag, JES and JER)
+  ******************************************/
+  TString GlobalJetSFPath = "/afs/cern.ch/user/b/brochero/brochero_WorkArea/LepJetsAnalyzer/";
+  // Jet corrections
+  TString JetResPath   = GlobalJetSFPath + "TopTools/JEC_btag/JER/JER_806/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt";
+  TString JetResSFPath = GlobalJetSFPath + "TopTools/JEC_btag/JER/JER_806/Spring16_25nsV10_MC_SF_AK4PFchs.txt";
+  std::cout << "-------- Correction Files -------- " << std::endl;
+  std::cout <<  JetResPath << "\n" << JetResSFPath << std::endl;
+  JME::JetResolution resolution        = JME::JetResolution((std::string)JetResPath);
+  JME::JetResolutionScaleFactor res_sf = JME::JetResolutionScaleFactor((std::string)JetResSFPath);
+  // b-tag
+  // New WP for 80X: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
+  // float CSV_WP = 0.8484; // Medium Moriond-17
+  float CSV_WP = 0.9535; // Tight Moriond-17
 
-  int JESVarIndex = -999;
+  btagCollection SF_btag;
+  TString btagHFPath   = GlobalJetSFPath + "TopTools/JEC_btag/bTag/bTag_2017_6_7/csv_rwt_fit_hf_v2_final_2017_6_7_all.root";
+  TString btagLFPath   = GlobalJetSFPath + "TopTools/JEC_btag/bTag/bTag_2017_6_7/csv_rwt_fit_lf_v2_final_2017_6_7_all.root";
+  SF_btag = SetupbtagSF(btagHFPath, btagLFPath);
 
+  // JES Variations 
+  bool sysJES = false;
+  int  nJES = -99, nJESVar = -99;
   if(_syst && syst_varname.Contains("JES")){
     // JES Components
-    for(unsigned ijes=JESUnc::AbsoluteStat; ijes<=JESUnc::PileUpPtHF; ijes++){
-      if(syst_name.Contains(JESName[ijes])) JESVarIndex = ijes;	
+    nJES    = FindSysID(JESName,  syst_name);
+    nJESVar = FindSysID(vVarNames, syst_var );
+    
+    if (nJES != -99 && nJESVar != -99){
+      sysJES = true;
+      std::cout << "JES UNCERTAINTY: CODE set to estimate " << JESName.at(nJES) << " + " << vVarNames.at(nJESVar) << std::endl;
     }
+    else{
+	std::cout << "JES variation NOT found." << std::endl;
+	std::exit (EXIT_FAILURE);
+      }
   } // if(JES)
+  
+  // b-tag Variations
+  bool sysbtag = false;
+  int  nbtag = -99, nbtagVar = -99;
+  if (syst_name.Contains("btag_")){
+    nbtag    = FindSysID(vbtgNames, syst_name);
+    nbtagVar = FindSysID(vVarNames, syst_var);
+    
+    if (nbtag != -99 && nbtagVar != -99) {
+      sysbtag = true;
+      std::cout << "b-TAG UNCERTAINTY: CODE set to estimate " << vbtgNames.at(nbtag) << " + " << vVarNames.at(nbtagVar) << std::endl;
+    }
+    else{      
+      std::cout << "btag variation NOT found." << std::endl;
+      std::exit (EXIT_FAILURE);
+    }
+  }
 
-  // PileUp Uncertainty  
+  // -- btag SF
+  hbtag hSF_btag;
+  if (sysbtag)     hSF_btag = SF_btag.Syst[nbtag][nbtagVar];
+  else if (sysJES) hSF_btag = SF_btag.SystJES[nJES][nJESVar];
+  else             hSF_btag = SF_btag.Central;
+
+
+  /************************
+     PileUp Uncertainty  
+  ************************/
   int pileupSysPar;
   if     (_syst && syst_varname.Contains("PileUpUp"))   pileupSysPar = 1; // Up
   else if(_syst && syst_varname.Contains("PileUpDown")) pileupSysPar = 2; // Down
-
+  
   /************************
     Normalization Weights
   *************************/  
   float NormWeight[2] = {0.0, 0.0}; // mu, e
-  // NormWeight = Lumi*(1.0/N_Gen_events)*(Xsec)
+  // It is estimated as ==> NormWeight = Lumi*(1.0/N_Gen_events)*(Xsec)
   NormWeight[0] = SFLumi(fname, LuminNorm_Mu, nNorm_Event);  
   NormWeight[1] = SFLumi(fname, LuminNorm_El, nNorm_Event);  
-
+  
   std::cout << "-----------------------                                 -------------------------" << std::endl;
   std::cout << "Number of Events         = " << nNorm_Event << std::endl;
   std::cout << "Normalization Factor[Mu] = " << NormWeight[0]  << std::endl;
@@ -694,7 +521,7 @@ int main(int argc, const char* argv[]){
              Event Loop
   ********************************/
   std::cout << "--- Processing: " << MaxEvt << " events" << std::endl;
-
+  
   for (Long64_t ievt=0; ievt<MaxEvt; ievt++) {
     
     theTree.GetEntry(ievt);  
@@ -716,10 +543,10 @@ int main(int argc, const char* argv[]){
     if (_syst && syst_varname.Contains("hdamp"))
       PUWeight = PUWeight*(*hdampWeight)[hdampSysPar];
     
-    unsigned int NJets, NBtagJets;
-    
-    TLorentzVector Lep;
-    
+    /*********************
+            Lepton 
+     *********************/
+    TLorentzVector Lep;    
     if (_syst && syst_varname.Contains("LESUp")) 
       Lep.SetPtEtaPhiE(Lep_pT + (Lep_pT*Lep_LES),
 		       Lep_eta,
@@ -735,41 +562,23 @@ int main(int argc, const char* argv[]){
     // Lep pT_mu > 30GeV
     if(Channel == 0 && Lep.Pt() < 30)  continue; 
     // Lep pT_e  > 35GeV
-    if(Channel == 1 && Lep.Pt() < 30)  continue; 
+    if(Channel == 1 && Lep.Pt() < 35)  continue; 
     
     // Transverse W Mass
     TLorentzVector METv;
     METv.SetPtEtaPhiE(MET,0.0,MET_Phi,MET);
     float mT = sqrt(2*MET*Lep.Pt()*(1.0-cos( Lep.DeltaPhi(METv) )));
     
-    // Jets     
-    NJets      = 0;
-    NBtagJets  = 0;
-    
-    // Shape Method
-    // From: https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration
-    float btagUnc_val = 0.0;
-    float btagUnc_TotalUp = 0.0, btagUnc_TotalDown = 0.0;
-    if (!fname.Contains("DataSingle")){
-      if(_syst && btagSysPar != 0 && syst_varname.Contains("Up"))
-	btagUnc_val = 1.0 * (*Jet_SF_CSV)[btagSysPar];
-      else if(_syst && btagSysPar != 0 && syst_varname.Contains("Down")) 
-	btagUnc_val = -1.0 * (*Jet_SF_CSV)[btagSysPar];      
-      
-      for (unsigned int ibtag = btagUnc::JES_UP; ibtag <= btagUnc::CFERR2_DN; ibtag++){
-	if (ibtag%2) btagUnc_TotalUp   += ((*Jet_SF_CSV)[ibtag])*((*Jet_SF_CSV)[ibtag]); 
-	else         btagUnc_TotalDown += ((*Jet_SF_CSV)[ibtag])*((*Jet_SF_CSV)[ibtag]); 
-      }
-      // SF estimated for jets with pT = 25, 30, 35 and 40 GeV
-      PUWeight = PUWeight * ((*Jet_SF_CSV)[btagUnc::CENTRAL] + btagUnc_val);
-    }// if(!data)
-    
-    // Kinematic Reconstruction (at least 4 Jets)
+    /*******************************************
+    Kinematic Reconstruction (at least 4 Jets)
+    ********************************************/
     // Order for Jets: 
     // [0] b from hadronic leg 
     // [1] j from W
     // [2] j from W
     // [3] b from leptonic leg
+    double KinProb = std::exp(-0.5*Kin_Chi2);
+
     int KinJetIndex[4];
     TLorentzVector KinNu;
     ComJet KinJet[4];
@@ -779,62 +588,49 @@ int main(int argc, const char* argv[]){
       KinJet[ikj].SetPtEtaPhiE((*KinJet_pT)[ikj],(*KinJet_eta)[ikj],(*KinJet_phi)[ikj],(*KinJet_E)[ikj]);
     }
 
-    std::vector<ComJet> Jets;    
-    for(int ijet=0; ijet < Jet_pT->size(); ijet++){
-
-      float JetSystVar = 1.0;
-      if (fname.Contains("DataSingle")){
-	// Measurements show that the jet energy resolution (JER) in data is worse than in the simulation and the jets in MC need to be smeared to describe the data.
-	// https://twiki.cern.ch/twiki/bin/vie
-	JetSystVar = (*Jet_JER_Nom)[ijet];	
-      }
+    /*********************
+             Jets
+    *********************/
+    std::vector<ComJet> PreJets;    
       
-      if(_syst){
-	// JES
-	if (JESVarIndex > -1){
-	  if(syst_varname.Contains("Up"))	 JetSystVar = 1.0 + std::abs((*Jet_JESCom_Up)  [ijet][JESVarIndex]);
-	  else if(syst_varname.Contains("Down")) JetSystVar = 1.0 - std::abs((*Jet_JESCom_Down)[ijet][JESVarIndex]);
-	}
-	// JER
-	if(syst_varname.Contains("JERUp"))        JetSystVar = (*Jet_JER_Up)[ijet];
-	else if(syst_varname.Contains("JERNom"))  JetSystVar = (*Jet_JER_Nom)[ijet];
-	else if(syst_varname.Contains("JERDown")) JetSystVar = (*Jet_JER_Down)[ijet];
-      }
+    for(int ijet=0; ijet < Jet_pT->size(); ijet++){
       
       ComJet jet;
       jet.SetPtEtaPhiE((*Jet_pT)[ijet], 
 		       (*Jet_eta)[ijet],
 		       (*Jet_phi)[ijet],
 		       (*Jet_E)[ijet]);
-      // if (ievt == 3354){
-      // 	std::cout << ievt << " <==> IndexpT  = " <<  (*Jet_pTIndex)[ijet] << std::endl; 
-      // 	std::cout << ievt << " <==> eta = " << (*Jet_eta)[ijet] << std::endl; 
-      // 	std::cout << ievt << " <==> phi = " << (*Jet_phi)[ijet] << std::endl; 
-      // 	std::cout << ievt << " <==> pT  = " << (*Jet_pT)[ijet] << std::endl; 
-      // 	std::cout << ievt << " <==> E  = " << (*Jet_E)[ijet] << std::endl; 
-      // 	std::cout << ievt << " ============================= "  << std::endl; 
-      // }
-      // For MC: Jet mearing applyed.
-      jet *= JetSystVar;
- 
-      jet.Flavour = (*Jet_partonFlavour)[ijet];
+      
+      jet.Flavour = (*Jet_hadronFlavour)[ijet]; 
       jet.CSV     = (*Jet_CSV)[ijet];
       if      (jet.CSV < 0.0)  jet.CSV = 0.0000;
       else if (jet.CSV >= 1.0) jet.CSV = 0.9999;
-      jet.CvsL    = (*Jet_CvsL)[ijet];
-      jet.CvsB    = (*Jet_CvsB)[ijet];
-      jet.Mom     = -1;
-      jet.KinMom  = -1;
+      jet.Mom      = -1;
+      jet.KinMom   = -1;
       jet.GenIndex = -1;
+      jet.Gen_pT   = -1;
+      jet.Gen_DR   = -1;
       jet.pTIndex  = (*Jet_pTIndex)[ijet];
-
-      // Jet Mother
-      if((fname.Contains("ttbar")  && !fname.Contains("Bkg"))){
-	jet.GenIndex = (*Jet_GENmatched)[ijet];
-	jet.Mom      = (*Jet_Mom)[ijet];
-	// int GenConeMom = (*GenCone_Mom)[ijet]; 
+      if(sysJES){
+	if     (nJESVar ==var::Up)   jet.JES = 1.0 + std::abs((*Jet_JESCom_Up)  [ijet][nJES]);
+	else if(nJESVar ==var::Down) jet.JES = 1.0 - std::abs((*Jet_JESCom_Down)[ijet][nJES]);
       }
-      // Kin Mother
+      if((fname.Contains("ttbar")  && !fname.Contains("Bkg"))){
+	jet.Mom      = (*Jet_Mom)[ijet];
+	jet.GenIndex = (*Jet_GENmatched)[ijet];
+	if(jet.GenIndex == -999){
+	  jet.Gen_pT = 0.0;
+	  jet.Gen_DR = 0.0;
+	}
+	else{
+	  TLorentzVector GenJet;
+	  GenJet.SetPtEtaPhiE((*GenJet_pT)[jet.GenIndex],(*GenJet_eta)[jet.GenIndex],(*GenJet_phi)[jet.GenIndex],(*GenJet_E)[jet.GenIndex] );
+	  jet.Gen_pT   = (*GenJet_pT) [jet.GenIndex];	
+	  jet.Gen_DR   = jet.DeltaR(GenJet);	
+	}
+      }// if(ttbar)
+      
+      // Kin Mother (All events)
       // [0] b from hadronic leg 
       // [1] j from W
       // [2] j from W
@@ -842,51 +638,56 @@ int main(int argc, const char* argv[]){
       if (ijet == KinJetIndex[0] || ijet == KinJetIndex[3] ) jet.KinMom = 6;
       if (ijet == KinJetIndex[1] || ijet == KinJetIndex[2] ) jet.KinMom = 24;
       
-      if(jet.Pt() > 30){ // Jet pT Cut
-
-	Jets.push_back(jet);
-	
-	/*******************************************
-                       b-tagging
-	*******************************************/    
-	if(jet.CSV > CSV_WP) NBtagJets++; // Number of b-tagged jets
-	
-      } // if(Jet_pT)
+      PreJets.push_back(jet);	
     }// for(jets)
     
+    
+    unsigned int NJets=0, NBtagJets=0;
+    
+    if (!fname.Contains("DataSingle")){
+      
+      // Measurements show that the jet energy resolution (JER) in data is worse than in the simulation and the jets in MC need to be smeared to describe the data.
+      // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
+      int JERVar = var::Nom;
+      if     (_syst && syst_varname.Contains("JERUp"))   JERVar = var::Up;
+      else if(_syst && syst_varname.Contains("JERDown")) JERVar = var::Down;
+      // JER      
+      JERCorrection(res_sf, resolution, Rho, &PreJets, JERVar);
+      
+      // JES
+      if(sysJES) JESCorrection(&PreJets);      
+      
+    }// if(!data)
+    
+    std::vector<ComJet> Jets;
+    for(int ijet=0; ijet < PreJets.size(); ijet++){
+      ComJet jet = PreJets.at(ijet);
+      
+      if(jet.Pt() > 30){ // Jet pT Cut
+	Jets.push_back(jet);
+	// b-tagging
+	if(jet.CSV > CSV_WP) NBtagJets++; // Number of b-tagged jets	
+      } // if(Jet_pT)
+      
+    }//for(jets)
+    
     NJets = Jets.size();
-    
-    float Mjj    = 0.0; // Dijet Inv. Mass   
-    // Only Final Cut Level
-    if(NJets > 5 && NBtagJets > 1){ 
-      // Estimation of the DiJet invariant mass closest to the W mass
-      bool ReArrangeMjj = false; // Jets keep the same order
-      Mjj = DiJetMassCorrection(Jets, ReArrangeMjj);            
-    } //if (6jets && 1btag)    
-    
+        
     /*******************************************
-                Number of GENJets
-    *******************************************/    
-    int NGenJets = 0;
-    std::vector<TLorentzVector> GenJets;
-    if ((fname.Contains("ttbar")  && !fname.Contains("Bkg"))){
-      for(int igenjet=0; igenjet < GenJet_pT->size(); igenjet++){
-	TLorentzVector TLGenJet;
-	TLGenJet.SetPtEtaPhiE((*GenJet_pT) [igenjet],
-			      (*GenJet_eta)[igenjet],
-			      (*GenJet_phi)[igenjet],
-			      (*GenJet_E)  [igenjet]); 
-
-	GenJets.push_back(TLGenJet);
-	if( TLGenJet.Pt() > 20 ) NGenJets++;
-      }
-    }
-
-  /*******************************************
-   Trigger,ID & ISO Scale Factors/bin(Pt,Eta)
-  *******************************************/    
-    std::vector<float> SF_ID_ISO_Tr;
+              b-tagging Scale Factors
+    *******************************************/     
     
+    // Shape Method
+    // From: https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration
+    float SFevt_btag = GetbtagEvtWeight(hSF_btag, Jets);
+
+    PUWeight = PUWeight * SFevt_btag;
+    
+
+    /*******************************************
+     Trigger,ID & ISO Scale Factors/bin(Pt,Eta)
+    *******************************************/    
+    std::vector<float> SF_ID_ISO_Tr;    
     if (fname.Contains("DataSingle")){
       SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Tr      [0] 
       SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Tr_Up   [1] 
@@ -895,17 +696,15 @@ int main(int argc, const char* argv[]){
       SF_ID_ISO_Tr.push_back(1.0); // SF_ID_ISO_Error   [4] 
       SF_ID_ISO_Tr.push_back(1.0); // SF_Tr             [5] 
       SF_ID_ISO_Tr.push_back(1.0); // SF_Tr_Error       [6] 
-    }
-    
+    }    
     else {
-      // First Method: Taking SF from root file
+      // Taking SF from root file
       SFIDISOTrigger(SF_ID_ISO_Tr,
       		     Lep, Channel, GoodPV,
       		     hmuIDISOSF, hmuTriggerSF, hmuTrackerSF,
-      		     heIDISOSF,  heTriggerSF);
+      		     heIDISOSF,  heTriggerSF);      
       
       if(_syst && syst_varname.Contains("LepSF")){
-
 	float SFSystUnc;
 	if(syst_varname.Contains("IDLepSF")){
 	  SFSystUnc = sqrt(pow(SF_ID_ISO_Tr[3]*0.01,2) + pow(SF_ID_ISO_Tr[4],2)); //Additional 1%
@@ -918,42 +717,12 @@ int main(int argc, const char* argv[]){
 	  if(syst_varname.Contains("Down")) PUWeight = PUWeight * (SF_ID_ISO_Tr[5] - SFSystUnc);
 	}
       }
-      else PUWeight = PUWeight * SF_ID_ISO_Tr[0]; // Central
-     
+      
+      else PUWeight = PUWeight * SF_ID_ISO_Tr[0]; // Central     
+
     }// else(Contain("Data"))
+    
 
-    /***************************
-          Fit Probability
-    ***************************/
-    double KinProb = std::exp(-0.5*Kin_Chi2);
-
-    /***************************
-     Number of additional jets
-    ***************************/
-    std::vector<int> vAddGenIndex, vAddKinIndex, vAddGenpTIndex, vAddKinpTIndex,vAddGenpTLocIndex, vAddKinpTLocIndex;
-    int nAddKin = 0;
-    if(NJets > 5){
-      for(int ijet=0; ijet < Jets.size(); ijet++){
-	ComJet jet = Jets[ijet];
-	if(jet.Mom != 24 && jet.Mom != 6){    
-	  vAddGenIndex.push_back(ijet);
-	  vAddGenpTLocIndex.push_back(ijet);
-	  vAddGenpTIndex.push_back(jet.pTIndex);
-	}
-	if(jet.KinMom != 24 && jet.KinMom != 6){
-	  vAddKinIndex.push_back(ijet);
-	  vAddKinpTLocIndex.push_back(ijet);
-	  vAddKinpTIndex.push_back(jet.pTIndex);
-	}
-      }// for(ijets)
-      nAddKin = vAddKinIndex.size();
-    } // if(NJets)
-
-    if (NJets > 5  && NBtagJets > 1){
-    for(int ijet=0; ijet < Jets.size(); ijet++){
-      ComJet jet = Jets[ijet];
-    }
-    }
     /***************************
             Selection
     ***************************/
@@ -961,25 +730,13 @@ int main(int argc, const char* argv[]){
     bool JumpCutEvent[Nhcuts];
     for(unsigned int bcut=0; bcut<Nhcuts; bcut++) JumpCutEvent[bcut] = true;
 
-    JumpCutEvent[0] = false;                                                 // Single Lepton (from Tree)
-    if(NJets > 5)                                    JumpCutEvent[1]= false; // lep + 6 Jets 
-    if(NJets > 5  && NBtagJets > 1)                  JumpCutEvent[2]= false; // lep + 6 Jets + 2 b-tag
-    if(NJets > 5  && NBtagJets > 2)                  JumpCutEvent[3]= false; // lep + 6 Jets + 3 b-tag
-    if(NJets > 5  && NBtagJets > 1 && KinProb > 0.2) JumpCutEvent[4]= false; // lep + 6 Jets + 2 b-tag + Fit Probability > 0.2
-    if(NJets > 5  && NBtagJets > 1 && nAddKin == 2)                  JumpCutEvent[5]= false; // lep + 6 Jets + 2 b-tag + 2 Add Jets
-    if(NJets > 5  && NBtagJets > 1 && nAddKin == 2 && KinProb > 0.2) JumpCutEvent[6]= false; // lep + 6 Jets + 2 b-tag + 2 Add Jets + Fit Probability > 0.2
-
+    JumpCutEvent[0] = false;                                // Single Lepton (from Tree)
+    if(NJets > 5)                   JumpCutEvent[1]= false; // lep + 6 Jets 
+    if(NJets > 5 && NBtagJets > 1)  JumpCutEvent[2]= false; // lep + 6 Jets + 2 b-tag
 
     bool JumpEvent = false;
     
-    /***************************
-        ttbar Categorization
-    ***************************/
-    if (_ttbar_cat) JumpEvent = !IsSelectedttbarCategory(GenConeCat, ttbar_id);
-    
-    /********************************
-      Exclusive Data and QCD Samples
-    *********************************/
+    // Exclusive Data and QCD Samples
     if (fname.Contains("DataSingleMu") && Channel==1)  JumpEvent = true;
     if (fname.Contains("DataSingleEG") && Channel==0)  JumpEvent = true;
     if (fname.Contains("QCD_MuEnr")    && Channel==1)  JumpEvent = true;
@@ -991,12 +748,19 @@ int main(int argc, const char* argv[]){
           Loop over cuts
     ***************************/
     for(int icut = 0; icut < Nhcuts; icut++){
-
+      
       if(JumpCutEvent[icut]) continue;
       
+      /******************
+          Acc. / Eff. 
+      ******************/
+      AccEvent[icut][Channel]++;
+      EffEvent[icut][Channel]+=  PUWeight;
+
       /*******************
         Fill Histograms
       *******************/
+      // ID, ISO and Trigger SF
       hSFIDISOTr[icut][Channel]->Fill(SF_ID_ISO_Tr[0],PUWeight);
       hSFIDISOTrError[icut][Channel]->Fill((SF_ID_ISO_Tr[1] - SF_ID_ISO_Tr[0]),PUWeight);
       hSFIDISO[icut][Channel]->Fill(SF_ID_ISO_Tr[3],PUWeight);
@@ -1004,81 +768,41 @@ int main(int argc, const char* argv[]){
       hSFTrigger[icut][Channel]->Fill(SF_ID_ISO_Tr[5],PUWeight);
       hSFTriggerError[icut][Channel]->Fill(SF_ID_ISO_Tr[6],PUWeight);
     
-      /******************
-          Acc. / Eff. 
-      ******************/
-      AccEvent[icut][Channel]++;
-      EffEvent[icut][Channel]+=  PUWeight;
-
-      /******************
-         PDF Weights 
-      ******************/
+      // PDF Weights 
       if(_syst && syst_varname.Contains("PDF")){
 	for(unsigned int ipdf=0; ipdf<=99; ipdf++) hWPDF [icut][Channel]->Fill((*PDFWeight)[ipdf], PUWeight);
 	hWPDFAlphaUp   [icut][Channel]->Fill((*PDFWeight)[101], PUWeight);
 	hWPDFAlphaDown [icut][Channel]->Fill((*PDFWeight)[100], PUWeight);
       }
-
-
-      /******************
-         hdamp Weights 
-      ******************/
+      
+      // hdamp Weights 
       if(_syst && syst_varname.Contains("hdamp"))  hWhdamp[icut][Channel]->Fill((*hdampWeight)[hdampSysPar], PUWeight);
-
-
-      /******************
-        Kinematic Var.
-      ******************/      
+      
+      // Kinematic Variables
       hPV     [icut][Channel]->Fill(GoodPV,             PUWeight);
       hMET    [icut][Channel]->Fill(MET,                PUWeight);
       hMET_Phi[icut][Channel]->Fill(fabs(MET_Phi),      PUWeight);
       hLepPt  [icut][Channel]->Fill(Lep.Pt(),           PUWeight);
       hLepEta [icut][Channel]->Fill(std::abs(Lep.Eta()),PUWeight);
       hLepPhi [icut][Channel]->Fill(std::abs(Lep.Phi()),PUWeight);
-      hmT     [icut][Channel]->Fill(mT,                 PUWeight);
-      
-      /******************
-          Jets Var.
-      ******************/
+      hmT     [icut][Channel]->Fill(mT,                 PUWeight);      
+      // Jets Multiplicity
       hNJets    [icut][Channel]->Fill(NJets,    PUWeight); 
       hNBtagJets[icut][Channel]->Fill(NBtagJets,PUWeight);
-      // Dijet InvMass
-      hInvMassjj[icut][Channel]->Fill(Mjj, PUWeight);
       // Global btag SF
-      hSFbtag_Global    [icut][Channel]->Fill((*Jet_SF_CSV)[btagUnc::CENTRAL], PUWeight);
-      hSFbtag_Global_var[icut][Channel]->Fill(btagUnc_val,                     PUWeight);
-      h2DSFbtag_Global  [icut][Channel]->Fill((*Jet_SF_CSV)[btagUnc::CENTRAL], btagUnc_val, PUWeight);
+      hSFbtag_Global[icut][Channel]->Fill(SFevt_btag, PUWeight);
 
       // Jet Variables
-      int nkinGenConeMatch = 0, nTopGenCone = 0, nWGenCone = 0, nAddGenCone = 0;
       bool fKinAddjj = true;
-      bool fGenAddjj = true;
-      
       for(int ijet=0; ijet < Jets.size(); ijet++){
 	ComJet jet = Jets[ijet];
-	// b-Jet Efficiencies
-	if(jet.Flavour == 5){
-	  h2DSFbtag_b[icut][Channel]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight); // b-Flavour
-	  if(jet.CSV > CSV_WP) h2DSFbtag_btag_b[icut][Channel]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight);  
-	}	
-	else if(jet.Flavour == 4){
-	  h2DSFbtag_c[icut][Channel]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight); // c-Flavour
-	  if(jet.CSV > CSV_WP) h2DSFbtag_btag_c[icut][Channel]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight);  
-	}
-	else if(jet.Flavour == 1 || jet.Flavour == 2 || jet.Flavour == 3){
-	  h2DSFbtag_l[icut][Channel]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight); // l-Flavour
-	  if(jet.CSV > CSV_WP) h2DSFbtag_btag_l[icut][Channel]->Fill(jet.Pt(), fabs(jet.Eta()), PUWeight);  
-	}
 	// SF_btag Profile
-	pSFCSVVsCSVAll[icut][Channel]->Fill(jet.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL], PUWeight);
-	pSFCSVErrorVsCSVAll[icut][Channel]->Fill(jet.CSV, btagUnc_val, PUWeight);
+	pSFCSVVsCSV[icut][Channel]->Fill(jet.CSV, SFevt_btag, PUWeight);
 	
 	// Jet variables
 	if (ijet < NhJets){
 	  hJetPt[ijet][icut][Channel]->Fill(jet.Pt(), PUWeight);
 	  hCSV  [ijet][icut][Channel]->Fill(jet.CSV,  PUWeight);
-	  hCvsL [ijet][icut][Channel]->Fill(jet.CvsL, PUWeight);
-	  hCvsB [ijet][icut][Channel]->Fill(jet.CvsB, PUWeight);
 	}
 	
 	//Dijet Invariant Mass 
@@ -1087,27 +811,7 @@ int main(int argc, const char* argv[]){
 	  ComJet jet_ = Jets[jjet];
 	  float DijetInvMass = (jet+jet_).M(); 
 	  float DijetDR = jet.DeltaR(jet_); 
-	  hMassJet[ijet][jjet][icut][Channel]->Fill(DijetInvMass, PUWeight);
-	  hDRJet  [ijet][jjet][icut][Channel]->Fill(DijetDR,      PUWeight);
-	  // 2D CSV discriminant plot for all DiJets system	  
-	  h2DCSV[ijet][jjet][icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
-	  // Gen Mass
-	  if(jet.Mom == 24 && jet_.Mom ==24)        hGenTagWMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
-	  if(jet.Mom != 24 && jet_.Mom !=24 &&
-	     jet.Mom != 6  && jet_.Mom != 6 &&
-	     fGenAddjj){
-	    hGenTagAddMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
-	    hGenTagAddDR  [icut][Channel]->Fill(DijetDR,      PUWeight);
-
-	    hGenTagAdd1CSV [icut][Channel]->Fill(jet.CSV,  PUWeight);
-	    hGenTagAdd2CSV [icut][Channel]->Fill(jet_.CSV, PUWeight);
-	    hGenTagAdd12CSV[icut][Channel]->Fill(jet.CSV,  PUWeight);
-	    hGenTagAdd12CSV[icut][Channel]->Fill((1.0 + jet_.CSV), PUWeight);
-	    h2DGenTagAddCSV[icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
-	    fGenAddjj = false;
-	  }
 	  // Kin Mass
-	  if(jet.KinMom == 24 && jet_.KinMom == 24) hKinTagWMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
 	  if(jet.KinMom != 24 && jet_.KinMom !=24 &&
 	     jet.KinMom != 6  && jet_.KinMom != 6 &&
 	     fKinAddjj){
@@ -1116,116 +820,25 @@ int main(int argc, const char* argv[]){
 
 	    hKinAdd1CSV   [icut][Channel]->Fill(jet.CSV,      PUWeight);
 	    hKinAdd2CSV   [icut][Channel]->Fill(jet_.CSV,     PUWeight);
-	    hKinAdd12CSV  [icut][Channel]->Fill(jet.CSV,      PUWeight);
-	    hKinAdd12CSV  [icut][Channel]->Fill((1.0 + jet_.CSV),  PUWeight);
 
-	    hKinAdd1CSV_30   [icut][Channel]->Fill(jet.CSV,      PUWeight);
-	    hKinAdd2CSV_30   [icut][Channel]->Fill(jet_.CSV,     PUWeight);
-	    hKinAdd12CSV_30  [icut][Channel]->Fill(jet.CSV,      PUWeight);
-	    hKinAdd12CSV_30  [icut][Channel]->Fill((1.0 + jet_.CSV),  PUWeight);
+	    h2DKinAddCSV  [icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
 
-	    hKinAdd1CSV_40   [icut][Channel]->Fill(jet.CSV,      PUWeight);
-	    hKinAdd2CSV_40   [icut][Channel]->Fill(jet_.CSV,     PUWeight);
-	    hKinAdd12CSV_40  [icut][Channel]->Fill(jet.CSV,      PUWeight);
-	    hKinAdd12CSV_40  [icut][Channel]->Fill((1.0 + jet_.CSV),  PUWeight);
-
-	    h2DKinAddCSV    [icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
-	    h2DKinAddCSV_30 [icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
-	    h2DKinAddCSV_40 [icut][Channel]->Fill(jet.CSV, jet_.CSV, PUWeight);
-
-	    pSFCSVVsCSVAdd  [icut][Channel]->Fill(jet.CSV,  (*Jet_SF_CSV)[btagUnc::CENTRAL],                   PUWeight);
-	    pSFCSVUpVsCSVAdd[icut][Channel]->Fill(jet.CSV,  (*Jet_SF_CSV)[btagUnc::CENTRAL]+btagUnc_TotalUp,   PUWeight);
-	    pSFCSVDownVsCSVAdd[icut][Channel]->Fill(jet.CSV,  (*Jet_SF_CSV)[btagUnc::CENTRAL]-btagUnc_TotalDown, PUWeight);
-
-	    pSFCSVVsCSVAdd    [icut][Channel]->Fill(jet_.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL],                   PUWeight);
-	    pSFCSVUpVsCSVAdd  [icut][Channel]->Fill(jet_.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL]+btagUnc_TotalUp,   PUWeight);
-	    pSFCSVDownVsCSVAdd[icut][Channel]->Fill(jet_.CSV, (*Jet_SF_CSV)[btagUnc::CENTRAL]-btagUnc_TotalDown, PUWeight);
+	    pSFCSVVsCSVAdd[icut][Channel]->Fill(jet.CSV,  SFevt_btag, PUWeight);
+	    pSFCSVVsCSVAdd[icut][Channel]->Fill(jet_.CSV, SFevt_btag, PUWeight);
 
 	    fKinAddjj = false; // FIRST Pair of additional jets! That means the pair with the highest CSV  
-	  }
+
+	  } // if(AddJet)
 	}// for(jjet)
-
-	// Jet Tag Efficiencies
-	if(NJets > 3){ 
-	  // -- CSV purity
-	  // Jets from Top
-	  if(ijet < 2)                   purTagCSV[icut][Channel]-> Fill(jet.Mom == 6, 0.5);
-	  // Add jets
-	  else if(ijet > 1 && ijet < 4)  purTagCSV[icut][Channel]-> Fill((jet.Mom != 24 && jet.Mom != 6), 1.5);
-	  // Jets from W
-	  else if(ijet > 3)              purTagCSV[icut][Channel]-> Fill(jet.Mom == 24, 2.5);
-	  // -- Kin. fitter purity
-	  // Jets from Top
-	  if(jet.KinMom == 6)  purKinGenIndex[icut][Channel]->Fill(jet.Mom == 6,  0.5);
-	  // Jets from W
-	  if(jet.KinMom == 24) purKinGenIndex[icut][Channel]->Fill(jet.Mom == 24, 1.5);
-	  // Add Jets
-	  if(jet.KinMom != 24 && jet.KinMom != 6){ 
-	    purKinGenIndex[icut][Channel]->Fill(jet.Mom != 24 && jet.Mom != 6, 2.5);
-	  }
-
-	  // GenCone Vs Kinematic Reconstruction 
-	  if (jet.Mom == 6 || jet.Mom == 24){ 
-	    
-	    if(jet.Mom == jet.KinMom) nkinGenConeMatch++; 
-	    
-	    if(jet.Mom == 6){ 
-	      nTopGenCone++;
-	      effKinGenIndex[icut][Channel]->Fill(jet.KinMom == 6,  1.5); 
-	    }
-	    if(jet.Mom == 24){ 
-	      nWGenCone++;	
-	      effKinGenIndex[icut][Channel]->Fill(jet.KinMom == 24, 2.5); 
-	      // Eff. Vs Xi2
-	      effKinGenIndexVsChi2[icut][Channel]->Fill(jet.KinMom == 24, Kin_Chi2);
-	    }
-
-	  } // if ((jet.Mom)
-	  else if(jet.Mom != 6 && jet.Mom != 24){ 
-	    nAddGenCone++;
-	    effKinGenIndex[icut][Channel]->Fill((jet.KinMom != 24 && jet.KinMom != 6), 3.5); 
-	  }
-
-	  // CSV Jet Postion Eff (No weights)
-	  bool isGoodCSVOrder = false;
-	  int CSVBin;
-	  if(jet.Mom == 6){
-	    CSVBin = 0.5;
-	    if(ijet < 2) isGoodCSVOrder = true; 
-	    hTJetPosition[icut][Channel]->Fill(ijet);
-	  }
-	  else if(jet.Mom == 24){
-	    CSVBin = 1.5;
-	    if(ijet > 3) isGoodCSVOrder = true;
-	    hWJetPosition[icut][Channel]->Fill(ijet);
-	  }
-	  else{
-	    CSVBin = 2.5;
-	    if(ijet > 1 && ijet < 4) isGoodCSVOrder = true;
-	    hOJetPosition[icut][Channel]->Fill(ijet);
-	  }
-
-	  effTagCSV[icut][Channel]-> Fill(isGoodCSVOrder, CSVBin);
-
-	} // if(NJets > 3)
 	
       }//for(ijet)     
       
       // GenCone Vs Kinematic Reconstruction 
-      if(NJets > 3){ 
-	// Categorization Comp
-	effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttbb",GenttHCat,NGenJets), 0.5);
-	effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttb", GenttHCat,NGenJets), 1.5);
-	effCatHiggs [icut][Channel]-> Fill(ttbar_category("tt2b",GenttHCat,NGenJets), 2.5);
-	effCatHiggs [icut][Channel]-> Fill(ttbar_category("ttcc",GenttHCat,NGenJets), 3.5);
-	effCatHiggs [icut][Channel]-> Fill(ttbar_category("tt",  GenttHCat,NGenJets), 4.5);
-		
+      if(NJets > 3){ 	
 	// Kinematic Reconstruction
 	TLorentzVector KinWl, KinWh, Kintl, Kinth;
 	hKinChi2 [icut][Channel]->Fill(Kin_Chi2,PUWeight);
-	h2DKinChi2_JetMatch[icut][Channel]->Fill(Kin_Chi2, nkinGenConeMatch, PUWeight);
-
-	hKinProb [icut][Channel]->Fill(KinProb,PUWeight);
+	hKinProb [icut][Channel]->Fill(KinProb, PUWeight);
 	
 	KinWl = Lep + KinNu;
 	KinWh = KinJet[1] + KinJet[2];
@@ -1240,226 +853,26 @@ int main(int argc, const char* argv[]){
 	hKinWhMass[icut][Channel]->Fill(KinWh.M());
 	hKinWhpT  [icut][Channel]->Fill(KinWh.Pt());
 
-	hKinWMass[icut][Channel]->Fill(KinWl.M()); // Leptonic
-	hKinWMass[icut][Channel]->Fill(KinWh.M()); // Hadronic
-	hKinWpT  [icut][Channel]->Fill(KinWl.Pt());// Leptonic
-	hKinWpT  [icut][Channel]->Fill(KinWh.Pt());// Hadronic
-	
 	hKintlMass[icut][Channel]->Fill(Kintl.M());
 	hKintlpT  [icut][Channel]->Fill(Kintl.Pt());
 	
 	hKinthMass[icut][Channel]->Fill(Kinth.M());
 	hKinthpT  [icut][Channel]->Fill(Kinth.Pt());
 	
-
-	bool IsKinGenMatch = false;
-	if ( nkinGenConeMatch == (nTopGenCone + nWGenCone) ) IsKinGenMatch = true;
-	effKinGenIndex[icut][Channel]->Fill(IsKinGenMatch, 0.5, PUWeight);
-	for(int ikj=0; ikj < 4; ikj++){
+	for(int ikj=0; ikj < 4; ikj++)
 	  hKinJetPt[ikj][icut][Channel]->Fill(KinJet[ikj].Pt(), PUWeight);
-	}
-
+	
       } //if(NJet > 3)
 
-
-      if(NJets > 5){ 
-	
-	// Number of Additional jets per event
-	hNAddJets_IDGen [icut][Channel]->Fill(nAddGenCone,PUWeight);
-	hNAddJets_IDKin [icut][Channel]->Fill(nAddKin,    PUWeight);
-
-	pNAddJets_IDKinVsChi2[icut][Channel]->Fill(nAddKin,     Kin_Chi2, PUWeight);
-	pNAddJets_IDGenVsChi2[icut][Channel]->Fill(nAddGenCone, Kin_Chi2, PUWeight);
-	pNAddJets_IDKinVsProb[icut][Channel]->Fill(nAddKin,     KinProb,  PUWeight);
-	pNAddJets_IDGenVsProb[icut][Channel]->Fill(nAddGenCone, KinProb,  PUWeight);
-
-	h2DNAddJets_IDGenKin [icut][Channel]->Fill(nAddGenCone,nAddKin,PUWeight);
-
-
-	// Additional jets matching 
-	int nAddJetsMatch = 0;
-	for(int iaj = 0; iaj < vAddGenIndex.size(); iaj++){
-	  for(int jaj = 0; jaj < vAddKinIndex.size(); jaj++){
-	    if(vAddGenIndex.at(iaj) == vAddKinIndex.at(jaj)) nAddJetsMatch ++;
-	  }
-	}
-	
-	hAddJetsMatchFrac[icut][Channel]-> Fill((1.0*nAddJetsMatch)/(1.0*vAddGenIndex.size()), PUWeight);
-	
-	// events with AT LEAST two additional jets
-	if (vAddGenIndex.size()>1 && vAddKinIndex.size()>1){
-
-	  if (vAddGenIndex.at(0) == vAddKinIndex.at(0) &&
-	      vAddGenIndex.at(1) == vAddKinIndex.at(1)) {// Full Match Pair
-	    h2DPairMatchVsAddGen[icut][Channel]->Fill(2.5,vAddGenIndex.size(),PUWeight);
-	    h2DPairMatchVsAddKin[icut][Channel]->Fill(2.5,vAddKinIndex.size(),PUWeight);	    
-	  }
-	  else if (vAddGenIndex.at(0) == vAddKinIndex.at(0) ||
-		   vAddGenIndex.at(1) == vAddKinIndex.at(1) ||
-		   vAddGenIndex.at(0) == vAddKinIndex.at(1) ||
-		   vAddGenIndex.at(1) == vAddKinIndex.at(0)) { // Only one add jet
-	    h2DPairMatchVsAddGen[icut][Channel]->Fill(1.5,vAddGenIndex.size(),PUWeight);
-	    h2DPairMatchVsAddKin[icut][Channel]->Fill(1.5,vAddKinIndex.size(),PUWeight);	    
-	  }
-	  else { // No one
-	    h2DPairMatchVsAddGen[icut][Channel]->Fill(0.5,vAddGenIndex.size(),PUWeight);
-	    h2DPairMatchVsAddKin[icut][Channel]->Fill(0.5,vAddKinIndex.size(),PUWeight);	    
-	  }
-	  
-	  // -- Pair arranged by pT
-	  for(unsigned int ijet=0; ijet < vAddGenpTIndex.size(); ijet++){
-	    for(unsigned int jjet=ijet+1; jjet < vAddGenpTIndex.size(); jjet++){		
-	      if(vAddGenpTIndex.at(jjet) < vAddGenpTIndex.at(ijet)){
-		int tempIndex = vAddGenpTIndex.at(ijet);
-		int tempLocIndex = vAddGenpTLocIndex.at(ijet);
-		vAddGenpTIndex.at(ijet) = vAddGenpTIndex.at(jjet);
-		vAddGenpTLocIndex.at(ijet) = vAddGenpTLocIndex.at(jjet);
-		vAddGenpTIndex.at(jjet) = tempIndex;
-		vAddGenpTLocIndex.at(jjet) = tempLocIndex;
-	      }// if(Index_j > Index_i)
-	    }// for(j)
-	  }// for(i)
-	  for(unsigned int ijet=0; ijet < vAddKinpTIndex.size(); ijet++){
-	    for(unsigned int jjet=ijet+1; jjet < vAddKinpTIndex.size(); jjet++){		
-	      if(vAddKinpTIndex.at(jjet) < vAddKinpTIndex.at(ijet)){
-		int tempIndex = vAddKinpTIndex.at(ijet);
-		int tempLocIndex = vAddKinpTLocIndex.at(ijet);
-		vAddKinpTIndex.at(ijet) = vAddKinpTIndex.at(jjet);
-		vAddKinpTLocIndex.at(ijet) = vAddKinpTLocIndex.at(jjet);
-		vAddKinpTIndex.at(jjet) = tempIndex;
-		vAddKinpTLocIndex.at(jjet) = tempLocIndex;
-	      }// if(Index_j > Index_i)
-	    }// for(j)
-	  }// for(i)
-	  	  
-	  if (vAddGenpTIndex.at(0) == vAddKinpTIndex.at(0) &&
-	      vAddGenpTIndex.at(1) == vAddKinpTIndex.at(1)) {// Full Match Pair
-	    h2DPairMatchpTVsAddGen[icut][Channel]->Fill(2.5,vAddGenpTIndex.size(),PUWeight);
-	    h2DPairMatchpTVsAddKin[icut][Channel]->Fill(2.5,vAddKinpTIndex.size(),PUWeight);	    
-	  }
-	  else if (vAddGenpTIndex.at(0) == vAddKinpTIndex.at(0) ||
-		   vAddGenpTIndex.at(1) == vAddKinpTIndex.at(1) ||
-		   vAddGenpTIndex.at(0) == vAddKinpTIndex.at(1) ||
-		   vAddGenpTIndex.at(1) == vAddKinpTIndex.at(0)) { // Only one add jet
-	    h2DPairMatchpTVsAddGen[icut][Channel]->Fill(1.5,vAddGenpTIndex.size(),PUWeight);
-	    h2DPairMatchpTVsAddKin[icut][Channel]->Fill(1.5,vAddKinpTIndex.size(),PUWeight);	    
-	  }
-	  else { // No one
-	    h2DPairMatchpTVsAddGen[icut][Channel]->Fill(0.5,vAddGenpTIndex.size(),PUWeight);
-	    h2DPairMatchpTVsAddKin[icut][Channel]->Fill(0.5,vAddKinpTIndex.size(),PUWeight);	    
-	  }
-	  
-	  // Histograms
-	  ComJet AddGenjet[2], AddKinjet[2];
-	  ComJet AddGenpTjet[2], AddKinpTjet[2];
-
-	  for (int iaj = 0; iaj<2; iaj++){
-	    AddGenjet[iaj] = Jets[vAddGenIndex.at(iaj)];
-	    AddKinjet[iaj] = Jets[vAddKinIndex.at(iaj)];
-	    
-	    AddGenpTjet[iaj] = Jets[vAddGenpTLocIndex.at(iaj)];
-	    AddKinpTjet[iaj] = Jets[vAddKinpTLocIndex.at(iaj)];
-	  }
-
-	  TLorentzVector GENAddGenjet[2], GENAddKinjet[2]; 
-	  TLorentzVector GENAddGenpTjet[2], GENAddKinpTjet[2];
-
-	  bool GoodGENJetMatch = false;
-	  if(AddGenjet[0].GenIndex > 0 &&
-	     AddGenjet[1].GenIndex > 0 &&
-	     AddGenpTjet[0].GenIndex > 0 &&
-	     AddGenpTjet[1].GenIndex > 0) GoodGENJetMatch = true;
-	  
-	  bool GoodGENKinJetMatch = false;
-	  if(AddKinjet[0].GenIndex > 0 &&
-	     AddKinjet[1].GenIndex > 0 &&
-	     AddKinpTjet[0].GenIndex > 0 &&
-	     AddKinpTjet[1].GenIndex > 0) GoodGENKinJetMatch = true;
-
-	  for (int iaj = 0; iaj<2; iaj++){
-	    if(GoodGENJetMatch){
-	      GENAddGenjet[iaj]   = GenJets.at(AddGenjet[iaj].GenIndex);
-	      GENAddGenpTjet[iaj] = GenJets.at(AddGenpTjet[iaj].GenIndex);
-	    }	    
-	    if(GoodGENKinJetMatch){
-	      GENAddKinjet[iaj]   = GenJets.at(AddKinjet[iaj].GenIndex);
-	      GENAddKinpTjet[iaj] = GenJets.at(AddKinpTjet[iaj].GenIndex);
-	    }
-	  }
-	  
-	  float AddGenM  = (AddGenjet[0]+AddGenjet[1]).M(); 
-	  float AddGenDR = AddGenjet[0].DeltaR(AddGenjet[1]); 	  
-	  float AddKinM  = (AddKinjet[0]+AddKinjet[1]).M(); 
-	  float AddKinDR = AddKinjet[0].DeltaR(AddKinjet[1]); 	  
-
-	  float AddGenpTM  = (AddGenpTjet[0]+AddGenpTjet[1]).M(); 
-	  float AddGenpTDR = AddGenpTjet[0].DeltaR(AddGenpTjet[1]); 	  
-	  float AddKinpTM  = (AddKinpTjet[0]+AddKinpTjet[1]).M(); 
-	  float AddKinpTDR = AddKinpTjet[0].DeltaR(AddKinpTjet[1]); 	  
-
-	  h2DAddKinVsAddGen_DR    [icut][Channel] ->Fill(AddKinDR,  AddGenDR,   PUWeight);
-	  h2DAddKinpTVsAddGenpT_DR[icut][Channel] ->Fill(AddKinpTDR,AddGenpTDR, PUWeight);
-	  h2DAddKinVsAddGen_M     [icut][Channel] ->Fill(AddKinM,  AddGenM,   PUWeight);
-	  h2DAddKinpTVsAddGenpT_M [icut][Channel] ->Fill(AddKinpTM,AddGenpTM, PUWeight);
-
-	  float GENAddGenM = 0.;
-	  float GENAddGenDR = 0.;
-	  float GENAddKinM = 0.;
-	  float GENAddKinDR = 0.;
-
-	  float GENAddGenpTM = 0.;
-	  float GENAddGenpTDR = 0.;
-	  float GENAddKinpTM = 0.;
-	  float GENAddKinpTDR = 0.;
-
-	  if(GoodGENJetMatch){
-	    GENAddGenM    = (GENAddGenjet[0]+GENAddGenjet[1]).M(); 
-	    GENAddGenpTM  = (GENAddGenpTjet[0]+GENAddGenpTjet[1]).M(); 
-	    GENAddGenDR   = GENAddGenjet[0].DeltaR(GENAddGenjet[1]); 	  
-	    GENAddGenpTDR = GENAddGenpTjet[0].DeltaR(GENAddGenpTjet[1]); 	  
-	    
-	  }
-
-	  if(GoodGENKinJetMatch){
-	    GENAddKinM    = (GENAddKinjet[0]+GENAddKinjet[1]).M(); 
-	    GENAddKinpTM  = (GENAddKinpTjet[0]+GENAddKinpTjet[1]).M(); 
-	    GENAddKinDR   = GENAddKinjet[0].DeltaR(GENAddKinjet[1]); 	  
-	    GENAddKinpTDR = GENAddKinpTjet[0].DeltaR(GENAddKinpTjet[1]); 	  
-	  }
-
-	  if(GoodGENJetMatch){
-	    h2DAddGenVsAddGEN_DR  [icut][Channel]->Fill(AddGenDR,   GENAddGenDR,   PUWeight);
-	    h2DAddKinVsAddGEN_DR  [icut][Channel]->Fill(AddKinDR,   GENAddGenDR,   PUWeight);
-	    h2DAddGenpTVsAddGEN_DR[icut][Channel]->Fill(AddGenpTDR, GENAddGenpTDR, PUWeight);
-	    h2DAddKinpTVsAddGEN_DR[icut][Channel]->Fill(AddKinpTDR, GENAddGenpTDR, PUWeight);
-	    h2DAddGenVsAddGEN_M   [icut][Channel]->Fill(AddGenM,    GENAddGenM,    PUWeight);
-	    h2DAddKinVsAddGEN_M   [icut][Channel]->Fill(AddKinM,    GENAddGenM,    PUWeight);
-	    h2DAddGenpTVsAddGEN_M [icut][Channel]->Fill(AddGenpTM,  GENAddGenpTM,  PUWeight);
-	    h2DAddKinpTVsAddGEN_M [icut][Channel]->Fill(AddKinpTM,  GENAddGenpTM,  PUWeight);
-	  }
-
-	  if(GoodGENKinJetMatch){
-	    h2DAddKinpTVsAddGENKin_DR[icut][Channel]->Fill(AddKinpTDR, GENAddKinpTDR, PUWeight);
-	    h2DAddKinpTVsAddGENKin_M [icut][Channel]->Fill(AddKinpTM,  GENAddKinpTM, PUWeight);
-	  }
-	  
-	  if(GoodGENJetMatch && GoodGENKinJetMatch){
-	    h2DAddKinVsAddGen_GENM     [icut][Channel] ->Fill(GENAddKinM,    GENAddGenM,    PUWeight);
-	    h2DAddKinpTVsAddGenpT_GENM [icut][Channel] ->Fill(GENAddKinpTM,  GENAddGenpTM,  PUWeight);
-	    h2DAddKinVsAddGen_GENDR    [icut][Channel] ->Fill(GENAddKinDR,   GENAddGenDR,   PUWeight);
-	    h2DAddKinpTVsAddGenpT_GENDR[icut][Channel] ->Fill(GENAddKinpTDR, GENAddGenpTDR, PUWeight);
-	  }
-
-	} // if(AddJets) 
-	
-      }// if(NJets>5)
-	
-	
     }//for(icuts)     
     
     Jets.clear();
 
   }//for(events)
+
+  /********************************
+         Event Loop END
+  ********************************/
   
   // Get elapsed time
   sw.Stop();
@@ -1498,23 +911,23 @@ int main(int argc, const char* argv[]){
       std::cout << std::endl;
 
       // Unroll TH2F in 1D histogram
-      if (nch < 2){
-	UnRoll2D(h2DKinAddCSV [nc][nch], hKinAddCSVUnroll[nc][nch]);
-	UnRoll2D(h2DKinAddCSV_30 [nc][nch], hKinAddCSVUnroll_30[nc][nch]);
-	UnRoll2D(h2DKinAddCSV_40 [nc][nch], hKinAddCSVUnroll_40[nc][nch]);
-      } // if(nch)
+      if (nch < 2)
+	UnRoll2D(h2DKinAddCSV    [nc][nch], hKinAddCSVUnroll[nc][nch]);
+      
+    }// for(nch)
 
-    }
     std::cout << "-----------------------------" << std::endl;
-  }
+
+  }// for (ncut)
 
   Yields         ->GetXaxis()->SetBinLabel(nbin, "Norm. Factor");
   YieldsNoWeights->GetXaxis()->SetBinLabel(nbin, "Norm. Factor");
   Yields         ->SetBinContent(nbin, NormWeight[0]);
   YieldsNoWeights->SetBinContent(nbin, NormWeight[0]);
-  
-  
-  // --- Write histograms
+    
+  /********************************
+         Write histograms
+  ********************************/
   TString outfname=dirname + "/hSF-" + hname + "_" + fname + ".root";
   TFile *target  = new TFile(outfname,"RECREATE" );  
   
@@ -1525,231 +938,83 @@ int main(int argc, const char* argv[]){
   target->mkdir(dirhistosname);
   target->cd   (dirhistosname);
   
-  Yields->Write();
+  Yields         ->Write();
   YieldsNoWeights->Write();
 
-  for(int j=0; j<Nhcuts; j++){
-    
-    //target->mkdir(namecut[j]);
-
+  for(int j=0; j<Nhcuts; j++){    
     for(int i=0; i<Nhch; i++){
       
-      // Plot Normalization
-      if (hAddJetsMatchFrac[j][i]->Integral() != 0.0) 
-	hAddJetsMatchFrac[j][i]->Scale(1.0/hAddJetsMatchFrac[j][i]->Integral());
-
-      if (h2DPairMatchVsAddGen[j][i]->Integral() != 0.0) 
-	h2DPairMatchVsAddGen[j][i]->Scale(1.0/h2DPairMatchVsAddGen[j][i]->Integral());
-      if (h2DPairMatchVsAddKin[j][i]->Integral() != 0.0) 
-	h2DPairMatchVsAddKin[j][i]->Scale(1.0/h2DPairMatchVsAddKin[j][i]->Integral());
-      if (h2DPairMatchpTVsAddGen[j][i]->Integral() != 0.0) 
-	h2DPairMatchpTVsAddGen[j][i]->Scale(1.0/h2DPairMatchpTVsAddGen[j][i]->Integral());
-      if (h2DPairMatchpTVsAddKin[j][i]->Integral() != 0.0) 
-	h2DPairMatchpTVsAddKin[j][i]->Scale(1.0/h2DPairMatchpTVsAddKin[j][i]->Integral());
-
-      if(h2DAddKinVsAddGen_GENDR[j][i]->Integral() != 0.0)
-      h2DAddKinVsAddGen_GENDR[j][i]->Scale(1.0/h2DAddKinVsAddGen_GENDR[j][i]->Integral());
-      if(h2DAddKinpTVsAddGenpT_GENDR[j][i]->Integral() != 0.0)
-      h2DAddKinpTVsAddGenpT_GENDR[j][i]->Scale(1.0/h2DAddKinpTVsAddGenpT_GENDR[j][i]->Integral());
-      if(h2DAddKinVsAddGen_GENM[j][i]->Integral() != 0.0)
-      h2DAddKinVsAddGen_GENM[j][i]->Scale(1.0/h2DAddKinVsAddGen_GENM[j][i]->Integral());
-      if(h2DAddKinpTVsAddGenpT_GENM[j][i]->Integral() != 0.0)
-      h2DAddKinpTVsAddGenpT_GENM[j][i]->Scale(1.0/h2DAddKinpTVsAddGenpT_GENM[j][i]->Integral());
-      if(h2DAddGenVsAddGEN_DR[j][i]->Integral() != 0.0)
-      h2DAddGenVsAddGEN_DR[j][i]->Scale(1.0/h2DAddGenVsAddGEN_DR[j][i]->Integral());
-      if(h2DAddKinVsAddGEN_DR[j][i]->Integral() != 0.0)
-      h2DAddKinVsAddGEN_DR[j][i]->Scale(1.0/h2DAddKinVsAddGEN_DR[j][i]->Integral());
-      if(h2DAddGenVsAddGEN_M[j][i]->Integral() != 0.0)
-      h2DAddGenVsAddGEN_M[j][i]->Scale(1.0/h2DAddGenVsAddGEN_M[j][i]->Integral());
-      if(h2DAddKinVsAddGEN_M[j][i]->Integral() != 0.0)
-      h2DAddKinVsAddGEN_M[j][i]->Scale(1.0/h2DAddKinVsAddGEN_M[j][i]->Integral());
-      if(h2DAddKinVsAddGEN_M[j][i]->Integral() != 0.0)
-      h2DAddKinVsAddGEN_M[j][i]->Scale(1.0/h2DAddGenpTVsAddGEN_DR[j][i]->Integral());
-      if(h2DAddKinpTVsAddGEN_DR[j][i]->Integral() != 0.0)
-      h2DAddKinpTVsAddGEN_DR[j][i]->Scale(1.0/h2DAddKinpTVsAddGEN_DR[j][i]->Integral());
-      if(h2DAddKinpTVsAddGEN_DR[j][i]->Integral() != 0.0)
-      h2DAddKinpTVsAddGEN_DR[j][i]->Scale(1.0/h2DAddGenpTVsAddGEN_M[j][i]->Integral());
-      if(h2DAddKinpTVsAddGEN_M[j][i]->Integral() != 0.0)
-      h2DAddKinpTVsAddGEN_M[j][i]->Scale(1.0/h2DAddKinpTVsAddGEN_M[j][i]->Integral());
-      if(h2DAddKinpTVsAddGENKin_DR[j][i]->Integral() != 0.0)
-      h2DAddKinpTVsAddGENKin_DR[j][i]->Scale(1.0/h2DAddKinpTVsAddGENKin_DR[j][i]->Integral());
-      if(h2DAddKinpTVsAddGENKin_M[j][i]->Integral() != 0.0)
-      h2DAddKinpTVsAddGENKin_M[j][i]->Scale(1.0/h2DAddKinpTVsAddGENKin_M[j][i]->Write());
-
-
-
       target->mkdir(dirhistosname + "/" + namecut[j] + "/" + namech[i]);
       target->cd   (dirhistosname + "/" + namecut[j] + "/" + namech[i]);
       
-      hPV[j][i]     ->Write();
-      hMET[j][i]    ->Write();
+      // Global Variables
+      hPV     [j][i]->Write();
+      hMET    [j][i]->Write();
       hMET_Phi[j][i]->Write();
-      hmT[j][i]     ->Write();
-
+      // PDF (and Alpha_s)
       hWPDF         [j][i]->Write();
       hWPDFAlphaUp  [j][i]->Write();
-      hWPDFAlphaDown[j][i]->Write();
-      
-      hWhdamp[j][i]->Write();
-
-      hLepPt[j][i]->Write();
+      hWPDFAlphaDown[j][i]->Write();      
+      hWhdamp       [j][i]->Write();
+      // SF(ID,ISO & Trigger)
+      hSFIDISOTr     [j][i]->Write();
+      hSFIDISOTrError[j][i]->Write();
+      hSFIDISO       [j][i]->Write();
+      hSFIDISOError  [j][i]->Write();
+      hSFTrigger     [j][i]->Write();
+      hSFTriggerError[j][i]->Write();
+      // SF(b-tag)
+      hSFbtag_Global[j][i]->Write();
+      pSFCSVVsCSV   [j][i]->Write();
+      pSFCSVVsCSVAdd[j][i]->Write();
+      // Lepton Variables
+      hLepPt [j][i]->Write();
       hLepEta[j][i]->Write();
       hLepPhi[j][i]->Write();
-      
-      hNJets[j][i]->Write();
-      hNBtagJets[j][i]->Write();            
-      
-      hNAddJets_IDGen     [j][i]->Write();
-      hNAddJets_IDKin     [j][i]->Write();
-      h2DNAddJets_IDGenKin[j][i]->Write();
-      hAddJetsMatchFrac   [j][i]->Write();
-
-      pNAddJets_IDGenVsChi2[j][i]->Write();
-      pNAddJets_IDKinVsChi2[j][i]->Write();
-      pNAddJets_IDGenVsProb[j][i]->Write();
-      pNAddJets_IDKinVsProb[j][i]->Write();
-      
-      h2DPairMatchVsAddGen[j][i]  ->Write();
-      h2DPairMatchVsAddKin[j][i]  ->Write();
-      h2DPairMatchpTVsAddGen[j][i]->Write();
-      h2DPairMatchpTVsAddKin[j][i]->Write();
-
-      h2DAddKinVsAddGen_DR    [j][i]->Write();
-      h2DAddKinpTVsAddGenpT_DR[j][i]->Write();
-      h2DAddKinVsAddGen_M     [j][i]->Write();
-      h2DAddKinpTVsAddGenpT_M [j][i]->Write();
-
-      h2DAddKinVsAddGen_GENDR[j][i]->Write();
-      h2DAddKinpTVsAddGenpT_GENDR[j][i]->Write();
-      h2DAddKinVsAddGen_GENM[j][i]->Write();
-      h2DAddKinpTVsAddGenpT_GENM[j][i]->Write();
-      h2DAddGenVsAddGEN_DR[j][i]->Write();
-      h2DAddKinVsAddGEN_DR[j][i]->Write();
-      h2DAddGenVsAddGEN_M[j][i]->Write();
-      h2DAddKinVsAddGEN_M[j][i]->Write();
-      h2DAddGenpTVsAddGEN_DR[j][i]->Write();
-      h2DAddKinpTVsAddGEN_DR[j][i]->Write();
-      h2DAddGenpTVsAddGEN_M[j][i]->Write();
-      h2DAddKinpTVsAddGEN_M[j][i]->Write();
-      h2DAddKinpTVsAddGENKin_DR[j][i]->Write();
-      h2DAddKinpTVsAddGENKin_M[j][i]->Write();
-
-
-      h2DSFbtag_Global[j][i]  ->Write();
-      hSFbtag_Global[j][i]    ->Write();
-      hSFbtag_Global_var[j][i]->Write();
-      pSFCSVVsCSVAll[j][i]       ->Write();
-      pSFCSVErrorVsCSVAll[j][i]  ->Write();
-
+      hmT    [j][i]->Write();
+      // Jets Variables 
       for(int ij=0; ij<NhJets; ij++){
   	hJetPt[ij][j][i]->Write();
   	hCSV  [ij][j][i]->Write();
-  	hCvsL [ij][j][i]->Write();
-  	hCvsB [ij][j][i]->Write();
       }
-
-      for(int ja=0; ja<NhJets; ja++){
-  	for(int jb=ja+1; jb<NhJets; jb++){
-  	  hMassJet[ja][jb][j][i]->Write();
-  	  hDRJet  [ja][jb][j][i]->Write();
-	  h2DCSV  [ja][jb][j][i]->Write();
-  	}
-      }   
-   
-      hInvMassjj[j][i]->Write();
-      
-      hSFIDISOTr[j][i]->Write();
-      hSFIDISOTrError[j][i]->Write();
-      hSFIDISO[j][i]->Write();
-      hSFIDISOError[j][i]->Write();
-      hSFTrigger[j][i]->Write();
-      hSFTriggerError[j][i]->Write();
-      
-      h2DSFbtag_b[j][i]->Write();
-      h2DSFbtag_c[j][i]->Write();
-      h2DSFbtag_l[j][i]->Write();
-
-      h2DSFbtag_btag_b[j][i]->Write();
-      h2DSFbtag_btag_c[j][i]->Write();
-      h2DSFbtag_btag_l[j][i]->Write();
-
-      // Kinematic Reconstruction
-      hKinChi2       [j][i]->Write();
-      hKinProb       [j][i]->Write();
-      h2DKinChi2_JetMatch[j][i]->Write();
-
-      hKinWlMass     [j][i]->Write();
+      // Jet Multiplicity     
+      hNJets    [j][i]->Write();
+      hNBtagJets[j][i]->Write();            
+      /***************************
+        Kinematic Reconstruction
+      ***************************/
+      // Global
+      hKinChi2[j][i]->Write();
+      hKinProb[j][i]->Write();
+      // Jets
+      for(int ikj=0; ikj<4;ikj++) hKinJetPt[ikj][j][i]->Write();
+      // W leptonic
       hKinWlTransMass[j][i]->Write();
+      hKinWlMass     [j][i]->Write();
       hKinWlpT       [j][i]->Write();
+      // W hadronic
       hKinWhMass     [j][i]->Write();
       hKinWhpT       [j][i]->Write();
-      hKinWMass     [j][i]->Write();
-      hKinWpT       [j][i]->Write();
-
-      hKinTagWMass  [j][i]->Write();
+      // Top leptonic
+      hKintlMass[j][i]->Write();
+      hKintlpT  [j][i]->Write();
+      // Top hadronic
+      hKinthMass[j][i]->Write();
+      hKinthpT  [j][i]->Write();
+      // Additional Jets
       hKinTagAddMass[j][i]->Write();
       hKinTagAddDR  [j][i]->Write();
-
-      hKintlMass     [j][i]->Write();
-      hKintlpT       [j][i]->Write();
-
-      hKinthMass     [j][i]->Write();
-      hKinthpT       [j][i]->Write();
-
-      hKinAdd1CSV    [j][i]->Write();
-      hKinAdd2CSV    [j][i]->Write();
-      hKinAdd12CSV   [j][i]->Write();
-
-      hKinAdd1CSV_30    [j][i]->Write();
-      hKinAdd2CSV_30    [j][i]->Write();
-      hKinAdd12CSV_30   [j][i]->Write();
-
-      hKinAdd1CSV_40    [j][i]->Write();
-      hKinAdd2CSV_40    [j][i]->Write();
-      hKinAdd12CSV_40   [j][i]->Write();
+      // CSV for Additional Jets      
+      hKinAdd1CSV     [j][i]->Write();
+      hKinAdd2CSV     [j][i]->Write();
+      hKinAddCSVUnroll[j][i]->Write();
 
       h2DKinAddCSV    [j][i]->Write();
-      h2DKinAddCSV_30 [j][i]->Write();
-      h2DKinAddCSV_40 [j][i]->Write();
-
-      hKinAddCSVUnroll[j][i]->Write();
-      hKinAddCSVUnroll_30[j][i]->Write();
-      hKinAddCSVUnroll_40[j][i]->Write();
-
-      pSFCSVVsCSVAdd    [j][i]->Write();
-      pSFCSVUpVsCSVAdd  [j][i]->Write();
-      pSFCSVDownVsCSVAdd[j][i]->Write();
-
-      for(int ikj=0; ikj<4;ikj++) hKinJetPt[ikj][j][i]->Write();
-
-      hTJetPosition [j][i]->Write();
-      hWJetPosition [j][i]->Write();
-      hOJetPosition [j][i]->Write();
-
-      hGenTagWMass    [j][i]->Write();
-      hGenTagAddMass  [j][i]->Write();
-      hGenTagAddDR    [j][i]->Write();
-      hGenTagAdd1CSV  [j][i]->Write();
-      hGenTagAdd2CSV  [j][i]->Write();
-      hGenTagAdd12CSV [j][i]->Write();
-      h2DGenTagAddCSV [j][i]->Write();
-      // Purities and Efficiencies
-      effKinGenIndex [j][i]->Write();
-      effKinGenIndexVsChi2 [j][i]->Write();
-      purKinGenIndex [j][i]->Write();
-      
-      effTagCSV     [j][i]->Write();
-      purTagCSV     [j][i]->Write();
-      
-      effCatHiggs   [j][i]->Write();
-
     }//for(i)
 
   }//for(j)
 
   target->cd(dirhistosname);
-
-  h2DttbarNGenJets->Write();
     
   target->Close();
 
@@ -1790,106 +1055,6 @@ void print_progress(int TreeEntries, Long64_t ievt){
   }  
 }
 
-
-float DiJetMassCorrection(std::vector<ComJet>  &Jets, bool ReArrange = false){
-
-  /*******************************************
-            Dijet Invariant Mass 
-  *******************************************/
-  int InvMassIndex[2];
-  float minDeltaMjj = 9999.;
-  float Mjj = 0.0;
-  
-  for(int ijet=0; ijet < Jets.size(); ijet++){
-    
-    ComJet jet_i = Jets[ijet];
-    
-    for(int jjet=ijet+1; jjet < Jets.size(); jjet++){
-      ComJet jet_j = Jets[jjet];
-      
-      float DijetInvMass = (jet_i+jet_j).M(); 
-      float DeltaMjj = std::abs(DijetInvMass-80.3);
-      
-      if(minDeltaMjj > DeltaMjj){
-	minDeltaMjj = DeltaMjj;
-	Mjj = DijetInvMass;
-	InvMassIndex[0] = ijet;
-	InvMassIndex[1] = jjet;
-      }
-      
-    }// for(jjets)
-
-  }// for(ijet)
-
-  // Change of Jet Ordering
-  if(ReArrange && (InvMassIndex[0] > 1 || InvMassIndex[1] > 1)){    
-    ComJet Mjj_a = Jets[InvMassIndex[0]];
-    ComJet Mjj_b = Jets[InvMassIndex[1]];
-  
-    // Delete the Mjj Jets: First the last one!
-    Jets.erase(Jets.begin()+InvMassIndex[1]);
-    Jets.erase(Jets.begin()+InvMassIndex[0]);
-
-    // Move them to the end
-    Jets.push_back(Mjj_a);
-    Jets.push_back(Mjj_b);
-  } // if(ReArrange)
-
-  return Mjj;
-}
-
-
-bool IsSelectedttbarCategory(std::vector<int> *GenConeCat, TString ttbar_id){
-  
-  // Categorization using Cone DeltaR
-  // Visible Phase Space: 
-  int cone_NJets  = (*GenConeCat)[1];
-  int cone_NbJets = (*GenConeCat)[2];
-  int cone_NcJets = (*GenConeCat)[3];
-  
-  int cone_NbJetsNoTop = (*GenConeCat)[4];
-  
-  // Full Phase Space:
-  int cone_NaddJets  = (*GenConeCat)[5];
-  int cone_NaddbJets = (*GenConeCat)[6];
-  int cone_NaddcJets = (*GenConeCat)[7];
-  
-  bool Isttjj = false;
-  bool Isttbb = false;
-  bool Isttcc = false;
-  bool Isttb  = false;
-  bool IsttLF = false;
-  bool Istt   = false;
-  
-  if(cone_NbJets > 1 && cone_NJets > 5) Isttjj = true;
-  
-  // Categorization based in the Visible Ph-Sp
-  // if      (cone_NbJets > 3  && cone_NJets > 5) Isttbb = true;
-  // else if (cone_NbJets > 2  && cone_NJets > 5) Isttb  = true;
-  // else if (cone_NbJets > 1  && cone_NJets > 5 && cone_NcJets > 1) Isttcc = true;
-  // else if (cone_NbJets > 1  && cone_NJets > 5) IsttLF = true;
-  // else Istt = true;
-  
-  // Categorization based in the Full Ph-Sp
-  if      (cone_NaddJets > 1) Isttjj = true;
-  
-  if      (cone_NaddbJets > 1) Isttbb = true;
-  else if (cone_NaddbJets > 0) Isttb  = true;
-  else if (cone_NaddcJets > 1) Isttcc = true;
-  else if (cone_NaddJets  > 0) IsttLF = true;
-  else Istt = true;
-  
-  bool IsttbarCat = true;
-  if(ttbar_id == "ttjj" && !Isttjj) IsttbarCat = false;
-  if(ttbar_id == "ttbb" && !Isttbb) IsttbarCat = false;
-  if(ttbar_id == "ttb"  && !Isttb ) IsttbarCat = false;
-  if(ttbar_id == "ttcc" && !Isttcc) IsttbarCat = false;
-  if(ttbar_id == "ttLF" && !IsttLF) IsttbarCat = false;
-  if(ttbar_id == "tt"   && !Istt)   IsttbarCat = false;
-  
-  return IsttbarCat;
-}
-
 void UnRoll2D(TH2D *h2D, TH1D *h1D){
   int UnRollbin = 1;
   for (int ibinx = 1; ibinx<=h2D->GetXaxis()->GetNbins(); ibinx++){ 
@@ -1902,6 +1067,14 @@ void UnRoll2D(TH2D *h2D, TH1D *h1D){
     } // for(ibinx) 
   } // for(ibinx)     
 
+}
+
+// Find Systematic Uncertainties
+int FindSysID(const std::vector<TString> Names, TString Name){
+  for(int iName = 0; iName < Names.size(); iName++){
+    if (Name.Contains(Names.at(iName))) return iName;
+  }
+  return -99;
 }
 
 #endif

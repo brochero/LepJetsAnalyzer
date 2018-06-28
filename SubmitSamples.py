@@ -158,4 +158,4 @@ queue 1
 
     fout = None
     
-# os.system("condor_submit " + RunFileName)
+os.system("condor_submit " + RunFileName)

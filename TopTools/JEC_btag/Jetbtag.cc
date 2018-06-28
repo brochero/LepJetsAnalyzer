@@ -5,31 +5,33 @@
 // Jet SF
 // ---------
 float GetbtagSF(hbtag SF, ComJet jet){
-  TH1F dummyPTh("dummyPTh", "dummyPTh",
-		dummypT_bin, dummypT_binsize);
+  TH1F dummyPTLFh("dummyPTLFh", "dummyPTLFh",
+		  dummypTLF_bin, dummypTLF_binsize);
+  TH1F dummyPTHFh("dummyPTHFh", "dummyPTHFh",
+		  dummypTHF_bin, dummypTHF_binsize);
   TH1F dummyETAh("dummyETAh","dummyETAh",
 		 dummyeta_bin, dummyeta_binsize);
   
   int hadronFlavour = jet.Flavour;
   
-  int ipT_bin = dummyPTh.GetXaxis()->FindBin(jet.Pt()) - 1; 
-  int icsv_bin = SF.HF[0]->GetXaxis()->FindBin(jet.CSV);
+  int ipTLF_bin = dummyPTLFh.GetXaxis()->FindBin(jet.Pt()) - 1; 
+  int ipTHF_bin = dummyPTHFh.GetXaxis()->FindBin(jet.Pt()) - 1; 
+  int icsv_bin  = SF.HF[0]->GetXaxis()->FindBin(jet.CSV);
   
   float SFbtag = 1.;
   
-  if(std::abs(jet.Eta()) > 2.4 || jet.CSV < -1) return SFbtag;
+  if(std::abs(jet.Eta()) > 2.4 || jet.CSV < -0.04) return SFbtag;
 
   // b-Flavor
   if (std::abs(hadronFlavour) == 5)
-    SFbtag = SF.HF[ipT_bin]->GetBinContent(icsv_bin);
+    SFbtag = SF.HF[ipTHF_bin]->GetBinContent(icsv_bin);
   // c-Flavor is 1
   else if(std::abs(hadronFlavour) == 4 )
-    SFbtag = SF.CF[ipT_bin]->GetBinContent(icsv_bin);            
+    SFbtag = SF.CF[ipTHF_bin]->GetBinContent(icsv_bin);            
   // light-Flavor
   else if(hadronFlavour == 0 ){ 
     int ieta_bin = dummyETAh.GetXaxis()->FindBin(std::abs(jet.Eta())) - 1; 
-    if (ipT_bin == 4) ipT_bin = 3;
-    SFbtag = SF.LF[ipT_bin][ieta_bin]->GetBinContent(icsv_bin);
+    SFbtag = SF.LF[ipTLF_bin][ieta_bin]->GetBinContent(icsv_bin);
   }
   
   return SFbtag;

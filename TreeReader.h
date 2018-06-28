@@ -106,7 +106,9 @@ const std::vector<TString> vbtgNames = {"HF","HFStats1","HFStats2",
                                         "LF","LFStats1","LFStats2","cErr1","cErr2"};
 
 // b-tag histo structure
-const int dummypT_bin = 5, dummyeta_bin = 3;
-const double dummypT_binsize[dummypT_bin+1]   = {20., 30., 40., 60., 100., 10000.};
-const double dummyeta_binsize[dummyeta_bin+1] = {0., 0.8, 1.6, 2.4};
+// From https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration#Brief_description_of_the_Tag_and
+const int dummypTHF_bin = 5, dummypTLF_bin = 4, dummyeta_bin = 3;
+const double dummypTLF_binsize[dummypTLF_bin+1] = {20., 30., 40., 60., 10000.};
+const double dummypTHF_binsize[dummypTHF_bin+1] = {20., 30., 50., 70., 100., 10000.};
+const double dummyeta_binsize[dummyeta_bin+1]   = {0., 0.8, 1.6, 2.4};
 

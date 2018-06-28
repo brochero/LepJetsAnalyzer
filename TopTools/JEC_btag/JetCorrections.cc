@@ -30,7 +30,7 @@ void JERCorrection(JME::JetResolutionScaleFactor res_sf, JME::JetResolution reso
     if (jet.Gen_DR < 0.2 && 
 	(jet.Pt() - jet.Gen_pT) < 3.*Res_JER*jet.Pt()) Jet_recogenMatch = true;
     
-    if (Jet_recogenMatch){            
+    if (Jet_recogenMatch){
       JetVar = std::max(0.0 , 
 			(double)( jet.Pt() + (jet.Pt() - jet.Gen_pT)*(SF_JER-1) ) / jet.Pt() );      
     }// if(seljet.ptGen)
@@ -41,9 +41,10 @@ void JERCorrection(JME::JetResolutionScaleFactor res_sf, JME::JetResolution reso
       JetVar = 1. + N_JER*sqrt(std::max(0.0,SF_JER*SF_JER-1.));
       delete ran;
     } // else
-    
+
     // Scale original pT
     (*itjet) *= JetVar;
+
   } // for(ijets)
   
 }

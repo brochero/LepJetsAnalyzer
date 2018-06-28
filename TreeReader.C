@@ -172,6 +172,8 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "jet_partonFlavour", &Jet_partonFlavour );
   theTree.SetBranchAddress( "jet_hadronFlavour", &Jet_hadronFlavour );
   theTree.SetBranchAddress( "jet_CSV",           &Jet_CSV );
+  // std::vector<float> *Jet_SF_CSV=0;
+  // theTree.SetBranchAddress( "jet_SF_CSVcsv",        &Jet_SF_CSV );
   
   if(!fname.Contains("DataSingle")){
     theTree.SetBranchAddress( "jet_JESCom_Up",  &Jet_JESCom_Up );  
@@ -436,10 +438,11 @@ int main(int argc, const char* argv[]){
   /*****************************************
     Jet uncertainties (btag, JES and JER)
   ******************************************/
-  TString GlobalJetSFPath = "/afs/cern.ch/user/b/brochero/brochero_WorkArea/LepJetsAnalyzer/";
+  //TString GlobalJetSFPath = "/afs/cern.ch/user/b/brochero/brochero_WorkArea/LepJetsAnalyzer/"; // CERN
+  TString GlobalJetSFPath = "/cms/scratch/brochero/LepJetsAnalyzer/"; // KISTI
   // Jet corrections
-  TString JetResPath   = GlobalJetSFPath + "TopTools/JEC_btag/JER/JER_806/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt";
-  TString JetResSFPath = GlobalJetSFPath + "TopTools/JEC_btag/JER/JER_806/Spring16_25nsV10_MC_SF_AK4PFchs.txt";
+  TString JetResPath   = GlobalJetSFPath + "TopTools/JEC_btag/JER/JER_806/Summer16_25nsV1_MC_PtResolution_AK4PFchs.txt";
+  TString JetResSFPath = GlobalJetSFPath + "TopTools/JEC_btag/JER/JER_806/Summer16_25nsV1_MC_SF_AK4PFchs.txt";
   std::cout << "-------- Correction Files -------- " << std::endl;
   std::cout <<  JetResPath << "\n" << JetResSFPath << std::endl;
   JME::JetResolution resolution        = JME::JetResolution((std::string)JetResPath);
@@ -563,7 +566,7 @@ int main(int argc, const char* argv[]){
     if(Channel == 0 && Lep.Pt() < 30)  continue; 
     // Lep pT_e  > 35GeV
     if(Channel == 1 && Lep.Pt() < 35)  continue; 
-    
+
     // Transverse W Mass
     TLorentzVector METv;
     METv.SetPtEtaPhiE(MET,0.0,MET_Phi,MET);
@@ -603,8 +606,8 @@ int main(int argc, const char* argv[]){
       
       jet.Flavour = (*Jet_hadronFlavour)[ijet]; 
       jet.CSV     = (*Jet_CSV)[ijet];
-      if      (jet.CSV < 0.0)  jet.CSV = 0.0000;
-      else if (jet.CSV >= 1.0) jet.CSV = 0.9999;
+      if      (jet.CSV < -0.04) jet.CSV = -0.0399; // Improve first bin agreement
+      else if (jet.CSV >= 1.0)  jet.CSV =  0.9999;
       jet.Mom      = -1;
       jet.KinMom   = -1;
       jet.GenIndex = -1;
@@ -640,7 +643,6 @@ int main(int argc, const char* argv[]){
       
       PreJets.push_back(jet);	
     }// for(jets)
-    
     
     unsigned int NJets=0, NBtagJets=0;
     
@@ -679,11 +681,12 @@ int main(int argc, const char* argv[]){
     
     // Shape Method
     // From: https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration
-    float SFevt_btag = GetbtagEvtWeight(hSF_btag, Jets);
-
+    float SFevt_btag = 1.0;
+    if (!fname.Contains("DataSingle"))
+      SFevt_btag = GetbtagEvtWeight(hSF_btag, Jets);
+    
     PUWeight = PUWeight * SFevt_btag;
     
-
     /*******************************************
      Trigger,ID & ISO Scale Factors/bin(Pt,Eta)
     *******************************************/    
@@ -817,6 +820,9 @@ int main(int argc, const char* argv[]){
 	     fKinAddjj){
 	    hKinTagAddMass[icut][Channel]->Fill(DijetInvMass, PUWeight);
 	    hKinTagAddDR  [icut][Channel]->Fill(DijetDR,      PUWeight);
+
+	    if (jet.CSV  < 0.0) jet.CSV  = 0.00;
+	    if (jet_.CSV < 0.0) jet_.CSV = 0.00;
 
 	    hKinAdd1CSV   [icut][Channel]->Fill(jet.CSV,      PUWeight);
 	    hKinAdd2CSV   [icut][Channel]->Fill(jet_.CSV,     PUWeight);
@@ -1037,6 +1043,8 @@ const TString currentDateTime() {
 
 void print_progress(int TreeEntries, Long64_t ievt){
   int step = TreeEntries/50;
+  if (step == 0) step = 1;
+
   if (ievt%(step) == 0){ 
     float progress=(ievt)/(TreeEntries*1.0);
     int barWidth = 50;

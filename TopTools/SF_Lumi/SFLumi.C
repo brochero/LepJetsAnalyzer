@@ -49,21 +49,21 @@ float SFLumi(TString filename,
   else if(filename.Contains("WJets"))          NormWeight = Lumi * (1.0/NGenEvents) * (61526.7);  // [pb]
 
   // 5f Inclusive
-  else if(filename.Contains("tW"))             NormWeight = Lumi * (1.0/NGenEvents) * (35.6);     // [pb]
-  else if(filename.Contains("tbarW"))          NormWeight = Lumi * (1.0/NGenEvents) * (35.6);     // [pb]
+  else if(filename.Contains("tW_Powheg"))      NormWeight = Lumi * (1.0/NGenEvents) * (35.6);     // [pb]
+  else if(filename.Contains("tbarW_Powheg"))   NormWeight = Lumi * (1.0/NGenEvents) * (35.6);     // [pb]
   // 4f Lepton Decay
   // else if(filename.Contains("t_tchannel"))     NormWeight = Lumi * (1.0/NGenEvents) * (44.33);    // [pb]
   // else if(filename.Contains("tbar_tchannel"))  NormWeight = Lumi * (1.0/NGenEvents) * (26.38);    // [pb]
   // 4f Inclusive
-  else if(filename.Contains("t_tchannel"))     NormWeight = Lumi * (1.0/NGenEvents) * (136.02);    // [pb]
-  else if(filename.Contains("tbar_tchannel"))  NormWeight = Lumi * (1.0/NGenEvents) * (80.95);    // [pb]
+  else if(filename.Contains("t_tchannel_Powheg"))     NormWeight = Lumi * (1.0/NGenEvents) * (136.02);    // [pb]
+  else if(filename.Contains("tbar_tchannel_Powheg"))  NormWeight = Lumi * (1.0/NGenEvents) * (80.95);    // [pb]
   // Inclusive
-  else if(filename.Contains("WW"))             NormWeight = Lumi * (1.0/NGenEvents) * (118.7);    // [pb]
-  else if(filename.Contains("WZ"))             NormWeight = Lumi * (1.0/NGenEvents) * (47.13);    // [pb]
-  else if(filename.Contains("ZZ"))             NormWeight = Lumi * (1.0/NGenEvents) * (16.52);    // [pb]
+  else if(filename.Contains("WW_Pythia"))             NormWeight = Lumi * (1.0/NGenEvents) * (118.7);    // [pb]
+  else if(filename.Contains("WZ_Pythia"))             NormWeight = Lumi * (1.0/NGenEvents) * (47.13);    // [pb]
+  else if(filename.Contains("ZZ_Pythia"))             NormWeight = Lumi * (1.0/NGenEvents) * (16.52);    // [pb]
 
-  else if(filename.Contains("ttW"))             NormWeight = Lumi * (1.0/NGenEvents) * (0.61);    // [pb]
-  else if(filename.Contains("ttZ"))             NormWeight = Lumi * (1.0/NGenEvents) * (0.78);    // [pb]
+  else if(filename.Contains("ttW_Madgraph"))             NormWeight = Lumi * (1.0/NGenEvents) * (0.61);    // [pb]
+  else if(filename.Contains("ttZ_Madgraph"))             NormWeight = Lumi * (1.0/NGenEvents) * (0.78);    // [pb]
   
   else if(filename.Contains("ttbar_LepJetsPowhegPythia"))  NormWeight = Lumi * (1.0/NGenEvents) * (363.1); // [pb] Xsec*Br(lep+Jets) = (831.76) * 2[(0.1086*3) * (0.67)] = 363.12 (356.4-> mtop = 173)
   else if(filename.Contains("ttbb_aMCatNLO"))              NormWeight = Lumi * (1.0/NGenEvents) * (13.93*1.3531);  // [pb] Xsec*Br(tt+bb) - From Higgs Group. 1.35 from norma. with PowhegPythia

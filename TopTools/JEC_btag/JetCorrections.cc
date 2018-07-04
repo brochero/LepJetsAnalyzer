@@ -21,7 +21,7 @@ void JERCorrection(JME::JetResolutionScaleFactor res_sf, JME::JetResolution reso
                                        });
     // Variation::NOMINAL = 0, Variation::UP = 1, Variation::DOWN = 2
     SF_JER = res_sf.getScaleFactor({{JME::Binning::JetEta, jet.Eta()}}, (Variation) nSystVar);
-      
+
     // Correct Jets and MET ONLY for jets with pT>20
     if ( jet.Pt() < 20.) continue ;
     
@@ -29,7 +29,7 @@ void JERCorrection(JME::JetResolutionScaleFactor res_sf, JME::JetResolution reso
     
     if (jet.Gen_DR < 0.2 && 
 	(jet.Pt() - jet.Gen_pT) < 3.*Res_JER*jet.Pt()) Jet_recogenMatch = true;
-    
+
     if (Jet_recogenMatch){
       JetVar = std::max(0.0 , 
 			(double)( jet.Pt() + (jet.Pt() - jet.Gen_pT)*(SF_JER-1) ) / jet.Pt() );      

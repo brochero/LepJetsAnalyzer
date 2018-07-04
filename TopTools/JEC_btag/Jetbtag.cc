@@ -34,6 +34,9 @@ float GetbtagSF(hbtag SF, ComJet jet){
     SFbtag = SF.LF[ipTLF_bin][ieta_bin]->GetBinContent(icsv_bin);
   }
   
+  // std::cout << "pT = " << jet.Pt() << " CSV = " << jet.CSV << std::endl;  
+  // std::cout << "fl = " << hadronFlavour << " SF = " << SFbtag << std::endl;  
+
   return SFbtag;
  
 }

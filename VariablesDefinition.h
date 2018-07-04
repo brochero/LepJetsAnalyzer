@@ -12,7 +12,7 @@ const unsigned int NhJets = 6;
 // Channel and cut names 
 TString namech     [Nhch + 1] = {"mujets","ejets","lepjets"};
 TString titlenamech[Nhch]     = {"#mu+Jets","e+Jets"};
-TString namecut    [Nhcuts]   = {"lepton","6Jets","2btag"};
+TString namecut    [Nhcuts]   = {"4Jets","6Jets","2btag"};
 // Acceptancies and Efficiencies
 int    AccEvent[Nhcuts][Nhch+1];
 double EffEvent[Nhcuts][Nhch+1];

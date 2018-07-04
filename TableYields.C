@@ -178,7 +178,7 @@ int main (int argc, char *argv[]){
   Samples.push_back(ZJets);
 
   Yields VV;
-  VV = loadhistoYields(cutname, "VV", fdir + fname, "VV", "DCSys");
+  VV = loadhistoYields(cutname, "VV", fdir + fname, "VV", "DC");
   Samples.push_back(VV);
 
   Yields QCD;
@@ -318,10 +318,6 @@ Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString 
   if      (SelCut=="lepton")    iSelCut = 0;
   else if (SelCut=="6Jets")     iSelCut = 1;
   else if (SelCut=="2btag")     iSelCut = 2;
-  else if (SelCut=="3btag")     iSelCut = 3;
-  else if (SelCut=="4Jets")     iSelCut = 4;
-  else if (SelCut=="4Jets2btag")iSelCut = 5;
-  else if (SelCut=="Only2btag") iSelCut = 6;
   else{
     std::cerr << "Invalid cut name!!!" << std::endl;
     std::exit(0); 
@@ -369,15 +365,14 @@ Yields loadhistoYields(TString SelCut, TString TName, TString HeadFile, TString 
   SysName.push_back("JESPileUpPtEC1");
   SysName.push_back("JESPileUpPtHF");
   SysName.push_back("PileUp");
-  //SysName.push_back("btagjes");
-  SysName.push_back("btaglf");
-  SysName.push_back("btaghf");
-  SysName.push_back("btaghfsI");
-  SysName.push_back("btaghfsII");
-  SysName.push_back("btaglfsI");
-  SysName.push_back("btaglfsII");
-  SysName.push_back("btagcfI");
-  SysName.push_back("btagcfII");
+  SysName.push_back("btag_HF");
+  SysName.push_back("btag_HFStats1");
+  SysName.push_back("btag_HFStats2");
+  SysName.push_back("btag_LF");
+  SysName.push_back("btag_LFStats1");
+  SysName.push_back("btag_LFStats2");
+  SysName.push_back("btag_cErr1");
+  SysName.push_back("btag_cErr2");
 
   TString SysNameVar[2] = {"Up","Down"};
 
@@ -586,15 +581,14 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   SysName.push_back("JESPileUpPtEC1");
   SysName.push_back("JESPileUpPtHF");
   SysName.push_back("PileUp");
-  //SysName.push_back("btagjes");
-  SysName.push_back("btaglf");
-  SysName.push_back("btaghf");
-  SysName.push_back("btaghfsI");
-  SysName.push_back("btaghfsII");
-  SysName.push_back("btaglfsI");
-  SysName.push_back("btaglfsII");
-  SysName.push_back("btagcfI");
-  SysName.push_back("btagcfII");
+  SysName.push_back("btag_HF");
+  SysName.push_back("btag_HFStats1");
+  SysName.push_back("btag_HFStats2");
+  SysName.push_back("btag_LF");
+  SysName.push_back("btag_LFStats1");
+  SysName.push_back("btag_LFStats2");
+  SysName.push_back("btag_cErr1");
+  SysName.push_back("btag_cErr2");
 
   std::vector<TString> SysThName;
   SysThName.push_back("ScaleRdF");
@@ -851,10 +845,10 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   fprintf(file,"JetScaleRel_Shape group    = JESRelativePtBB JESRelativeStatEC JESRelativeFSR JESRelativeJEREC2 JESRelativeJEREC1 JESRelativeStatFSR JESRelativePtEC2 JESRelativeStatHF JESRelativePtEC1 JESRelativeJERHF JESRelativeBal JESRelativePtHF \n");
   fprintf(file,"JetScalePU_Shape group     = JESPileUpPtRef JESPileUpPtBB JESPileUpDataMC JESPileUpPtHF JESPileUpPtEC1 \n");
   fprintf(file,"JetScaleOthers_Shape group = JESFragmentation JESFlavorQCD JESSinglePionECAL JESSinglePionHCAL JESTimePtEta \n\n");
-  fprintf(file,"btag_Shape   group = btaghf btaghfsI btaghfsII btaglfsI btaglfsII btagcfII btagcfI btaglf \n");
-  fprintf(file,"btagLF_Shape group = btaglfsI btaglfsII btaglf \n");
-  fprintf(file,"btagHF_Shape group = btaghf btaghfsI btaghfsII \n");
-  fprintf(file,"btagCF_Shape group = btagcfII btagcfI \n\n");
+  fprintf(file,"btag_Shape   group = btag_HF btag_HFStats1 btag_HFStats2 btag_LF btag_LFStats1 btag_LFStats2 btag_cErr1 btag_cErr2 \n");
+  fprintf(file,"btagLF_Shape group = btag_LF btag_LFStats1 btag_LFStats2 \n");
+  fprintf(file,"btagHF_Shape group = btag_HF btag_HFStats1 btag_HFStats2 \n");
+  fprintf(file,"btagCF_Shape group = btagcErr1 btag_cErr2 \n\n");
   fprintf(file,"Other_Shape  group = PileUp Lumin\n");
 
   if(DCNorm){

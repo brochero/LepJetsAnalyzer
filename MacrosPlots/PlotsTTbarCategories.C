@@ -322,6 +322,10 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
   histoname.push_back("hKinAdd2CSV");
   histoname.push_back("hGenTagAdd1CSV");
   histoname.push_back("hGenTagAdd2CSV");
+  histoname.push_back("hGenTagAddDR");
+  histoname.push_back("hGenTagAddMass");
+  histoname.push_back("hKinTagAddDR");
+  histoname.push_back("hKinTagAddMass");
 
   for(unsigned int h=0; h<histoname.size(); h++){
     for(unsigned int ch=0; ch<2; ch++) histofile.hist[ch] = (TH1D*)file->Get("central/" + plots + "/" + channel[ch] + "/" +  histoname[h] + "_" + channel[ch] + "_" + plots);

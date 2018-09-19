@@ -28,7 +28,6 @@ void display_usage()
   std::cout << "    -o name in the output file \"h_\"" << std::endl;
   std::cout << "    -n number of events" << std::endl;
   std::cout << "    -s create a file with the systematic uncertainty yields: \"variation name\"" << std::endl;
-  // std::cout << "    -JES create a file with the JEX systematic uncertainty yields: \"variation name\"" << std::endl;
   std::cout << "    -cat ttbar categorization" << std::endl;
   std::cout << "    -d Input file directory. Default directory: InputTrees" << std::endl;
   std::cout << "    -h                 displays this help message and exits " << std::endl;
@@ -172,35 +171,30 @@ int main(int argc, const char* argv[]){
   theTree.SetBranchAddress( "jet_partonFlavour", &Jet_partonFlavour );
   theTree.SetBranchAddress( "jet_hadronFlavour", &Jet_hadronFlavour );
   theTree.SetBranchAddress( "jet_CSV",           &Jet_CSV );
-  // std::vector<float> *Jet_SF_CSV=0;
-  // theTree.SetBranchAddress( "jet_SF_CSVcsv",        &Jet_SF_CSV );
   
   if(!fname.Contains("DataSingle")){
     theTree.SetBranchAddress( "jet_JESCom_Up",  &Jet_JESCom_Up );  
     theTree.SetBranchAddress( "jet_JESCom_Down",&Jet_JESCom_Down );  
     // Rho for JER
-    theTree.SetBranchAddress( "jet_JER_Up",     &Jet_JER_Up );
-    theTree.SetBranchAddress( "jet_JER_Nom",    &Jet_JER_Nom );
-    theTree.SetBranchAddress( "jet_JER_Down",   &Jet_JER_Down );
+    theTree.SetBranchAddress("rho",        &Rho);
+    // GEN-Match
+    theTree.SetBranchAddress("jet_MatchedGenJetIndex",&Jet_GENmatched);
+    // Jets at GENERATION level
+    theTree.SetBranchAddress("genjet_pT",  &GenJet_pT);
+    theTree.SetBranchAddress("genjet_eta", &GenJet_eta);
+    theTree.SetBranchAddress("genjet_phi", &GenJet_phi);
+    theTree.SetBranchAddress("genjet_E",   &GenJet_E);
   }
   
-  if(fname.Contains("ttbar") && !fname.Contains("Bkg")){
-    
+  if(fname.Contains("ttbar") && !fname.Contains("Bkg")){    
     // PDF Uncertainty
     theTree.SetBranchAddress("pdfweight",   &PDFWeight);
     // hdamp Uncertainty
     theTree.SetBranchAddress("hdampweight", &hdampWeight);
     // Scale Uncertainties
     theTree.SetBranchAddress("scaleweight", &ScaleWeight );
-    theTree.SetBranchAddress("rho",         &Rho);
     // Jet Origin
     theTree.SetBranchAddress("jet_gencone_mom",       &Jet_Mom);
-    theTree.SetBranchAddress("jet_MatchedGenJetIndex",&Jet_GENmatched);
-    
-    theTree.SetBranchAddress("genjet_pT",             &GenJet_pT);
-    theTree.SetBranchAddress("genjet_eta",            &GenJet_eta);
-    theTree.SetBranchAddress("genjet_phi",            &GenJet_phi);
-    theTree.SetBranchAddress("genjet_E",              &GenJet_E);
   }
   
   // Kinematic Reconstruction Variables
@@ -270,8 +264,7 @@ int main(int argc, const char* argv[]){
       hSFTrigger[j][i]      = new TH1D("hSFTrigger_"     +namech[i]+"_"+namecut[j]+syst_varname, "SF^{Trigger} "           +titlenamech[i],80,0.8,1.2);    
       hSFTriggerError[j][i] = new TH1D("hSFTriggerError_"+namech[i]+"_"+namecut[j]+syst_varname, "#Delta SF^{Trigger} "    +titlenamech[i],20,0,0.02);
       // SF(b-tag)
-      hSFbtag_Global[j][i]  = new TH1D("hSFbtag_Global_"+namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag} " + titlenamech[i] + ";SF_{b-tag}",40,0.0,4.0);
-
+      hSFbtag_Global[j][i]  = new TH1D("hSFbtag_Global_"+namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag} " + titlenamech[i] + ";SF_{b-tag}",50,0.5,1.5);
       pSFCSVVsCSV[j][i]     = new TProfile("pSFCSVVsCSV_"   +namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag}"           +titlenamech[i]+";CSV;SF_{b-tag}",20,0.0,1.0,0.0,2.0);
       pSFCSVVsCSVAdd[j][i]  = new TProfile("pSFCSVVsCSVAdd_"+namech[i]+"_"+namecut[j]+syst_varname, "Global SF_{b-tag} Add. Jets "+titlenamech[i]+";CSV;SF_{b-tag}",20,0.0,1.0,0.0,2.0);
       // Lepton Variables
@@ -449,7 +442,7 @@ int main(int argc, const char* argv[]){
   JME::JetResolutionScaleFactor res_sf = JME::JetResolutionScaleFactor((std::string)JetResSFPath);
   // b-tag
   // New WP for 80X: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
-  // float CSV_WP = 0.8484; // Medium Moriond-17
+  //float CSV_WP = 0.8484; // Medium Moriond-17
   float CSV_WP = 0.9535; // Tight Moriond-17
 
   btagCollection SF_btag;
@@ -612,27 +605,27 @@ int main(int argc, const char* argv[]){
       jet.KinMom   = -1;
       jet.GenIndex = -1;
       jet.Gen_pT   = -1;
-      jet.Gen_DR   = -1;
+      jet.Gen_DR   = 999;
       jet.pTIndex  = (*Jet_pTIndex)[ijet];
       if(sysJES){
 	if     (nJESVar ==var::Up)   jet.JES = 1.0 + std::abs((*Jet_JESCom_Up)  [ijet][nJES]);
 	else if(nJESVar ==var::Down) jet.JES = 1.0 - std::abs((*Jet_JESCom_Down)[ijet][nJES]);
       }
-      if((fname.Contains("ttbar")  && !fname.Contains("Bkg"))){
-	jet.Mom      = (*Jet_Mom)[ijet];
+      if (!fname.Contains("DataSingle")){
 	jet.GenIndex = (*Jet_GENmatched)[ijet];
-	if(jet.GenIndex == -999){
-	  jet.Gen_pT = 0.0;
-	  jet.Gen_DR = 0.0;
-	}
-	else{
+	
+	if(jet.GenIndex != -999){
 	  TLorentzVector GenJet;
 	  GenJet.SetPtEtaPhiE((*GenJet_pT)[jet.GenIndex],(*GenJet_eta)[jet.GenIndex],(*GenJet_phi)[jet.GenIndex],(*GenJet_E)[jet.GenIndex] );
 	  jet.Gen_pT   = (*GenJet_pT) [jet.GenIndex];	
 	  jet.Gen_DR   = jet.DeltaR(GenJet);	
 	}
-      }// if(ttbar)
+      } // if (!fname.Contains("DataSingle"))
+
+      if((fname.Contains("ttbar")  && !fname.Contains("Bkg")))
+	jet.Mom      = (*Jet_Mom)[ijet];
       
+
       // Kin Mother (All events)
       // [0] b from hadronic leg 
       // [1] j from W
@@ -711,13 +704,13 @@ int main(int argc, const char* argv[]){
 	float SFSystUnc;
 	if(syst_varname.Contains("IDLepSF")){
 	  SFSystUnc = sqrt(pow(SF_ID_ISO_Tr[3]*0.01,2) + pow(SF_ID_ISO_Tr[4],2)); //Additional 1%
-	  if(syst_varname.Contains("Up"))   PUWeight = PUWeight * (SF_ID_ISO_Tr[3] + SFSystUnc);
-	  if(syst_varname.Contains("Down")) PUWeight = PUWeight * (SF_ID_ISO_Tr[3] - SFSystUnc);
+	  if(syst_varname.Contains("Up"))   PUWeight = PUWeight * (SF_ID_ISO_Tr[3] + SFSystUnc) * (SF_ID_ISO_Tr[5]);
+	  if(syst_varname.Contains("Down")) PUWeight = PUWeight * (SF_ID_ISO_Tr[3] - SFSystUnc) * (SF_ID_ISO_Tr[5]);
 	}
 	else if(syst_varname.Contains("TrLepSF")){
-	  SFSystUnc = sqrt(pow(SF_ID_ISO_Tr[5]*0.01,2) + pow(SF_ID_ISO_Tr[6],2)); //Additional 1%
-	  if(syst_varname.Contains("Up"))   PUWeight = PUWeight * (SF_ID_ISO_Tr[5] + SFSystUnc);
-	  if(syst_varname.Contains("Down")) PUWeight = PUWeight * (SF_ID_ISO_Tr[5] - SFSystUnc);
+	  SFSystUnc = SF_ID_ISO_Tr[6];
+	  if(syst_varname.Contains("Up"))   PUWeight = PUWeight * (SF_ID_ISO_Tr[3]) * (SF_ID_ISO_Tr[5] + SFSystUnc);
+	  if(syst_varname.Contains("Down")) PUWeight = PUWeight * (SF_ID_ISO_Tr[3]) * (SF_ID_ISO_Tr[5] - SFSystUnc);
 	}
       }
       
@@ -733,7 +726,7 @@ int main(int argc, const char* argv[]){
     bool JumpCutEvent[Nhcuts];
     for(unsigned int bcut=0; bcut<Nhcuts; bcut++) JumpCutEvent[bcut] = true;
 
-    JumpCutEvent[0] = false;                                // Single Lepton (from Tree)
+    if(NJets > 3)                   JumpCutEvent[0]= false; // lep + 4 Jets // Control Region 
     if(NJets > 5)                   JumpCutEvent[1]= false; // lep + 6 Jets 
     if(NJets > 5 && NBtagJets > 1)  JumpCutEvent[2]= false; // lep + 6 Jets + 2 b-tag
 
@@ -751,7 +744,7 @@ int main(int argc, const char* argv[]){
           Loop over cuts
     ***************************/
     for(int icut = 0; icut < Nhcuts; icut++){
-      
+
       if(JumpCutEvent[icut]) continue;
       
       /******************
@@ -794,7 +787,7 @@ int main(int argc, const char* argv[]){
       hNBtagJets[icut][Channel]->Fill(NBtagJets,PUWeight);
       // Global btag SF
       hSFbtag_Global[icut][Channel]->Fill(SFevt_btag, PUWeight);
-
+ 
       // Jet Variables
       bool fKinAddjj = true;
       for(int ijet=0; ijet < Jets.size(); ijet++){

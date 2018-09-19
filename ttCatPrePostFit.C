@@ -67,13 +67,13 @@ TH1D *HistoRatio (TH1D *hisNum, TH1D *hisDen){
   Ratio->SetLineWidth(1);
   Ratio->SetTitle("");
   
-  Ratio->GetYaxis()->SetTitle("Obs/Exp");
+  Ratio->GetYaxis()->SetTitle("Pre/Post(fit)");
   Ratio->GetYaxis()->CenterTitle();
-  Ratio->GetYaxis()->SetTitleOffset(0.15);
-  Ratio->GetYaxis()->SetTitleSize(0.16);
-  Ratio->GetYaxis()->SetLabelSize(0.15);
+  Ratio->GetYaxis()->SetTitleOffset(0.5);
+  Ratio->GetYaxis()->SetTitleSize(0.10);
+  Ratio->GetYaxis()->SetLabelSize(0.10);
   Ratio->GetYaxis()->SetNdivisions(402);
-  Ratio->GetXaxis()->SetTitle("CSV bin"); 
+  Ratio->GetXaxis()->SetTitle("CSVv2"); 
   Ratio->GetXaxis()->SetNdivisions(509); //(402)
   Ratio->GetXaxis()->SetTitleOffset(1.1);
   Ratio->GetXaxis()->SetLabelSize(0.20);
@@ -87,7 +87,7 @@ TH1D *HistoRatio (TH1D *hisNum, TH1D *hisDen){
 }
 
 
-void ttCatPrePostFit(TString InpDir = "FitResults_DataCardThSysRateEffVisPhSp_hSF-Full-v0_Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1_2btag", TString FitDir = "OBSERVED"){
+void ttCatPrePostFit(TString InpDir = "FitResults_DataCardFixbtagSysVisPhSp_hSF-PreApp-v0_Tree_LepJets_NewJEC-OldKinFit_v8-0-6_Spring16-80X_36814pb-1_2btag", TString FitDir = "OBSERVED"){
 
   TString PlotsFileName;
   if(FitDir == "OBSERVED") PlotsFileName = "obs";
@@ -196,12 +196,18 @@ void ttCatPrePostFit(TString InpDir = "FitResults_DataCardThSysRateEffVisPhSp_hS
 
       // prefit
       RecoverCSVHisto (hInput[ich][0].at(ih), GlobalCSVJet[ih][0][0], GlobalCSVJet[ih][1][0]);
+      GlobalCSVJet[ih][0][0]->SetLineStyle(8);
+      GlobalCSVJet[ih][1][0]->SetLineStyle(8);
+      GlobalCSVJet[ih][0][0]->SetLineWidth(2);
+      GlobalCSVJet[ih][1][0]->SetLineWidth(2);
       GlobalCSVJet[ih][0][0]->SetLineColor(2);
       GlobalCSVJet[ih][1][0]->SetLineColor(2);
       // postfit
       RecoverCSVHisto (hInput[ich][1].at(ih), GlobalCSVJet[ih][0][1], GlobalCSVJet[ih][1][1]);
-      GlobalCSVJet[ih][0][1]->SetLineColor(4);
-      GlobalCSVJet[ih][1][1]->SetLineColor(4);
+      GlobalCSVJet[ih][0][1]->SetLineWidth(2);
+      GlobalCSVJet[ih][1][1]->SetLineWidth(2);
+      GlobalCSVJet[ih][0][1]->SetLineColor(kGreen-2);
+      GlobalCSVJet[ih][1][1]->SetLineColor(kGreen-2);
       
       if (ih == 0){
 	GlobalCSVJet[12][0][0] = (TH1D *) GlobalCSVJet[ih][0][0]->Clone("PreJet1ttjj");
@@ -237,7 +243,7 @@ void ttCatPrePostFit(TString InpDir = "FitResults_DataCardThSysRateEffVisPhSp_hS
     titlePr->Draw("SAME");
     
     TLatex *title;
-    title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 36.8 fb^{-1}");
+    title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 35.9 fb^{-1}");
     title->SetNDC();
     title->SetTextAlign(12);
     title->SetX(0.20);
@@ -305,14 +311,14 @@ void ttCatPrePostFit(TString InpDir = "FitResults_DataCardThSysRateEffVisPhSp_hS
     padI[3]->SetRightMargin(0.04);
 
     int icat = 0;  // ttbb   
-    //int icat = 12; // ttjj   
+    //icat = 12; // ttjj   
 
     TH1D *hstyleI = new TH1D ("hstyleI","",
 			      GlobalCSVJet[icat][0][0]->GetNbinsX(),
 			      GlobalCSVJet[icat][0][0]->GetBinLowEdge (1),
 			      GlobalCSVJet[icat][0][0]->GetBinLowEdge (GlobalCSVJet[0][0][1]->GetNbinsX()+1));
     
-    hstyleI -> GetYaxis()->SetTitleOffset(0.6);
+    hstyleI -> GetYaxis()->SetTitleOffset(1.);
     hstyleI -> GetYaxis()->SetTitleSize(0.05);
     hstyleI -> GetYaxis()->SetLabelSize(0.05);
     hstyleI -> GetYaxis()->SetTitle("Events"); 
@@ -334,12 +340,12 @@ void ttCatPrePostFit(TString InpDir = "FitResults_DataCardThSysRateEffVisPhSp_hS
     TH1D *RatioFullJet1 = HistoRatio (GlobalCSVJet[icat][0][0], GlobalCSVJet[icat][0][1]);
 
     TLegend *legI;
-    legI = new TLegend(0.70,0.64,0.93,0.87);
+    legI = new TLegend(0.70,0.64,0.88,0.87);
     legI->SetFillColor(0);
     legI->SetLineColor(0);
     legI->SetLineWidth(0.0);
     legI->SetTextFont(62);
-    legI->SetTextSize(0.03);
+    legI->SetTextSize(0.05);
   
     if (icat == 0 ) legI->AddEntry((TObject*)0,"t#bar{t}+bb","");
     else legI->AddEntry((TObject*)0,"t#bar{t}+jj","");
@@ -350,6 +356,7 @@ void ttCatPrePostFit(TString InpDir = "FitResults_DataCardThSysRateEffVisPhSp_hS
 
     padI[1]->cd();
     RatioFullJet1 ->GetYaxis()->SetTitleOffset(0.25);
+    RatioFullJet1 ->SetLineStyle(1);
     RatioFullJet1 ->Draw("HIST");
 
     padI[2]->cd();
@@ -373,6 +380,7 @@ void ttCatPrePostFit(TString InpDir = "FitResults_DataCardThSysRateEffVisPhSp_hS
 
     padI[3]->cd();
     RatioFullJet2 ->GetYaxis()->SetTitleOffset(0.25);
+    RatioFullJet2 ->SetLineStyle(1);
     RatioFullJet2 ->Draw("HIST");
 
     if(icat == 0){

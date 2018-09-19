@@ -613,7 +613,7 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   fprintf(file,"----------------------------------------------------------\n\n"); 
   fprintf(file,"imax \t 1 # Number of channels\n"); 
   fprintf(file,"jmax \t %i # Number of contribution - 1 \n", (nDCSam-1)); 
-  int ValSysName = SysName.size() + 3 + SysThName.size(); // 2 from Xsec + Lumin 
+  int ValSysName = SysName.size() + 7 + 1 + 5 + SysThName.size(); // 2 from Xsec + Lumin + 5 Stat 
   if(DCNorm) fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", ValSysName); 
   else fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", ValSysName); 
   fprintf(file,"----------------------------------------------------------\n\n"); 
@@ -809,12 +809,27 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
     fprintf(file,"\n");
   } // for(nsys)
 
+  // Statistical Uncertainties
+  std::vector<TString> StatName = {"ttbb","ttbj","ttcc","ttLF","tt"};
+  for (int nstat = 0; nstat < StatName.size(); nstat++){
+    fprintf(file,"%s \t ShapeN2 ", (StatName.at(nstat)+"Stat").Data());
+    for(int ns = 0; ns < Samples.size(); ns++){
+      Yields samEntry = Samples.at(ns);
+      if(samEntry.InDataCard.Contains("DC")){
+	if(samEntry.SamComName.EndsWith(StatName.at(nstat))) fprintf(file,"\t 1.0 ");
+	else fprintf(file,"\t - ");
+      }
+    } // for(ns)
+    fprintf(file,"\n");
+  } // for(nsys)
+  
+  
   // Background: Cross Section Uncertainty
   // -- QCD (50%)
   fprintf(file,"XSqcd \t lnN ");
   for(int ns = 0; ns < Samples.size(); ns++){ 
     if(Samples.at(ns).InDataCard.Contains("DC") &&
-       Samples.at(ns).SamComName == "QCD") fprintf(file,"\t 0.001/1.5 ");      
+       Samples.at(ns).SamComName == "QCD") fprintf(file,"\t 0.001/1.50 ");      
     else if (Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t - ");
   } 
  fprintf(file,"\n");
@@ -822,7 +837,47 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   fprintf(file,"XSwjets \t lnN ");
   for(int ns = 0; ns < Samples.size(); ns++){ 
     if(Samples.at(ns).InDataCard.Contains("DC") &&
-       Samples.at(ns).SamComName == "WJets_aMCatNLO") fprintf(file,"\t 1.1 ");      
+       Samples.at(ns).SamComName == "WJets_aMCatNLO") fprintf(file,"\t 1.10 ");      
+    else if (Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t - ");
+  } 
+ fprintf(file,"\n");
+  // -- Z+Jets (10%)
+  fprintf(file,"XSzjets \t lnN ");
+  for(int ns = 0; ns < Samples.size(); ns++){ 
+    if(Samples.at(ns).InDataCard.Contains("DC") &&
+       Samples.at(ns).SamComName == "ZJets_aMCatNLO") fprintf(file,"\t 1.10 ");      
+    else if (Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t - ");
+  } 
+ fprintf(file,"\n");
+  // -- Single Top (15%)
+  fprintf(file,"XSst \t lnN ");
+  for(int ns = 0; ns < Samples.size(); ns++){ 
+    if(Samples.at(ns).InDataCard.Contains("DC") &&
+       Samples.at(ns).SamComName == "SingleTop") fprintf(file,"\t 1.15 ");      
+    else if (Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t - ");
+  } 
+ fprintf(file,"\n");
+  // -- VV (10%)
+  fprintf(file,"XSvv \t lnN ");
+  for(int ns = 0; ns < Samples.size(); ns++){ 
+    if(Samples.at(ns).InDataCard.Contains("DC") &&
+       Samples.at(ns).SamComName == "VV") fprintf(file,"\t 1.10 ");      
+    else if (Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t - ");
+  } 
+ fprintf(file,"\n");
+  // -- ttV (20%)
+  fprintf(file,"XSttv \t lnN ");
+  for(int ns = 0; ns < Samples.size(); ns++){ 
+    if(Samples.at(ns).InDataCard.Contains("DC") &&
+       Samples.at(ns).SamComName == "ttV_Madgraph") fprintf(file,"\t 1.2 ");      
+    else if (Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t - ");
+  } 
+ fprintf(file,"\n");
+  // -- ttH (60%)
+  fprintf(file,"XStth \t lnN ");
+  for(int ns = 0; ns < Samples.size(); ns++){ 
+    if(Samples.at(ns).InDataCard.Contains("DC") &&
+       Samples.at(ns).SamComName == "ttHbb_PowhegPythia") fprintf(file,"\t 1.6 ");      
     else if (Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t - ");
   } 
   fprintf(file,"\n");
@@ -832,12 +887,13 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   for(int ns = 0; ns < Samples.size(); ns++){ 
     if(Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t 1.026 ");      
   } 
- fprintf(file,"\n");
+  fprintf(file,"\n");
   
   fprintf(file,"----------------------------------------------------------\n\n");
 
   fprintf(file,"Theory group = ScaleRdF ISR FSR UE hdamp \n");
-  fprintf(file,"XSBkg  group = XSqcd XSwjets \n");
+  fprintf(file,"Stat group = ttbbStat ttbjStat ttccStat ttLFStat ttStat \n");
+  fprintf(file,"XSBkg  group = XSqcd XSwjets XSst XSzjets XSvv XSttv XStth \n");
   fprintf(file,"Lepton_Shape group = LES IDLepSF TrLepSF \n");
   fprintf(file,"Jet_Shape group = JER \n\n");
   fprintf(file,"JetScale_Shape group = JESAbsoluteStat JESAbsoluteScale JESAbsoluteMPFBias JESFragmentation JESSinglePionECAL JESSinglePionHCAL JESFlavorQCD JESTimePtEta JESRelativeJEREC1 JESRelativeJEREC2 JESRelativeJERHF JESRelativePtBB JESRelativePtEC1 JESRelativePtEC2 JESRelativePtHF JESRelativeBal JESRelativeFSR JESRelativeStatFSR JESRelativeStatEC JESRelativeStatHF JESPileUpDataMC JESPileUpPtRef JESPileUpPtBB JESPileUpPtEC1 JESPileUpPtHF \n");
@@ -848,8 +904,19 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   fprintf(file,"btag_Shape   group = btag_HF btag_HFStats1 btag_HFStats2 btag_LF btag_LFStats1 btag_LFStats2 btag_cErr1 btag_cErr2 \n");
   fprintf(file,"btagLF_Shape group = btag_LF btag_LFStats1 btag_LFStats2 \n");
   fprintf(file,"btagHF_Shape group = btag_HF btag_HFStats1 btag_HFStats2 \n");
-  fprintf(file,"btagCF_Shape group = btagcErr1 btag_cErr2 \n\n");
+  fprintf(file,"btagCF_Shape group = btag_cErr1 btag_cErr2 \n\n");
   fprintf(file,"Other_Shape  group = PileUp Lumin\n");
+
+  fprintf(file,"\n");
+  fprintf(file,"----------------------------------------------------------\n\n");
+  
+  // New lines to change names for lepton uncertainties (descorrelate them)
+  for (int nsys = 0; nsys < SysName.size(); nsys++){
+    if(SysName.at(nsys) == "LES" ||
+       SysName.at(nsys) == "IDLepSF" ||
+       SysName.at(nsys) == "TrLepSF")
+      fprintf(file,"nuisance edit rename * %s %s %s \n", ljchannel.Data(), SysName.at(nsys).Data(), (SysName.at(nsys)+"_"+ljchannel).Data());
+  } // for(nsys)
 
   if(DCNorm){
     // fprintf(file,"Theory_Rate group = ISR_Rate FSR_Rate UE_Rate \n");

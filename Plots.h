@@ -30,6 +30,7 @@
 typedef struct histos{
   TH1D     *hist[3]; 
   THStack  *mc[3];
+  TString units;
 } histos;
 
 
@@ -46,5 +47,10 @@ void overwritehistograms (std::vector<histos> newhistos, TString plots, TString 
 /***********************
  Files and Directories
 ************************/
-TString dirnameIn= "TopResults/Full-v0/";
-TString fl  = "hSF-Full-v0_Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1";
+TString dirnameIn= "TopResults/PreApp-v0/";
+TString fl  = "hSF-PreApp-v0_Tree_LepJets_NewJEC-OldKinFit_v8-0-6_Spring16-80X_36814pb-1";
+
+// Only for Lepton+Jets Cut
+/* TString dirnameIn= "TopResults/Control-v0/"; */
+/* TString fl  = "hSF-Control-v0_Tree_LepJets_NoSkim_v8-0-6_Spring16-80X_36814pb-1"; */
+

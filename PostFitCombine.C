@@ -69,15 +69,20 @@ TH1D *HistoRatio (TH1D *hisNum, TH1D *hisDen){
   
   Ratio->GetYaxis()->SetTitle("Obs/Exp");
   Ratio->GetYaxis()->CenterTitle();
-  Ratio->GetYaxis()->SetTitleOffset(0.15);
-  Ratio->GetYaxis()->SetTitleSize(0.16);
-  Ratio->GetYaxis()->SetLabelSize(0.15);
+  Ratio->GetYaxis()->SetTitleFont(42);
+  Ratio->GetYaxis()->SetTitleSize(0.135);
+  Ratio->GetYaxis()->SetTitleOffset(0.28);
+  Ratio->GetYaxis()->SetLabelFont(42);
+  Ratio->GetYaxis()->SetLabelSize(0.115);
   Ratio->GetYaxis()->SetNdivisions(402);
-  Ratio->GetXaxis()->SetTitle("CSV bin"); 
+  
+  Ratio->GetXaxis()->SetTitle("CSVv2 bin"); 
   Ratio->GetXaxis()->SetNdivisions(509); //(402)
   Ratio->GetXaxis()->SetTitleOffset(1.1);
-  Ratio->GetXaxis()->SetLabelSize(0.20);
+  Ratio->GetXaxis()->SetTitleFont(42);
   Ratio->GetXaxis()->SetTitleSize(0.16);
+  Ratio->GetXaxis()->SetTitleFont(42);
+  Ratio->GetXaxis()->SetLabelSize(0.14);
   
   Ratio->SetMinimum(0.4);
   Ratio->SetMaximum(1.6);
@@ -87,7 +92,7 @@ TH1D *HistoRatio (TH1D *hisNum, TH1D *hisDen){
 }
 
 
-void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCardFullThVisPhSp_hSF-Full-v0_Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1_2btag", TString FitDir = "OBSERVED"){
+void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCardFixbtagSysVisPhSp_hSF-PreApp-v0_Tree_LepJets_NewJEC-OldKinFit_v8-0-6_Spring16-80X_36814pb-1_2btag", TString FitDir = "OBSERVED"){
 
   TString PlotsFileName;
   if(FitDir == "OBSERVED") PlotsFileName = "obs";
@@ -286,10 +291,13 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
 			     hData[ich]->GetBinLowEdge (hData[ich]->GetNbinsX()+1));
     
     hstyle -> SetMaximum(1.1*hInput[ich].at(12)->GetMaximum());
-    hstyle -> GetYaxis()->SetTitleOffset(0.6);
+    hstyle -> GetYaxis()->SetTitleFont(42);
+    hstyle -> GetYaxis()->SetTitleOffset(0.7);
     hstyle -> GetYaxis()->SetTitleSize(0.05);
-    hstyle -> GetYaxis()->SetLabelSize(0.05);
-    hstyle -> GetYaxis()->SetTitle("Events"); 
+    hstyle -> GetYaxis()->SetLabelFont(42);
+    hstyle -> GetYaxis()->SetLabelSize(0.045);
+    hstyle -> GetYaxis()->SetNdivisions(607);
+    hstyle -> GetYaxis()->SetTitle("Events / unit"); 
     
     
     hData[ich] -> SetMarkerStyle(20); 
@@ -360,7 +368,7 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
 		       0.40,  // y_o
 		       0.94,  // x_f
 		       0.87}; // y_f
-    
+ 
     leg = new TLegend(legPos[0],legPos[1],legPos[2],legPos[3]);
     leg->SetFillColor(0);
     leg->SetLineColor(0);
@@ -387,34 +395,34 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
     leg->Draw("SAME");
     
     TLatex *titlePr;      
-    titlePr  = new TLatex(-20.,50.,"Preliminary");
+    titlePr  = new TLatex(-20.,50.,"35.9 fb^{-1} (13TeV)");
     titlePr->SetNDC();
     titlePr->SetTextAlign(12);
-    titlePr->SetX(0.25);
-    titlePr->SetY(0.93);
-    titlePr->SetTextColor(2);
+    titlePr->SetX(0.78);
+    titlePr->SetY(0.935);
     titlePr->SetTextFont(42);
     titlePr->SetTextSize(0.05);
     titlePr->SetTextSizePixels(24);
     titlePr->Draw("SAME");
     
     TLatex *title;
-    title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 36.8 fb^{-1}");
+    //title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 35.9 fb^{-1}");
+    title  = new TLatex(-20.,50.,"CMS");
     title->SetNDC();
     title->SetTextAlign(12);
-    title->SetX(0.20);
-    title->SetY(0.83);
-    title->SetTextFont(42);
-    title->SetTextSize(0.05);
+    title->SetX(0.13);
+    title->SetY(0.84);
+    title->SetTextFont(61);
+    title->SetTextSize(0.06);
     title->SetTextSizePixels(24);
     title->Draw("SAME");
   
     TLatex *chtitle;
-    chtitle  = new TLatex(-20.,50.,titlechname[ich]+" channel");
+    chtitle  = new TLatex(-20.,50.,titlechname[ich]+"");
     chtitle->SetNDC();
     chtitle->SetTextAlign(12);
-    chtitle->SetX(0.20);
-    chtitle->SetY(0.75);
+    chtitle->SetX(0.14);
+    chtitle->SetY(0.74);
     chtitle->SetTextFont(42);
     chtitle->SetTextSize(0.05);
     chtitle->SetTextSizePixels(24);
@@ -424,8 +432,8 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
     pad[2]->cd()->SetLogy();
     
     TH1D *hstyleLog = (TH1D *)hstyle->Clone();
-    hstyleLog -> SetMaximum(5.0*hInput[ich].at(12)->GetMaximum());
-    hstyleLog -> SetMinimum(1);
+    hstyleLog -> SetMaximum(10.0*hInput[ich].at(12)->GetMaximum());
+    hstyleLog -> SetMinimum(0.8);
     hstyleLog -> Draw();
     
     AllMC[ich] -> Draw("HISTSAME"); 
@@ -488,13 +496,13 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
     chtitle->Draw("SAME");
 
     TLegend *legLog;
-    legLog = new TLegend(0.65,0.60,0.99,0.99);
+    legLog = new TLegend(0.70,0.60,0.94,0.87);
     legLog->SetFillColor(0);
     legLog->SetLineColor(0);
     legLog->SetLineWidth(0.0);
     legLog->SetTextFont(62);
     legLog->SetTextSize(0.03);
-    legLog->SetNColumns(3);
+    legLog->SetNColumns(2);
   
     legLog->AddEntry(hData[ich],         "Data","PL");
     legLog->AddEntry(hInput[ich].at(11), "Z+Jets","F");
@@ -562,8 +570,9 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
 	pad_reg[0]->SetLogy();
 	TH1D *hstyle_reg = (TH1D*)AllMC_reg[ich][ireg]->GetHistogram(); 
 	hstyle_reg -> Reset();
-	hstyle_reg -> SetMaximum(5.0*hData_reg[ich][ireg]->GetMaximum());
-	hstyle_reg -> GetYaxis()->SetTitleOffset(0.8);
+	hstyle_reg -> SetMaximum(10.0*hData_reg[ich][ireg]->GetMaximum());
+	hstyle_reg -> SetMinimum(0.7);
+	hstyle_reg -> GetYaxis()->SetTitleOffset(0.9);
 	hstyle_reg -> GetYaxis()->SetTitleSize(0.05);
 	hstyle_reg -> GetYaxis()->SetLabelSize(0.05);
 	hstyle_reg -> GetYaxis()->SetTitle("Events"); 
@@ -645,7 +654,7 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
 			      GlobalCSVJet_Data[1]->GetBinLowEdge (GlobalCSVJet_Data[1]->GetNbinsX()+1));
     
     hstyleI -> SetMaximum(1.1*GlobalCSVJet_Data[1]->GetMaximum());
-    hstyleI -> GetYaxis()->SetTitleOffset(0.6);
+    hstyleI -> GetYaxis()->SetTitleOffset(0.8);
     hstyleI -> GetYaxis()->SetTitleSize(0.05);
     hstyleI -> GetYaxis()->SetLabelSize(0.05);
     hstyleI -> GetYaxis()->SetTitle("Events"); 
@@ -660,7 +669,7 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
     padI[0]->cd()->SetLogy();
     
     hstyleI -> SetMaximum(100.0*GlobalCSVJet_Data[0]->GetMaximum());
-    hstyleI -> SetMinimum(0.1);
+    hstyleI -> SetMinimum(0.7);
     hstyleI -> Draw();
 
     AllMC_CSV1[ich] -> Draw("HISTSAME");
@@ -709,16 +718,17 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
 
     padI[1]->cd();
     RatioFullJet1 ->GetYaxis()->SetTitleOffset(0.25);
+    RatioFullJet1 ->GetXaxis()->SetTitle("CSVv2");
     RatioFullJet1 ->Draw("HIST");
     gRatioFullJet1->Draw("e2");
     RatioFullJet1 ->Draw("HISTSAME");
 
     padI[2]->cd();
     padI[2]->cd()->SetLogy();
-    
+    // No Log
     TH1D *hstyleII = (TH1D *)hstyleI -> Clone("StyleII"); 
     hstyleII -> SetMaximum(100.0*GlobalCSVJet_Data[1]->GetMaximum());
-    hstyleII -> SetMinimum(0.1);
+    hstyleII -> SetMinimum(0.7);
 
     hstyleII -> Draw();
     AllMC_CSV2[ich] -> Draw("HISTSAME");
@@ -743,6 +753,7 @@ void PostFitCombine(TString Plots = "fit_s", TString InpDir = "FitResults_DataCa
 
     padI[3]->cd();
     RatioFullJet2 ->GetYaxis()->SetTitleOffset(0.25);
+    RatioFullJet2 ->GetXaxis()->SetTitle("CSVv2");
     RatioFullJet2 ->Draw("HIST");
     gRatioFullJet2->Draw("e2");
     RatioFullJet2 ->Draw("HISTSAME");

@@ -72,7 +72,7 @@ void TwoDimPlots(TString plots="2btag", TString Cat = "ttbb") {
       titlePr->Draw("SAME");
       
       TLatex *title;
-      title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 36.8 fb^{-1}");
+      title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 35.9 fb^{-1}");
       title->SetNDC();
       title->SetTextAlign(12);
       title->SetX(0.20);

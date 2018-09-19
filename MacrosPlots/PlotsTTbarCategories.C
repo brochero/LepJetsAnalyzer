@@ -90,7 +90,9 @@ void PlotsTTbarCategories(TString plots="2btag", bool LogScale=true, TString nSy
       //ttbar_0_ttbb[h].hist[ch]->GetYaxis()->SetTitle("Events");
       ttbar_0_ttbb[h].hist[ch]->GetYaxis()->SetTitleOffset(1.2);
       ttbar_0_ttbb[h].hist[ch]->GetYaxis()->SetTitleSize(0.07);
-      ttbar_0_ttbb[h].hist[ch]->GetYaxis()->SetLabelSize(0.055);
+      ttbar_0_ttbb[h].hist[ch]->GetXaxis()->SetTitleSize(0.05);
+      ttbar_0_ttbb[h].hist[ch]->GetXaxis()->SetLabelSize(0.04);
+      ttbar_0_ttbb[h].hist[ch]->GetYaxis()->SetLabelSize(0.05);
       ttbar_0_ttbb[h].hist[ch]->GetYaxis()->SetNdivisions(607);
       //ttbar_0_ttbb[h].hist[ch]->GetYaxis()->SetLabelSize(0.05);
       TGaxis *hYaxis = (TGaxis*)ttbar_0_ttbb[h].hist[ch]->GetYaxis();
@@ -128,7 +130,7 @@ void PlotsTTbarCategories(TString plots="2btag", bool LogScale=true, TString nSy
              Legends
       ***********************/
       TLegend *leg;
-      float legPos[4] = {0.6,  // x_o
+      float legPos[4] = {0.65,  // x_o
 			 0.70,  // y_o
 			 0.82,  // x_f
 			 0.87}; // y_f
@@ -141,11 +143,11 @@ void PlotsTTbarCategories(TString plots="2btag", bool LogScale=true, TString nSy
       leg->SetTextSize(0.03);
       leg->SetNColumns(2);
 
-      leg->AddEntry(ttOther[h].hist[ch],"t#bar{t}+other","l");
-      leg->AddEntry(ttbar_0_ttLF[h].hist[ch],"t#bar{t}+LF","l");
-      leg->AddEntry(ttbar_0_ttcc[h].hist[ch],"t#bar{t}+cc","l");
-      leg->AddEntry(ttbar_0_ttb[h].hist[ch],"t#bar{t}+b","l");
       leg->AddEntry(ttbar_0_ttbb[h].hist[ch],"t#bar{t}+bb","l");
+      leg->AddEntry(ttbar_0_ttb[h].hist[ch],"t#bar{t}+b","l");
+      leg->AddEntry(ttbar_0_ttcc[h].hist[ch],"t#bar{t}+cc","l");
+      leg->AddEntry(ttbar_0_ttLF[h].hist[ch],"t#bar{t}+LF","l");
+      leg->AddEntry(ttOther[h].hist[ch],"t#bar{t}+other","l");
       //leg->AddEntry((TObject*)0,"","");
       leg->Draw("SAME");
 
@@ -153,41 +155,52 @@ void PlotsTTbarCategories(TString plots="2btag", bool LogScale=true, TString nSy
       // CMS Legend
       //-------------------------------------------------------
       TString htitleCMSChannel[3];
-      htitleCMSChannel[0] = "#mu^{#pm}+jets channel";
-      htitleCMSChannel[1] = "e^{#pm}+jets channel";
-      htitleCMSChannel[2] = "l^{#pm}+jets channel";
+      htitleCMSChannel[0] = "#mu^{#pm}+jets";
+      htitleCMSChannel[1] = "e^{#pm}+jets";
+      htitleCMSChannel[2] = "l^{#pm}+jets";
       
       TLatex *titlePr;
-      titlePr  = new TLatex(-20.,50.,"Preliminary");
+      titlePr  = new TLatex(-20.,50.,"Simulation");
       titlePr->SetNDC();
       titlePr->SetTextAlign(12);
-      titlePr->SetX(0.25);
-      titlePr->SetY(0.93);
-      titlePr->SetTextColor(2);
-      titlePr->SetTextFont(42);
+      titlePr->SetX(0.23);
+      titlePr->SetY(0.84);
+      // titlePr->SetTextColor(2);
+      titlePr->SetTextFont(52);
       titlePr->SetTextSize(0.05);
       titlePr->SetTextSizePixels(24);
       titlePr->Draw("SAME");
       
+      TLatex *titleCMS;
+      titleCMS  = new TLatex(-20.,50.,"CMS");
+      titleCMS->SetNDC();
+      titleCMS->SetTextAlign(12);
+      titleCMS->SetX(0.13);
+      titleCMS->SetY(0.84);
+      titleCMS->SetTextFont(61);
+      titleCMS->SetTextSize(0.06);
+      titleCMS->SetTextSizePixels(24);
+      titleCMS->Draw("SAME");
+
       TLatex *title;
-      title  = new TLatex(-20.,50.,"CMS(2016) #sqrt{s} = 13TeV, L = 36.5 fb^{-1}");
+      title  = new TLatex(-20.,50.,"35.9 fb^{-1} (13TeV)");
       title->SetNDC();
       title->SetTextAlign(12);
-      title->SetX(0.20);
-      title->SetY(0.83);
+      title->SetX(0.7);
+      title->SetY(0.935);
       title->SetTextFont(42);
-      title->SetTextSize(0.03);
+      title->SetTextSize(0.04);
       title->SetTextSizePixels(24);
       title->Draw("SAME");
-      
+
       TLatex *chtitle;
       chtitle  = new TLatex(-20.,50.,htitleCMSChannel[ch]);
       chtitle->SetNDC();
       chtitle->SetTextAlign(12);
-      chtitle->SetX(0.20);
-      chtitle->SetY(0.75);
+      chtitle->SetX(0.14);
+      chtitle->SetY(0.74);
       chtitle->SetTextFont(42);
-      chtitle->SetTextSize(0.03);
+      chtitle->SetTextSize(0.05);
       chtitle->SetTextSizePixels(24);
       chtitle->Draw("SAME");
 
@@ -301,31 +314,31 @@ std::vector<histos> loadhistograms(TString plots, TString namefile){
   std::vector<TString> histoname;
   
   // Histograms
-  histoname.push_back("hPV");
-  histoname.push_back("hMET");
-  histoname.push_back("hLepPt");
-  histoname.push_back("hLepEta");
-  histoname.push_back("hLepPhi");
-  histoname.push_back("hJetPt_Jet-0");
-  histoname.push_back("hJetPt_Jet-1");
-  histoname.push_back("hJetPt_Jet-2");
-  histoname.push_back("hJetPt_Jet-3");
-  histoname.push_back("hNJets");
-  histoname.push_back("hNBtagJets");
-  histoname.push_back("hCSV_Jet-0");
-  histoname.push_back("hCSV_Jet-1");
-  histoname.push_back("hCSV_Jet-2");
-  histoname.push_back("hCSV_Jet-3");
-  histoname.push_back("hCSV_Jet-4");
-  histoname.push_back("hCSV_Jet-5");
+  // histoname.push_back("hPV");
+  // histoname.push_back("hMET");
+  // histoname.push_back("hLepPt");
+  // histoname.push_back("hLepEta");
+  // histoname.push_back("hLepPhi");
+  // histoname.push_back("hJetPt_Jet-0");
+  // histoname.push_back("hJetPt_Jet-1");
+  // histoname.push_back("hJetPt_Jet-2");
+  // histoname.push_back("hJetPt_Jet-3");
+  // histoname.push_back("hNJets");
+  // histoname.push_back("hNBtagJets");
+  // histoname.push_back("hCSV_Jet-0");
+  // histoname.push_back("hCSV_Jet-1");
+  // histoname.push_back("hCSV_Jet-2");
+  // histoname.push_back("hCSV_Jet-3");
+  // histoname.push_back("hCSV_Jet-4");
+  // histoname.push_back("hCSV_Jet-5");
   histoname.push_back("hKinAdd1CSV");
   histoname.push_back("hKinAdd2CSV");
-  histoname.push_back("hGenTagAdd1CSV");
-  histoname.push_back("hGenTagAdd2CSV");
-  histoname.push_back("hGenTagAddDR");
-  histoname.push_back("hGenTagAddMass");
-  histoname.push_back("hKinTagAddDR");
-  histoname.push_back("hKinTagAddMass");
+  // histoname.push_back("hGenTagAdd1CSV");
+  // histoname.push_back("hGenTagAdd2CSV");
+  // histoname.push_back("hGenTagAddDR");
+  // histoname.push_back("hGenTagAddMass");
+  // histoname.push_back("hKinTagAddDR");
+  // histoname.push_back("hKinTagAddMass");
 
   for(unsigned int h=0; h<histoname.size(); h++){
     for(unsigned int ch=0; ch<2; ch++) histofile.hist[ch] = (TH1D*)file->Get("central/" + plots + "/" + channel[ch] + "/" +  histoname[h] + "_" + channel[ch] + "_" + plots);

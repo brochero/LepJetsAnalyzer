@@ -46,11 +46,12 @@ void display_usage()
   std::cout << "\033[1;37musage:\033[1;m skimfile cutindex [options]" << std::endl;
   std::cout << "" << std::endl;
   std::cout << "Options:" << std::endl;
-  std::cout << "    -i inputfile  Input file without .root" << std::endl;
+  std::cout << "    -i Reference name of the inputfile (up to the lumi)" << std::endl;
   std::cout << "    -o name of the output directory. Default: Yields" << std::endl;
-  std::cout << "    -d Input file directory. Default directory: TopResults" << std::endl;
+  std::cout << "    -d Input file directory (From LepJetsAnalyzer). Default directory: TopResults" << std::endl;
   std::cout << "    -combine datacardname Create datacard for COMBINE." << std::endl;
   std::cout << "    -his Histo name to use in COMBINE." << std::endl;
+  std::cout << "    -cut Cut level used to created yields/DataCard (2btag)" << std::endl;
   std::cout << "    -h displays this help message and exits " << std::endl;
   std::cout << "" << std::endl;
 }
@@ -64,7 +65,7 @@ int main (int argc, char *argv[]){
   const char * _outputDC;
   const char * _input    = 0;
   const char * _dir      = "TopResults/";
-  const char * _cut      = 0;
+  const char * _cut      = "2btag";
   const char * _histoDC = "hKinAddCSVUnroll";  
   
   bool _createDC = false;
@@ -812,7 +813,7 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   // Statistical Uncertainties
   std::vector<TString> StatName = {"ttbb","ttbj","ttcc","ttLF","tt"};
   for (int nstat = 0; nstat < StatName.size(); nstat++){
-    fprintf(file,"%s \t ShapeN2 ", (StatName.at(nstat)+"Stat").Data());
+    fprintf(file,"%s \t shapeN2 ", (StatName.at(nstat)+"Stat").Data());
     for(int ns = 0; ns < Samples.size(); ns++){
       Yields samEntry = Samples.at(ns);
       if(samEntry.InDataCard.Contains("DC")){

@@ -614,7 +614,7 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   fprintf(file,"----------------------------------------------------------\n\n"); 
   fprintf(file,"imax \t 1 # Number of channels\n"); 
   fprintf(file,"jmax \t %i # Number of contribution - 1 \n", (nDCSam-1)); 
-  int ValSysName = SysName.size() + 7 + 1 + 5 + SysThName.size(); // 2 from Xsec + Lumin + 5 Stat 
+  int ValSysName = SysName.size() + 7 + 1 + 6 + SysThName.size(); // 7 from Xsec + Lumin + 6 Stat 
   if(DCNorm) fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", ValSysName); 
   else fprintf(file,"kmax \t %i # Number of Nuisance Parameters \n", ValSysName); 
   fprintf(file,"----------------------------------------------------------\n\n"); 
@@ -811,13 +811,14 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   } // for(nsys)
 
   // Statistical Uncertainties
-  std::vector<TString> StatName = {"ttbb","ttbj","ttcc","ttLF","tt"};
+  std::vector<TString> StatName = {"ttbb","ttbj","ttcc","ttLF","tt","st"};
   for (int nstat = 0; nstat < StatName.size(); nstat++){
     fprintf(file,"%s \t shapeN2 ", (StatName.at(nstat)+"Stat").Data());
     for(int ns = 0; ns < Samples.size(); ns++){
       Yields samEntry = Samples.at(ns);
       if(samEntry.InDataCard.Contains("DC")){
 	if(samEntry.SamComName.EndsWith(StatName.at(nstat))) fprintf(file,"\t 1.0 ");
+	else if(samEntry.SamComName == "SingleTop" && StatName.at(nstat)=="st") fprintf(file,"\t 1.0 ");
 	else fprintf(file,"\t - ");
       }
     } // for(ns)
@@ -886,16 +887,17 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
   // Luminosity
   fprintf(file,"Lumin \t lnN ");
   for(int ns = 0; ns < Samples.size(); ns++){ 
-    if(Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t 1.026 ");      
+    if(Samples.at(ns).InDataCard.Contains("DC")) fprintf(file,"\t 1.025 ");      
   } 
   fprintf(file,"\n");
   
   fprintf(file,"----------------------------------------------------------\n\n");
 
   fprintf(file,"Theory group = ScaleRdF ISR FSR UE hdamp \n");
-  fprintf(file,"Stat group = ttbbStat ttbjStat ttccStat ttLFStat ttStat \n");
+  fprintf(file,"Stat group = ttbbStat ttbjStat ttccStat ttLFStat ttStat stStat \n");
   fprintf(file,"XSBkg  group = XSqcd XSwjets XSst XSzjets XSvv XSttv XStth \n");
-  fprintf(file,"Lepton_Shape group = LES IDLepSF TrLepSF \n");
+  fprintf(file,"Muon_Shape group = LES_mujets IDLepSF_mujets TrLepSF_mujets \n");
+  fprintf(file,"Electron_Shape group = LES_ejets IDLepSF_ejets TrLepSF_ejets \n");
   fprintf(file,"Jet_Shape group = JER \n\n");
   fprintf(file,"JetScale_Shape group = JESAbsoluteStat JESAbsoluteScale JESAbsoluteMPFBias JESFragmentation JESSinglePionECAL JESSinglePionHCAL JESFlavorQCD JESTimePtEta JESRelativeJEREC1 JESRelativeJEREC2 JESRelativeJERHF JESRelativePtBB JESRelativePtEC1 JESRelativePtEC2 JESRelativePtHF JESRelativeBal JESRelativeFSR JESRelativeStatFSR JESRelativeStatEC JESRelativeStatHF JESPileUpDataMC JESPileUpPtRef JESPileUpPtBB JESPileUpPtEC1 JESPileUpPtHF \n");
   fprintf(file,"JetScaleAbs_Shape group    = JESAbsoluteMPFBias JESAbsoluteStat JESAbsoluteScale \n");

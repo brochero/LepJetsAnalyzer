@@ -1,7 +1,7 @@
 
-void ProduceTheUnc_ttbarBkg(TString FileVersion = "Full-v0"){
+void ProduceTheUnc_ttbarBkg(TString FileVersion = "PreApp-v0"){
   
-  TString HeadFile = "hSF-" + FileVersion + "_Tree_LepJets_EGTightSkim_v8-0-6_Spring16-80X_36814pb-1";
+  TString HeadFile = "hSF-" + FileVersion + "_Tree_LepJets_NewJEC-OldKinFit_v8-0-6_Spring16-80X_36814pb-1";
   TString InOutDir = "TopResults/" + FileVersion + "/";
 
   TString ChName[2];
@@ -24,6 +24,7 @@ void ProduceTheUnc_ttbarBkg(TString FileVersion = "Full-v0"){
   SysName.push_back("FSR");
   SysName.push_back("UE");
   SysName.push_back("ScaleRdF");
+  SysName.push_back("ScaleRuF");
 
   TString SysNameVar[2] = {"Up","Down"};
   

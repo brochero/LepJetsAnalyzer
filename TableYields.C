@@ -825,6 +825,16 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
     fprintf(file,"\n");
   } // for(nsys)
   
+  // -- ttbb/ttbj Ratio (each one in opposite direction)
+  fprintf(file,"Ratiottbjttbb \t lnN ");
+  for(int ns = 0; ns < Samples.size(); ns++){ 
+    if(Samples.at(ns).InDataCard.Contains("DC")){
+      if     (Samples.at(ns).SamComName == "ttbar_LepJetsPowhegPythiattbb") fprintf(file,"\t 0.95/1.05 ");     
+      else if(Samples.at(ns).SamComName == "ttbar_LepJetsPowhegPythiattbj") fprintf(file,"\t 1.05/0.95 ");
+      else fprintf(file,"\t - ");
+    } 
+  }
+ fprintf(file,"\n");
   
   // Background: Cross Section Uncertainty
   // -- QCD (50%)
@@ -921,6 +931,12 @@ void CreateDataCard (FILE *file, std::vector<Yields> Samples, TString ljchannel,
       fprintf(file,"nuisance edit rename * %s %s %s \n", ljchannel.Data(), SysName.at(nsys).Data(), (SysName.at(nsys)+"_"+ljchannel).Data());
   } // for(nsys)
 
+  // Remove ttbb uncertainties with problems and replace it by a lnN (1.004 and 1.014 from the plot)
+  if(ljchannel=="mujets"){
+    fprintf(file,"nuisance edit drop ttbar_LepJetsPowhegPythiattbb mujets JESPileUpDataMC\n");
+    fprintf(file,"nuisance edit add  ttbar_LepJetsPowhegPythiattbb mujets ttbbJESmujets lnN 1.004/1.014\n");
+  }
+  
   if(DCNorm){
     // fprintf(file,"Theory_Rate group = ISR_Rate FSR_Rate UE_Rate \n");
     // fprintf(file,"Lepton_Rate group = LES_Rate IDLepSF_Rate TrLepSF_Rate \n");

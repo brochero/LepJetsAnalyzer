@@ -140,33 +140,7 @@ void MergeSystematics(TString Sample, std::vector<TString> SysName){
       histofileStatDown->Write();
 
     }
-
-    // ttbb/ttbj Ratio
-    // Statistical Uncertainties
-    if(Sample.Contains("ttbar_LepJetsPowhegPythiattbb") ||
-       Sample.Contains("ttbar_LepJetsPowhegPythiattbj")){
-      
-      TH1D *histofileStatUp   = (TH1D*)histofile->Clone();
-      TH1D *histofileStatDown = (TH1D*)histofile->Clone();
-      
-      TString ttName = Sample(Sample.Length()-4,Sample.Length());// 4 is the number of characters in tt**
-      if (ttName == "iatt" || ttName == "kgtt") ttName = "tt"; // for only tt
-      if (ttName == "eTop") ttName = "st"; // for only tt
-      
-      GetStatVar(histofile, histofileStatDown, histofileStatUp, ttName);
-      
-      target->cd();
-      target->mkdir(ttName + "StatUp/2btag/" + channel[ch]);
-      target->mkdir(ttName + "StatDown/2btag/" + channel[ch]);
-
-      target->cd(ttName + "StatUp/2btag/" + channel[ch]);
-      histofileStatUp->Write();
-      target->cd(ttName + "StatDown/2btag/" + channel[ch]);
-      histofileStatDown->Write();
-
-    }
-    
-    
+        
   }
   
   // Systematics  
